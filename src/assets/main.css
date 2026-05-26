@@ -1,0 +1,31 @@
+@font-face {
+  font-family: "Poppins";
+  src: url("@/assets/fonts/Poppins-Regular.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: "Hanuman";
+  src: url("@/assets/fonts/Hanuman-Regular.ttf") format("truetype");
+}
+
+body {
+  font-family: "Poppins", "Hanuman", sans-serif !important;
+}
+
+/* Error toast */
+.Vue-Toastification__toast--error {
+  background: #e02424 !important;
+  color: white !important;
+}
+
+/* Success toast */
+.Vue-Toastification__toast--success {
+  background: #16a34a !important;
+  color: #fff !important;
+}
+
+/* Info toast */
+.Vue-Toastification__toast--info {
+  background: #2563eb !important;
+  color: #fff !important;
+}

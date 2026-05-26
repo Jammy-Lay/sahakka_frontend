@@ -1,0 +1,17 @@
+@container style(--isPopular) {
+  .card::after {
+    content: "🔥 Popular";
+  }
+}
+
+@container style(--isNew:true) {
+  .card::after {
+    content: "🆕 New";
+  }
+}
+
+@container style(--isTrend:true) {
+  .card::after {
+    content: "🚀 Trend";
+  }
+}
