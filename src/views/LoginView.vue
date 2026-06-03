@@ -1,10 +1,6 @@
 <template>
   <div class="container mt-5">
     <section class="vh-100 d-flex align-items-center justify-content-center">
-      <!-- <div v-if="auth.loading" class="loading-only">
-        <div class="loader"></div>
-        <h5 class="mt-5">Loading...</h5>
-      </div> -->
       <div class="container">
         <div class="row justify-content-center">
           <div class="col-12 col-md-8 col-lg-5">
@@ -14,50 +10,34 @@
 
                 <form @submit.prevent="handleLogin">
                   <div class="mb-3">
-                    <label for="emailInput" class="form-label">
-                      Email address
-                    </label>
+                    <label for="emailInput" class="form-label"> Email address </label>
                     <input
                       v-model="email"
                       type="text"
                       class="form-control mb-2"
                       id="emailInput"
                       placeholder="name@example.com"
+                      autocomplete="current-email"
                     />
                     <p v-if="err.email" class="text-danger">{{ err.email }}</p>
                   </div>
 
                   <div class="mb-3">
-                    <label for="passwordInput" class="form-label">
-                      Password
-                    </label>
+                    <label for="passwordInput" class="form-label"> Password </label>
                     <input
                       v-model="password"
                       type="password"
                       class="form-control mb-2"
                       id="passwordInput"
+                      autocomplete="current-password"
                     />
                     <p v-if="err.password" class="text-danger">
                       {{ err.password }}
                     </p>
                   </div>
 
-                  <div
-                    class="d-flex justify-content-between align-items-center mb-4"
-                  >
-                    <div class="form-check">
-                      <input
-                        class="form-check-input"
-                        type="checkbox"
-                        id="rememberMe"
-                      />
-                      <label class="form-check-label" for="rememberMe">
-                        Remember me
-                      </label>
-                    </div>
-                    <a href="#" class="text-decoration-none small">
-                      Forgot password?
-                    </a>
+                  <div class="d-flex justify-content-between align-items-center mb-4">
+                    <a href="#" class="text-decoration-none small"> Forgot password? </a>
                   </div>
 
                   <div class="d-grid">
@@ -73,13 +53,6 @@
                       <span>{{ isLoading ? "Signing In..." : "Sign In" }}</span>
                     </button>
                   </div>
-
-                  <p class="text-center mt-4 mb-0">
-                    Don't have an account?
-                    <router-link to="/register" class="text-decoration-none"
-                      >Sign Up</router-link
-                    >
-                  </p>
                 </form>
               </div>
             </div>
@@ -102,10 +75,11 @@ import { notify } from "@/utils/toast";
 
 const email = ref("");
 const password = ref("");
-const auth = useAuthStore();
 const router = useRouter();
 const toast = notify(router);
 const isLoading = ref(false);
+
+const auth = useAuthStore();
 
 // toast.error("Something went wrong!");
 
@@ -131,10 +105,19 @@ async function handleLogin() {
   isLoading.value = true;
   try {
     await auth.login(email.value, password.value);
-    router.push({ name: "home" });
+
+    // restore last visited route
+    const lastVisited = JSON.parse(localStorage.getItem("lastVisitedTeam")) ?? {};
+    const entries = Object.entries(lastVisited);
+
+    if (entries.length > 0) {
+      // get the last entry
+      const [workspace_id, team_id] = entries[entries.length - 1];
+      router.push(`/workspace/${workspace_id}/team/${team_id}/tasks`);
+    } else {
+      router.push({ name: "tasks", params: { workspace_id: 1, team_id: 1 } }); // fallback
+    }
   } catch (error) {
-    // backend error message example
-    // console.log(error);
     toast.error(error.message);
   } finally {
     isLoading.value = false;
@@ -142,103 +125,4 @@ async function handleLogin() {
 }
 </script>
 
-<style scoped>
-.loading-only {
-  min-height: 300px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.loader {
-  position: relative;
-  width: 2.5em;
-  height: 2.5em;
-  transform: rotate(165deg);
-}
-
-.loader:before,
-.loader:after {
-  content: "";
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  display: block;
-  width: 0.5em;
-  height: 0.5em;
-  border-radius: 0.25em;
-  transform: translate(-50%, -50%);
-}
-
-.loader:before {
-  animation: before8 2s infinite;
-}
-
-.loader:after {
-  animation: after6 2s infinite;
-}
-
-@keyframes before8 {
-  0% {
-    width: 0.5em;
-    box-shadow:
-      1em -0.5em rgba(225, 20, 98, 0.75),
-      -1em 0.5em rgba(111, 202, 220, 0.75);
-  }
-
-  35% {
-    width: 2.5em;
-    box-shadow:
-      0 -0.5em rgba(225, 20, 98, 0.75),
-      0 0.5em rgba(111, 202, 220, 0.75);
-  }
-
-  70% {
-    width: 0.5em;
-    box-shadow:
-      -1em -0.5em rgba(225, 20, 98, 0.75),
-      1em 0.5em rgba(111, 202, 220, 0.75);
-  }
-
-  100% {
-    box-shadow:
-      1em -0.5em rgba(225, 20, 98, 0.75),
-      -1em 0.5em rgba(111, 202, 220, 0.75);
-  }
-}
-
-@keyframes after6 {
-  0% {
-    height: 0.5em;
-    box-shadow:
-      0.5em 1em rgba(61, 184, 143, 0.75),
-      -0.5em -1em rgba(233, 169, 32, 0.75);
-  }
-
-  35% {
-    height: 2.5em;
-    box-shadow:
-      0.5em 0 rgba(61, 184, 143, 0.75),
-      -0.5em 0 rgba(233, 169, 32, 0.75);
-  }
-
-  70% {
-    height: 0.5em;
-    box-shadow:
-      0.5em -1em rgba(61, 184, 143, 0.75),
-      -0.5em 1em rgba(233, 169, 32, 0.75);
-  }
-
-  100% {
-    box-shadow:
-      0.5em 1em rgba(61, 184, 143, 0.75),
-      -0.5em -1em rgba(233, 169, 32, 0.75);
-  }
-}
-
-.loader {
-  position: absolute;
-  top: calc(50% - 1.25em);
-  left: calc(50% - 1.25em);
-}
-</style>
+<style scoped></style>

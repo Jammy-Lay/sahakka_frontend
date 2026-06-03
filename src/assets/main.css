@@ -29,3 +29,104 @@ body {
   background: #2563eb !important;
   color: #fff !important;
 }
+
+.w-fit {
+  width: fit-content !important;
+}
+
+.h-fit {
+  height: fit-content !important;
+}
+
+.fs-15 {
+  font-size: 15px !important;
+}
+
+.fs-14 {
+  font-size: 14px !important;
+}
+
+.fs-13 {
+  font-size: 13px !important;
+}
+
+.fs-12 {
+  font-size: 12px !important;
+}
+
+.fs-11 {
+  font-size: 11px !important;
+}
+
+.fs-10 {
+  font-size: 10px !important;
+}
+
+.cursor-pointer {
+  cursor: pointer !important;
+}
+
+.bg-accent {
+  background-color: #F5F5F5 !important;
+}
+
+.bg-mute {
+  background-color: #F4F4F5 !important;
+}
+
+.bg-btn {
+  background-color: #171717;
+}
+
+.bg-danger {
+  background-color: #FF383C !important;
+}
+
+.bg-btn,
+.bg-btn:focus,
+.bg-btn:active {
+  background-color: #171717 !important;
+  color: white !important;
+}
+
+.bg-btn:hover {
+  background-color: #171717e8 !important;
+}
+
+.btn-ghost:hover {
+  background-color: #171717;
+  color: white;
+  font-size: 12px !important;
+  font-weight: normal !important;
+}
+
+.btn-outline {
+  background-color: #fff;
+  color: #171717;
+}
+
+.btn-outline:hover {
+  background-color: #171717 !important;
+  color: white;
+  border: 2px solid #171717 !important;
+}
+
+.rounded-btn {
+  border-radius: 12px !important;
+}
+
+.rounded-btn-sm {
+  border-radius: 8px !important;
+}
+
+.rounded-card {
+  border-radius: 16px !important;
+}
+
+.text-mute {
+  color: #71717A !important;
+}
+
+.text-danger {
+  color: #FF383C !important;
+}
