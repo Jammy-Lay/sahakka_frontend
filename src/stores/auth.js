@@ -3,23 +3,49 @@ import { defineStore } from "pinia";
 import api from "@/api/https";
 
 export const useAuthStore = defineStore("auth", () => {
-  let user = ref(null);
+  let user = ref({});
   let token = ref(localStorage.getItem("token"));
   let isLoggedIn = computed(() => !!token.value);
-  console.log(isLoggedIn);
+  // console.log(isLoggedIn);
+
+  let getMe = ref({});
 
   async function login(email, password) {
     try {
-      const res = await api.post("/auth/login", { email, password });
-
-      user.value = res.data.data.user;
+      const res = await api.post("/api/login", { email, password });
+      user.value = res.data.data;
+      console.log(user.value);
       token.value = res.data.data.token;
       localStorage.setItem("token", token.value);
-      loginSuccess.value = true;
     } catch (err) {
       throw new Error(err.response?.data?.message || "Login failed");
     }
   }
 
-  return { user, token, isLoggedIn, login };
+  function logout() {
+    user.value = {};
+    getMe.value = {};
+    token.value = null;
+    localStorage.removeItem("token");
+  }
+
+  const getMeStore = async () => {
+    try {
+      const res = await api.get("/api/getMe");
+      getMe.value = res.data.data;
+      // console.log(getMe.value);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  return {
+    user,
+    token,
+    isLoggedIn,
+    login,
+    logout,
+    getMe,
+    getMeStore,
+  };
 });
