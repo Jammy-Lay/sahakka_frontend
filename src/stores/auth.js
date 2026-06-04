@@ -6,6 +6,7 @@ export const useAuthStore = defineStore("auth", () => {
   let user = ref({});
   let token = ref(localStorage.getItem("token"));
   let isLoggedIn = computed(() => !!token.value);
+  let ForgotEmail= ref("");
   // console.log(isLoggedIn);
 
   let getMe = ref({});
@@ -33,12 +34,57 @@ export const useAuthStore = defineStore("auth", () => {
     try {
       const res = await api.get("/api/getMe");
       getMe.value = res.data.data;
-      // console.log(getMe.value);
     } catch (error) {
       console.log(error);
     }
   };
+  
+  const register = async (email, password, name) => {
+    try {
+      const res = await api.post("/api/register", { email, password, name });
+      return res.data;
+      
+    } catch (err) {
+      throw new Error(err.response?.data?.message || "Registration failed");
+    }
+  };
+  
+  const forgotPassword = async (email) => {
+    try {
+      const res = await api.post("/api/forgot-password", { email });
+      ForgotEmail.value = email;
+      return res.data;
+    } catch (err) {
+      throw new Error(err.response?.data?.message || "Forgot password failed");
+    }
+  };
+  const otp = async (email, otp) => {
+    try {
+      const res = await api.post("/api/verify-otp", { email, otp });
+      return res.data;
+    } catch (err) {
+      throw new Error(err.response?.data?.message || "Otp verification failed");
+    }
+  };
+  const resetPassword = async (email, new_password, confirm_password) => {
+    if (new_password != confirm_password) {
+      throw new Error("Passwords do not match");
+    }
 
+    try {
+      const res = await api.post("/api/reset-password", {
+        email,
+        new_password,
+        confirm_password,
+      });
+      return res.data;
+    } catch (err) {
+      const errorMessage =
+        err.response?.data?.message || "Reset password failed";
+      console.error("Auth Service Error:", errorMessage);
+      throw new Error(errorMessage);
+    }
+  };
   return {
     user,
     token,
@@ -47,5 +93,10 @@ export const useAuthStore = defineStore("auth", () => {
     logout,
     getMe,
     getMeStore,
+    forgotPassword,
+    resetPassword,
+    otp,
+    ForgotEmail,
+    register
   };
 });
