@@ -2,12 +2,11 @@
   <main class="body-login">
     <div class="container-fluid p-0 h-100">
       <div class="row g-0 h-100">
+        <div class="col-lg-6 d-none d-lg-block left-panel"></div>
 
-        <div class="col-lg-6 d-none d-lg-block left-panel">
-        </div>
-
-
-        <div class="col-lg-6 col-md-12 right-panel d-flex align-items-center justify-content-center">
+        <div
+          class="col-lg-6 col-md-12 right-panel d-flex align-items-center justify-content-center"
+        >
           <div class="form-wrapper">
             <!-- Compact Brand Logo Header -->
             <div class="form-header d-flex align-items-center gap-2 mb-4">
@@ -23,11 +22,16 @@
 
             <!-- Form Main -->
             <form id="loginFormMain" @submit.prevent="handleLogin">
-
               <!-- EMAIL -->
               <div class="input-group-custom">
                 <label for="email">Email</label>
-                <input id="email" v-model="email" type="email" class="form-control" placeholder="Enter email">
+                <input
+                  id="email"
+                  v-model="email"
+                  type="email"
+                  class="form-control"
+                  placeholder="Enter email"
+                />
                 <p v-if="err.email" class="text-danger mt-1 tiny-text">{{ err.email }}</p>
               </div>
 
@@ -35,20 +39,35 @@
               <div class="input-group-custom">
                 <label for="password">Password</label>
                 <div class="password-wrapper">
-                  <input id="password" v-model="password" :type="showPassword ? 'text' : 'password'"
-                    class="form-control" placeholder="Enter Password" />
-                  <i class="bi" :class="showPassword ? 'bi-eye-slash' : 'bi-eye'"
-                    @click="showPassword = !showPassword"></i>
+                  <input
+                    id="password"
+                    v-model="password"
+                    :type="showPassword ? 'text' : 'password'"
+                    class="form-control"
+                    placeholder="Enter Password"
+                  />
+                  <i
+                    class="bi"
+                    :class="showPassword ? 'bi-eye-slash' : 'bi-eye'"
+                    @click="showPassword = !showPassword"
+                  ></i>
                 </div>
-                <p v-if="err.password" class="text-danger mt-1 tiny-text">{{ err.password }}</p>
+                <p v-if="err.password" class="text-danger mt-1 tiny-text">
+                  {{ err.password }}
+                </p>
               </div>
               <div class="forgot-password-wrapper mb-4">
-                <router-link to="/forgot-password" class="forgot-password-link">Forgot password?</router-link>
+                <router-link to="/forgot-password" class="forgot-password-link"
+                  >Forgot password?</router-link
+                >
               </div>
 
               <!-- ACTION BUTTON -->
               <button type="submit" class="btn btn-submit mt-4" :disabled="isLoading">
-                <span v-if="isLoading" class="spinner-border spinner-border-sm me-2"></span>
+                <span
+                  v-if="isLoading"
+                  class="spinner-border spinner-border-sm me-2"
+                ></span>
                 {{ isLoading ? "Logging in..." : "Sign in" }}
               </button>
             </form>
@@ -60,12 +79,10 @@
             </div>
           </div>
         </div>
-
       </div>
     </div>
   </main>
 </template>
-
 
 <script setup>
 import { reactive, ref } from "vue";
@@ -73,6 +90,8 @@ import { useAuthStore } from "@/stores/auth";
 import { useRouter } from "vue-router";
 import { isEmail, require, validates } from "@/utils/validate";
 import { notify } from "@/utils/toast";
+import { UseWorkspaceStore } from "@/stores/user/workspace";
+import { useTeamStore } from "@/stores/user/team";
 
 // import { useToast } from "vue-toastification";
 // let toast = useToast();
@@ -85,6 +104,8 @@ const isLoading = ref(false);
 const showPassword = ref(false);
 
 const auth = useAuthStore();
+const workspaceStore = UseWorkspaceStore();
+const teamStore = useTeamStore();
 
 // toast.error("Something went wrong!");
 
@@ -111,16 +132,24 @@ async function handleLogin() {
   try {
     await auth.login(email.value, password.value);
 
-    // restore last visited route
-    const lastVisited = JSON.parse(localStorage.getItem("lastVisitedTeam")) ?? {};
-    const entries = Object.entries(lastVisited);
+    const lastVisited = JSON.parse(localStorage.getItem("lastVisited"));
 
-    if (entries.length > 0) {
-      // get the last entry
-      const [workspace_id, team_id] = entries[entries.length - 1];
+    if (lastVisited) {
+      // returning user → go to last visited
+      const { workspace_id, team_id } = lastVisited;
       router.push(`/workspace/${workspace_id}/team/${team_id}/tasks`);
     } else {
-      router.push({ name: "tasks", params: { workspace_id: 1, team_id: 1 } }); // fallback
+      await workspaceStore.getMyWorkspaceStore();
+      const workspace = workspaceStore.myWorkspaces[0];
+
+      if (workspace) {
+        await teamStore.getTeamByWorkspaceStore(workspace.workspace_id);
+        const team = teamStore.getTeamByWorkspace[0];
+
+        if (team) {
+          router.push(`/workspace/${workspace.workspace_id}/team/${team.team_id}/tasks`);
+        }
+      }
     }
   } catch (error) {
     toast.error(error.message);
@@ -133,23 +162,21 @@ async function handleLogin() {
 <style scoped>
 /* BASE VIEWPORT SETUP */
 .body-login {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   /* background: #ffffff; */
   height: 100vh;
   width: 100vw;
   overflow: hidden;
 }
-.forgot-password-link{
+.forgot-password-link {
   color: #000000;
   font-size: 0.9rem;
   text-decoration: none;
-  
 }
 
 .h-100 {
   height: 100% !important;
 }
-
 
 .left-panel {
   width: 50%;
@@ -165,14 +192,12 @@ async function handleLogin() {
   height: 100%;
 }
 
-
 /* .panel-image-asset {
    
     height: 100vh;
     object-fit: cover;
     object-position: 18% center;
 } */
-
 
 .left-brand-header {
   position: absolute;
@@ -196,7 +221,6 @@ async function handleLogin() {
 
 /* RIGHT SIDE FORM PANEL */
 .right-panel {
-
   background: #ffffff;
   /* padding: 3rem; */
   height: 100%;
