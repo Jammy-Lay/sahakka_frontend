@@ -10,6 +10,26 @@ const router = createRouter({
       component: HomeView,
     },
     {
+      path: "/register",
+      name: "register",
+      component: () => import("../views/auth/RegisterView.vue"),
+    },
+    {
+      path: "/otp",
+      name: "otp",
+      component: () => import("../views/auth/OtpView.vue"),
+    },
+    {
+      path: "/forgot-password",
+      name: "forgot-password",
+      component: () => import("../views/auth/ForgotPassView.vue"),
+    },
+    {
+      path: "/newpassword",
+      name: "newpassword",
+      component: () => import("../views/auth/newPassword.vue")
+    },
+    {
       path: "/workspace",
       name: "workspace",
       component: () => import("../layouts/MainLayout.vue"),
