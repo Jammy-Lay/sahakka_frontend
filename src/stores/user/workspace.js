@@ -25,6 +25,12 @@ export const UseWorkspaceStore = defineStore("workspace", () => {
       "lastVisitedTeam",
       JSON.stringify(lastVisitedTeam.value),
     );
+
+    // track the most recently visited pair
+    localStorage.setItem(
+      "lastVisited",
+      JSON.stringify({ workspace_id, team_id }),
+    );
   };
 
   const getMyWorkspaceStore = async () => {
