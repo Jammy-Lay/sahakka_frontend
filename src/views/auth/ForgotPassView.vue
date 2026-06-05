@@ -36,7 +36,7 @@
 
               <button type="submit" class="btn btn-submit" :disabled="isLoading">
                 <span v-if="isLoading" class="spinner-border spinner-border-sm me-2"></span>
-                {{ isLoading ? "Sending..." : "Send reset link" }}
+                {{ isLoading ? "Creating..." : "Create New Password" }}
               </button>
             </form>
 
@@ -156,16 +156,16 @@ const forgotPassword = async () => {
 }
 
 .logo {
-    width: 24px;
-    height: 24px;
-    object-fit: contain;
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
 }
 
 .brand-name {
-    font-size: 1.3rem;
-    font-weight: 500;
-    color: #000000;
-    letter-spacing: -0.02em;
+  font-size: 1.5rem;
+  font-weight: 500;
+  color: #000000;
+  letter-spacing: -0.02em;
 }
 
 .form-title {

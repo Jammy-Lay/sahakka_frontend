@@ -4,9 +4,7 @@
       <div class="row g-0 h-100">
         <div class="col-lg-6 d-none d-lg-block left-panel"></div>
 
-        <div
-          class="col-lg-6 col-md-12 right-panel d-flex align-items-center justify-content-center"
-        >
+        <div class="col-lg-6 col-md-12 right-panel d-flex align-items-center justify-content-center">
           <div class="form-wrapper">
             <!-- Compact Brand Logo Header -->
             <div class="form-header d-flex align-items-center gap-2 mb-4">
@@ -25,13 +23,7 @@
               <!-- EMAIL -->
               <div class="input-group-custom">
                 <label for="email">Email</label>
-                <input
-                  id="email"
-                  v-model="email"
-                  type="email"
-                  class="form-control"
-                  placeholder="Enter email"
-                />
+                <input id="email" v-model="email" type="email" class="form-control" placeholder="Enter email" />
                 <p v-if="err.email" class="text-danger mt-1 tiny-text">{{ err.email }}</p>
               </div>
 
@@ -39,35 +31,22 @@
               <div class="input-group-custom">
                 <label for="password">Password</label>
                 <div class="password-wrapper">
-                  <input
-                    id="password"
-                    v-model="password"
-                    :type="showPassword ? 'text' : 'password'"
-                    class="form-control"
-                    placeholder="Enter Password"
-                  />
-                  <i
-                    class="bi"
-                    :class="showPassword ? 'bi-eye-slash' : 'bi-eye'"
-                    @click="showPassword = !showPassword"
-                  ></i>
+                  <input id="password" v-model="password" :type="showPassword ? 'text' : 'password'"
+                    class="form-control" placeholder="Enter Password" />
+                  <i class="bi" :class="showPassword ? 'bi-eye-slash' : 'bi-eye'"
+                    @click="showPassword = !showPassword"></i>
                 </div>
                 <p v-if="err.password" class="text-danger mt-1 tiny-text">
                   {{ err.password }}
                 </p>
               </div>
-              <div class="forgot-password-wrapper mb-4">
-                <router-link to="/forgot-password" class="forgot-password-link"
-                  >Forgot password?</router-link
-                >
+              <div class="forgot-password-wrapper mb-1 ">
+                <router-link to="/forgot-password" class="forgot-password-link">Forgot password?</router-link>
               </div>
 
               <!-- ACTION BUTTON -->
               <button type="submit" class="btn btn-submit mt-4" :disabled="isLoading">
-                <span
-                  v-if="isLoading"
-                  class="spinner-border spinner-border-sm me-2"
-                ></span>
+                <span v-if="isLoading" class="spinner-border spinner-border-sm me-2"></span>
                 {{ isLoading ? "Logging in..." : "Sign in" }}
               </button>
             </form>
@@ -168,6 +147,7 @@ async function handleLogin() {
   width: 100vw;
   overflow: hidden;
 }
+
 .forgot-password-link {
   color: #000000;
   font-size: 0.9rem;
@@ -192,13 +172,6 @@ async function handleLogin() {
   height: 100%;
 }
 
-/* .panel-image-asset {
-   
-    height: 100vh;
-    object-fit: cover;
-    object-position: 18% center;
-} */
-
 .left-brand-header {
   position: absolute;
   top: 45px;
@@ -222,7 +195,6 @@ async function handleLogin() {
 /* RIGHT SIDE FORM PANEL */
 .right-panel {
   background: #ffffff;
-  /* padding: 3rem; */
   height: 100%;
   margin: 0 auto;
 }
@@ -233,19 +205,18 @@ async function handleLogin() {
 }
 
 .logo {
-  width: 24px;
-  height: 24px;
+  width: 40px;
+  height: 40px;
   object-fit: contain;
 }
 
 .brand-name {
-  font-size: 1.3rem;
+  font-size: 1.5rem;
   font-weight: 500;
   color: #000000;
   letter-spacing: -0.02em;
 }
 
-/* TYPOGRAPHY */
 .form-title {
   font-size: 1.65rem;
   font-weight: 500;
@@ -258,8 +229,6 @@ async function handleLogin() {
   font-size: 0.95rem;
   font-weight: 400;
 }
-
-/* INPUT COMPONENT BLOCKS */
 .input-group-custom {
   margin-bottom: 1.15rem;
 }
@@ -291,8 +260,6 @@ async function handleLogin() {
   box-shadow: none;
   outline: none;
 }
-
-/* PASSWORD INTERACTIVE LAYER */
 .password-wrapper {
   position: relative;
   display: flex;
@@ -312,7 +279,6 @@ async function handleLogin() {
   font-size: 1.1rem;
 }
 
-/* SUBMIT BUTTON ACCENT */
 .btn-submit {
   background-color: #141416;
   color: #ffffff;
@@ -329,7 +295,6 @@ async function handleLogin() {
   background-color: #232326;
 }
 
-/* PROMPTS */
 .signup-prompt {
   text-align: center;
   font-size: 0.9rem;

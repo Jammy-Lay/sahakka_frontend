@@ -76,7 +76,7 @@
 import { reactive, ref } from "vue";
 import { useRouter } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
-import { require, isEmail, isPassword, minlength, validates } from "@/utils/validate";
+import { require,isPassword, minlength, validates,validateUsername,isEmail} from "@/utils/validate";
 import { notify } from "@/utils/toast";
 
 const authStore = useAuthStore();
@@ -101,6 +101,8 @@ const err = reactive({
 function validate() {
     err.name = validates(form.name, [
         (v) => require(v, "Username is required."),
+        (v) => minlength(v, 3, "Username must be at least 3 characters."),
+        (v) => validateUsername(v, "Invalid username.")
     ]);
     err.email = validates(form.email, [
         (v) => require(v, "Email is required."),
@@ -135,7 +137,7 @@ async function handleRegister() {
             return;
         }
 
-        console.error("Registration failed:", error);
+        // console.error("Registration failed:", error);
         toast.error("Registration failed. Please try again.");
     } finally {
         isLoading.value = false;
@@ -205,16 +207,16 @@ async function handleRegister() {
 }
 
 .logo {
-    width: 24px;
-    height: 24px;
-    object-fit: contain;
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
 }
 
 .brand-name {
-    font-size: 1.3rem;
-    font-weight: 500;
-    color: #000000;
-    letter-spacing: -0.02em;
+  font-size: 1.5rem;
+  font-weight: 500;
+  color: #000000;
+  letter-spacing: -0.02em;
 }
 
 .form-title {
