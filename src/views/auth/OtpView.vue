@@ -38,15 +38,13 @@
 
                             <!-- SUBMIT -->
                             <button class="btn btn-submit mt-3" :disabled="isLoading">
-                                {{ isLoading ? "Verifying..." : "Reset password" }}
+                                {{ isLoading ? "Verifying..." : "Verify Code" }}
                             </button>
 
                             <div class="signup-prompt mt-4">
                                 Remember your password?
                                 <router-link to="/login">Go back to sign in</router-link>
                             </div>
-
-
 
                         </form>
 
@@ -131,7 +129,7 @@ const handleOtp = async () => {
         isLoading.value = true
         await auth.otp(email, otp)
         localStorage.removeItem('otp_expiry')
-        router.push('/newpassword')
+        router.push('/new-password')
     } catch (err) {
         toast.error(err?.message || 'Verification failed')
     } finally {

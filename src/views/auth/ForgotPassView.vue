@@ -36,7 +36,7 @@
 
               <button type="submit" class="btn btn-submit" :disabled="isLoading">
                 <span v-if="isLoading" class="spinner-border spinner-border-sm me-2"></span>
-                {{ isLoading ? "Creating..." : "Create New Password" }}
+                {{ isLoading ? "Sending code…" : "Send code to email" }}
               </button>
             </form>
 
