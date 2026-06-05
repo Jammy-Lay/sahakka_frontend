@@ -1,7 +1,7 @@
 <template>
   <div class="app-wrapper">
     <!-- NAVBAR -->
-    <header class="navbar">
+    <header class="navbar" :style="{ borderBottomColor: activeBorderColor }">
       <!-- LEFT -->
       <div
         class="navbar-left d-flex align-items-center justify-content-between ps-3 bg-accent"
@@ -11,7 +11,7 @@
           placement="bottom-start"
           :show-arrow="false"
           v-model:show="showPopover"
-          style="padding: 0; border-radius: 16px; width: 280px"
+          style="padding: 0; border-radius: 16px; width: 267px; margin-top: 12px"
         >
           <template #trigger>
             <div class="workspace-trigger d-flex align-items-center gap-2">
@@ -36,13 +36,13 @@
           </template>
 
           <!-- POPUP CONTENT -->
-          <div class="p-2" style="width: 280px">
+          <div class="p-2">
             <!-- PROFILE HEADER -->
             <div
               class="rounded-btn p-2 border border-2 mb-2"
               style="background-color: #fcfcfc"
             >
-              <div class="d-flex align-items-center gap-2 mb-2">
+              <div class="d-flex align-items-center gap-2 mb-3">
                 <img
                   :src="getMe.avatar"
                   style="width: 32px; height: 32px"
@@ -53,28 +53,20 @@
                   <div class="text-mute fs-11">{{ getMe.email }}</div>
                 </div>
               </div>
-              <BaseButton class="fs-11" btnName="View Profile" />
+              <BaseButton class="fs-11 rounded-btn-sm" btnName="View Profile" />
             </div>
 
             <!-- MY WORKSPACE -->
             <div class="d-flex align-items-center justify-content-between px-2 py-1 mb-1">
               <span class="fs-13 fw-semibold">My Workspace</span>
               <button
-                class="btn rounded-btn-sm fs-11 btn-outline p-1 pe-2 border border-2 text-nowrap"
+                class="btn rounded-btn-sm fs-12 btn-outline px-2 border text-nowrap"
               >
                 <plus size="13" /> New
               </button>
             </div>
 
-            <n-empty
-              description="No Data"
-              v-if="myWorkspaces.length === 0"
-              class="my-2"
-              style="--n-icon-size: 25px; font-size: 10px"
-            />
-
             <div
-              v-else
               v-for="ws in myWorkspaces"
               :key="ws.workspace_id"
               @click="switchWorkspace(ws.workspace_id)"
@@ -86,9 +78,43 @@
                   style="width: 22px; height: 22px"
                   class="rounded-circle object-fit-cover"
                 />
-                <span style="font-size: 13px">{{ ws.workspace_name }}</span>
+                <span class="fs-13">{{ ws.workspace_name }}</span>
               </div>
-              <n-button text size="small"><more-horizontal size="14" /></n-button>
+              <n-popover
+                trigger="click"
+                placement="right"
+                :show-arrow="false"
+                style="border-radius: 12px; width: 105px; padding: 0; margin-left: 18px"
+              >
+                <template #trigger>
+                  <n-button
+                    text
+                    size="small"
+                    class="btn-option rounded-circle text-dark p-1"
+                    @click.stop
+                  >
+                    <more-horizontal size="14" />
+                  </n-button>
+                </template>
+
+                <div class="p-1 fs-13">
+                  <div
+                    class="d-flex align-items-center rounded gap-2 px-2 py-1 fw-bold workspace-item"
+                    @click="handleRename(ws)"
+                  >
+                    <Pencil size="13" />
+                    Rename
+                  </div>
+
+                  <div
+                    class="d-flex align-items-center rounded gap-2 px-2 py-1 text-danger fw-bold workspace-item"
+                    @click="handleDelete(ws)"
+                  >
+                    <Trash2 size="13" />
+                    Delete
+                  </div>
+                </div>
+              </n-popover>
             </div>
 
             <n-divider style="margin: 10px 0" />
@@ -99,7 +125,7 @@
             >
               <span class="fs-12 fw-semibold">Invited Workspace</span>
               <button
-                class="btn rounded-btn-sm fs-11 btn-outline p-1 pe-2 border border-2 text-nowrap"
+                class="btn rounded-btn-sm fs-12 btn-outline px-2 border text-nowrap"
               >
                 <plus size="13" /> Join
               </button>
@@ -173,10 +199,17 @@
       <!-- CENTER -->
       <div class="navbar-center d-flex align-items-center">
         <router-link
-          v-for="section in getTeamSection"
+          v-for="(section, index) in getTeamSection"
           :key="section.id"
           :to="`/workspace/${currentRouteWorkspaceId}/team/${currentRouteTeamId}/${section.name.toLowerCase()}`"
-          class="team-section text-decoration-none text-dark fs-13 d-flex justify-content-center align-items-center"
+          :class="[
+            'team-section text-decoration-none text-mute fs-15 d-flex justify-content-center align-items-center',
+            getSectionClass(section.name),
+          ]"
+          :style="{
+            borderRightColor: getBorderColor(index),
+          }"
+          active-class="active-section"
         >
           {{ section.name }}
         </router-link>
@@ -186,7 +219,7 @@
             class="team-section d-flex justify-content-center align-items-center gap-2 cursor-pointer fw-bold"
           >
             <Mail size="14" />
-            <span class="fs-13">Invite</span>
+            <span class="fs-14">Invite</span>
           </div>
         </n-dropdown>
       </div>
@@ -203,19 +236,34 @@
           <div class="px-3">
             <div class="d-flex align-items-center justify-content-between py-3">
               <h6 class="fs-13 mb-0">Team</h6>
-              <button class="btn px-2 rounded-btn text-nowrap fs-12 btn-ghost">
+              <button class="btn px-2 py-1 rounded-btn text-nowrap fs-12 btn-ghost">
                 <Plus size="15" class="me-1" /> New Team
               </button>
             </div>
             <n-scrollbar style="max-height: 635px">
-              <div class="d-flex flex-column gap-3">
+              <div class="d-flex flex-column gap-2">
                 <router-link
                   v-for="t in teamList"
                   :key="t.team_id"
-                  :to="`/workspace/${currentRouteWorkspaceId}/team/${t.team_id}/tasks`"
+                  :to="`/workspace/${currentRouteWorkspaceId}/team/${t.team_id}/${currentSection}`"
                   class="text-decoration-none"
                 >
-                  <div class="card py-2 px-3 rounded-btn border border-1 text-nowrap">
+                  <div
+                    class="card py-2 px-3 rounded-btn text-nowrap"
+                    :style="
+                      String(t.team_id) === String(currentRouteTeamId)
+                        ? {
+                            borderColor: activeBorderColor,
+                            borderWidth: '1.5px',
+                            borderStyle: 'solid',
+                          }
+                        : {
+                            borderWidth: '1.5px',
+                            borderStyle: 'solid',
+                            borderColor: 'transparent',
+                          }
+                    "
+                  >
                     <div class="d-flex justify-content-between align-items-center mb-1">
                       <div>
                         <h6 class="mb-1 fw-semibold">{{ t.title }}</h6>
@@ -319,7 +367,7 @@ const currentRouteWorkspaceId = computed(() => route.params.workspace_id);
 const currentRouteTeamId = computed(() => route.params.team_id);
 
 const leftOpen = ref(true);
-const showPopover = ref(false)
+const showPopover = ref(false);
 
 const teamStore = useTeamStore();
 const { getTeamSection, getTeamByWorkspace } = storeToRefs(teamStore);
@@ -371,7 +419,7 @@ const switchWorkspace = async (id) => {
 
   if (targetTeamId) {
     router.push(`/workspace/${id}/team/${targetTeamId}/tasks`);
-    showPopover.value = false
+    showPopover.value = false;
   }
 };
 
@@ -400,6 +448,41 @@ function createDropdownOptions(options) {
   }));
 }
 
+function getSectionClass(name) {
+  const map = {
+    tasks: "section-task",
+    issues: "section-issue",
+    documents: "section-document",
+    activity: "section-activity",
+  };
+  return map[name.toLowerCase()] ?? "";
+}
+
+const activeBorderColor = computed(() => {
+  const section = route.params.section ?? route.path.split("/").pop();
+  const map = {
+    tasks: "#0088ff",
+    issues: "#ff383c",
+    documents: "#00C3D0",
+    activity: "#6155F5",
+  };
+  return map[section?.toLowerCase()] ?? "#0088ff";
+});
+
+const currentSection = computed(() => route.path.split("/").pop()?.toLowerCase());
+
+function getBorderColor(index) {
+  const activeIndex = getTeamSection.value.findIndex(
+    (s) => s.name.toLowerCase() === currentSection.value
+  );
+
+  if (index === activeIndex || index === activeIndex - 1) {
+    return activeBorderColor.value;
+  }
+
+  return "#ccc";
+}
+
 const inviteOptions = [
   { label: "Workspace 1", key: "workspace1", icon: renderIcon(FolderKanban) },
   { label: "Team Members", key: "members", icon: renderIcon(Users) },
@@ -417,14 +500,13 @@ const inviteOptions = [
   display: flex;
   align-items: stretch;
   height: 35px;
-  border-bottom: 2px solid #0088ff;
+  border-bottom: 1.6px solid #0088ff;
   padding: 0;
   margin: 0;
 }
 .navbar-left {
   width: 300px;
   height: 100%;
-  border-right: 1px solid #ccc;
 }
 .workspace-trigger {
   cursor: pointer;
@@ -433,6 +515,13 @@ const inviteOptions = [
 .navbar-center {
   flex: 1;
   height: 100%;
+  padding: 0;
+  margin: 0;
+}
+.team-section {
+  flex: 1;
+  align-self: stretch;
+  border-right: 1px solid;
   padding: 0;
   margin: 0;
 }
@@ -485,6 +574,31 @@ const inviteOptions = [
   background: #f5f5f5;
   cursor: pointer;
 }
+.btn-option:hover {
+  background-color: #ccc !important;
+}
+
+.active-card {
+  border: 1.6px solid transparent;
+}
+
+.section-task.active-section {
+  color: #0088ff !important;
+  background-color: #b2dbff !important;
+}
+.section-issue.active-section {
+  color: #ff383c !important;
+  background-color: #ffc3c4 !important;
+}
+.section-document.active-section {
+  color: #00c3d0 !important;
+  background-color: #b2ecf8 !important;
+}
+.section-activity.active-section {
+  color: #6155f5 !important;
+  background-color: #cfccfc !important;
+}
+
 :deep(.n-scrollbar-rail.n-scrollbar-rail--vertical) {
   right: -100% !important;
 }

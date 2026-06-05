@@ -74,6 +74,10 @@ body {
   background-color: #F4F4F5 !important;
 }
 
+.bg-body {
+  background-color: #F2F5F9 !important;
+}
+
 .bg-btn {
   background-color: #171717;
 }
@@ -103,6 +107,7 @@ body {
 .btn-outline {
   background-color: #fff;
   color: #171717;
+  padding: 2px 0;
 }
 
 .btn-outline:hover {
@@ -127,6 +132,50 @@ body {
   color: #71717A !important;
 }
 
+.bg-red {
+  background-color: #FFC3C4 !important;
+}
+
 .text-danger {
   color: #FF383C !important;
+}
+
+.bg-blue {
+  background-color: #B2DBFF !important;
+}
+
+.text-blue {
+  color: #0088FF !important;
+}
+
+.bg-aqua {
+  background-color: #B2ECF8 !important;
+}
+
+.text-aqua {
+ color: #00C3D0 !important;
+}
+
+.bg-purple {
+  background-color: #CFCCFC !important;
+}
+
+.text-purple {
+  color: #6155F5 !important;
+}
+
+.bg-orange {
+  background-color: #FFDDBE !important;
+}
+
+.text-orange {
+  color: #FF8D28 !important;
+}
+
+.bg-green {
+  background-color: #C2EECD !important;
+}
+
+.text-green {
+  color: #34C759 !important;
 }
