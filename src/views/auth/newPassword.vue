@@ -49,7 +49,7 @@
 
                             <button type="submit" class="btn btn-submit" :disabled="isLoading">
                                 <span v-if="isLoading" class="spinner-border spinner-border-sm me-2"></span>
-                                {{ isLoading ? "Resetting..." : "Reset Password" }}
+                                {{ isLoading ? "Resetting..." : "Confirm Change" }}
                             </button>
                         </form>
                     </div>
