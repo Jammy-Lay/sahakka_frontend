@@ -7,7 +7,6 @@ export function isEmail(value, message = "This field is require") {
     ? ""
     : message;
 }
-
 export function isPassword(value, message) {
   return /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]).{8,}$/.test(
     String(value).trim(),
@@ -38,3 +37,18 @@ export function minlength(value, min, message) {
   return String(value).trim().length >= min ? "" : message;
 } 
 
+export function inputvalidate(value, rules = []) {
+  
+}
+ 
+export function validateUsername(value, message) {
+  const text = String(value).trim();
+
+  return /^[a-zA-Z0-9_]{3,30}$/.test(text)
+    ? ""
+    : message || "Only letters, numbers and _ allowed";
+}
+
+export function isMatch(value, compareTo, message) {
+  return String(value).trim() === String(compareTo).trim() ? "" : message;
+}
