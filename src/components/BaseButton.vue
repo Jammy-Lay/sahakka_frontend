@@ -1,5 +1,5 @@
 <template>
-  <button class="btn bg-btn text-white px-2 rounded-btn text-nowrap">
+  <button class="btn bg-btn text-white px-2 py-1 rounded-btn text-nowrap">
     <component v-if="icon" :is="icon" size="14" class="me-1" />
     {{ btnName }}
   </button>
