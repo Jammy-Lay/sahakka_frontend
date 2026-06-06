@@ -38,6 +38,18 @@ body {
   height: fit-content !important;
 }
 
+.fs-18 {
+  font-size: 18px !important;
+}
+
+.fs-17 {
+  font-size: 17px !important;
+}
+
+.fs-16 {
+  font-size: 16px !important;
+}
+
 .fs-15 {
   font-size: 15px !important;
 }
@@ -98,8 +110,8 @@ body {
 }
 
 .btn-ghost:hover {
-  background-color: #171717;
-  color: white;
+  background-color: #171717 !important;
+  color: white !important;
   font-size: 12px !important;
   font-weight: normal !important;
 }
@@ -107,13 +119,19 @@ body {
 .btn-outline {
   background-color: #fff;
   color: #171717;
-  padding: 2px 0;
+  padding-bottom: 2px !important;
+  padding-top: 2px !important;
+  border-color: #ebebeb;
 }
 
 .btn-outline:hover {
   background-color: #171717 !important;
-  color: white;
-  border: 2px solid #171717 !important;
+  color: white !important;
+  border: 1px solid #171717 !important;
+}
+
+.hover-circle:hover {
+  background-color: #f5f5f5 !important;
 }
 
 .rounded-btn {
