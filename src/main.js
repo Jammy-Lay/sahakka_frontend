@@ -1,7 +1,6 @@
-import 'bootstrap/dist/css/bootstrap.min.css'
-import 'bootstrap/dist/js/bootstrap.bundle.min.js'
-import 'bootstrap-icons/font/bootstrap-icons.css'
-
+import "bootstrap/dist/css/bootstrap.min.css";
+import "bootstrap/dist/js/bootstrap.bundle.min.js";
+import "bootstrap-icons/font/bootstrap-icons.css";
 
 // npm install vue-toastification@next
 import Toast from "vue-toastification";
@@ -19,12 +18,15 @@ import { createPinia } from "pinia";
 import App from "./App.vue";
 import router from "./router";
 import naive from "naive-ui";
+import VCalendar from "v-calendar";
+import "v-calendar/style.css";
 
 const app = createApp(App);
 
 app.use(createPinia());
 app.use(router);
 app.use(naive);
+app.use(VCalendar, {});
 
 app.use(Toast, {
   position: "bottom-right",
