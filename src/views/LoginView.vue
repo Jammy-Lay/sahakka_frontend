@@ -8,7 +8,7 @@
           <div class="form-wrapper">
             <!-- Compact Brand Logo Header -->
             <div class="form-header d-flex align-items-center gap-2 mb-4">
-              <img src=".././assets/image/image.png" alt="Sahakka Logo" class="logo" />
+              <img src="../assets/image/image.png" class="logo" alt="Logo" />
               <h2 class="brand-name m-0">Sahakka</h2>
             </div>
 
@@ -205,10 +205,11 @@ async function handleLogin() {
 }
 
 .logo {
-  width: 40px;
-  height: 40px;
-  object-fit: contain;
+    width: 40px;
+    height: 40px;
+    object-fit: contain;
 }
+
 
 .brand-name {
   font-size: 1.5rem;
@@ -224,11 +225,16 @@ async function handleLogin() {
   letter-spacing: -0.02em;
 }
 
+.form-header {
+  padding-left: -50px;
+}
+
 .form-subtitle {
   color: #71717a;
   font-size: 0.95rem;
   font-weight: 400;
 }
+
 .input-group-custom {
   margin-bottom: 1.15rem;
 }
@@ -260,6 +266,7 @@ async function handleLogin() {
   box-shadow: none;
   outline: none;
 }
+
 .password-wrapper {
   position: relative;
   display: flex;
