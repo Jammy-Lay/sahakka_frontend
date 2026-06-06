@@ -5,45 +5,61 @@
 
                 <!-- LEFT -->
                 <div class="col-lg-6 d-none d-lg-block left-panel">
-                    <img src="../../assets/image/style 1.png" class="panel-image-asset" />
+                    <img src="../../assets/image/style 1.png" class="panel-image-asset" alt="Background" />
                 </div>
 
                 <!-- RIGHT -->
                 <div class="col-lg-6 col-md-12 right-panel d-flex align-items-center justify-content-center">
                     <div class="form-wrapper">
 
+                        <!-- HEADER -->
                         <div class="form-header d-flex align-items-center gap-2 mb-4">
-                            <img src="../../assets/image/image.png" class="logo" />
+                            <img src="../../assets/image/image.png" class="logo" alt="Logo" />
                             <h2 class="brand-name m-0">Sahakka</h2>
                         </div>
 
+                        <!-- TITLE -->
                         <div class="title-section mb-4">
-                            <h3 class="form-title mb-1">OTP reset password</h3>
-                            <p class="form-subtitle">We sent OTP to your email</p>
+                            <h3 class="form-title mb-1">OTP Reset Password</h3>
+                            <p class="form-subtitle">
+                                We sent an OTP to your email
+                            </p>
                         </div>
 
+                        <!-- FORM -->
                         <form @submit.prevent="handleOtp">
 
-                            <!-- OTP -->
+                            <!-- OTP INPUT -->
                             <div class="input-group-custom mt-3">
                                 <n-input-otp v-model:value="value" :length="6" class="custom-otp" />
                             </div>
 
-                            <!-- TIMER -->
-                            <div class="timer-section d-flex justify-content-center mt-4">
-                                <span class="timer-text">
+                            <!-- TIMER / RESEND -->
+                            <div class="timer-section d-flex justify-content-center align-items-center mt-4">
+                                <span v-if="countdown > 0" class="timer-text">
                                     Resend code in {{ formatTime() }}
                                 </span>
+
+                                <span v-else class="text-black fw-semibold">
+                                    Did u get OTP?
+                                </span>
+
+                                <button type="button" class="btn-resend ms-3" :disabled="countdown > 0" @click="Resend">
+                                    Resend OTP
+                                </button>
                             </div>
 
-                            <!-- SUBMIT -->
-                            <button class="btn btn-submit mt-3" :disabled="isLoading">
+                            <!-- VERIFY BUTTON -->
+                            <button type="submit" class="btn btn-submit mt-3" :disabled="isLoading">
                                 {{ isLoading ? "Verifying..." : "Verify Code" }}
                             </button>
 
+                            <!-- BACK TO LOGIN -->
                             <div class="signup-prompt mt-4">
                                 Remember your password?
-                                <router-link to="/login">Go back to sign in</router-link>
+                                <router-link to="/login">
+                                    Go back to sign in
+                                </router-link>
                             </div>
 
                         </form>
@@ -55,7 +71,6 @@
         </div>
     </main>
 </template>
-
 <script setup>
 import { useAuthStore } from '@/stores/auth'
 import { useRouter } from 'vue-router'
@@ -91,15 +106,28 @@ function formatTime() {
 
 // Start persistent timer
 
-function startTimer() {
+function startTimer(reset = false) {
     clearInterval(timer)
 
-    let expiry = localStorage.getItem('otp_expiry')
+    let expiry
 
-    if (!expiry) {
+    if (reset) {
         expiry = Date.now() + OTP_TIME * 1000
         localStorage.setItem('otp_expiry', expiry)
+    } else {
+        expiry = localStorage.getItem('otp_expiry')
+
+        if (!expiry) {
+            expiry = Date.now() + OTP_TIME * 1000
+            localStorage.setItem('otp_expiry', expiry)
+        }
     }
+
+    // SET IMMEDIATELY
+    countdown.value = Math.max(
+        0,
+        Math.floor((Number(expiry) - Date.now()) / 1000)
+    )
 
     timer = setInterval(() => {
         const remaining = Math.max(
@@ -115,20 +143,42 @@ function startTimer() {
         }
     }, 1000)
 }
+const Resend = async () => {
+    try {
+        await auth.forgotPassword(email)
 
+        // toast.success('OTP resent to your email')
 
+        startTimer(true)
+
+        // Optional: clear old OTP input
+        value.value = []
+    } catch (err) {
+        toast.error(err?.message || 'Failed to resend OTP')
+    }
+}
 // Submit OTP
 const handleOtp = async () => {
+
+    if (countdown.value <= 0) {
+        toast.error('OTP expired. Please click Resend OTP.')
+        return
+    }
+
     const otp = value.value.join('')
 
     if (otp.length !== 6) {
         toast.error('Enter full 6-digit OTP')
         return
     }
+
     try {
         isLoading.value = true
+
         await auth.otp(email, otp)
+
         localStorage.removeItem('otp_expiry')
+
         router.push('/new-password')
     } catch (err) {
         toast.error(err?.message || 'Verification failed')
@@ -148,6 +198,17 @@ onUnmounted(() => clearInterval(timer))
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+}
+/* REMOVE GREEN FOCUS BORDER */
+:deep(.custom-otp .n-input.n-input--focus) {
+    box-shadow: none !important;
+}
+
+/* REMOVE INTERNAL GREEN BORDER */
+:deep(.custom-otp .n-input__border),
+:deep(.custom-otp .n-input__state-border) {
+    border: 2px solid #d9d9d9 !important;
+    box-shadow: none !important;
 }
 
 /* OTP BOX SIZE */
