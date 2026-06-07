@@ -6,7 +6,7 @@ export const useAuthStore = defineStore("auth", () => {
   let user = ref({});
   let token = ref(localStorage.getItem("token"));
   let isLoggedIn = computed(() => !!token.value);
-  let ForgotEmail= ref("");
+  let ForgotEmail = ref("");
   // console.log(isLoggedIn);
 
   let getMe = ref({});
@@ -23,12 +23,17 @@ export const useAuthStore = defineStore("auth", () => {
     }
   }
 
-  function logout() {
-    user.value = {};
-    getMe.value = {};
-    token.value = null;
-    localStorage.removeItem("token");
-  }
+  const logout = async () => {
+    try {
+      await api.delete("/api/logout");
+      user.value = {};
+      getMe.value = {};
+      token.value = null;
+      localStorage.removeItem("token");
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   const getMeStore = async () => {
     try {
@@ -38,17 +43,16 @@ export const useAuthStore = defineStore("auth", () => {
       console.log(error);
     }
   };
-  
+
   const register = async (email, password, name) => {
     try {
       const res = await api.post("/api/register", { email, password, name });
       return res.data;
-      
     } catch (err) {
       throw new Error(err.response?.data?.message || "Registration failed");
     }
   };
-  
+
   const forgotPassword = async (email) => {
     try {
       const res = await api.post("/api/forgot-password", { email });
@@ -97,6 +101,6 @@ export const useAuthStore = defineStore("auth", () => {
     resetPassword,
     otp,
     ForgotEmail,
-    register
+    register,
   };
 });
