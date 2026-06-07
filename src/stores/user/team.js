@@ -26,5 +26,16 @@ export const useTeamStore = defineStore("team", () => {
     }
   };
 
-  return { getTeamSection, getTeamSectionStore, getTeamByWorkspace, getTeamByWorkspaceStore };
+  const createTeam = async (workspace_id,title,description) => {
+    try {
+      const res = await api.post(`/api/workspace/${workspace_id}/team`, { title, description });
+
+      return res.data;
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
+  };
+
+  return { getTeamSection, getTeamSectionStore, getTeamByWorkspace, getTeamByWorkspaceStore, createTeam };
 });

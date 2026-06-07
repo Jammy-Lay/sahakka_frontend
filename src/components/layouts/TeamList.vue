@@ -181,10 +181,26 @@ const description = ref("");
 
 const handleCreateTeam = async () => {
   if (!teamName.value.trim()) return;
-  // your create logic here
-  teamName.value = "";
-  description.value = "";
-  showCreateTeam.value = false;
+
+  try {
+    await teamStore.createTeam(
+      currentRouteWorkspaceId.value,
+      teamName.value,
+      description.value
+    );
+
+    
+    teamName.value = "";
+    description.value = "";
+    showCreateTeam.value = false;
+
+    
+    await teamStore.getTeamByWorkspaceStore(
+      currentRouteWorkspaceId.value
+    );
+  } catch (error) {
+    console.error("Failed to create team:", error);
+  }
 };
 </script>
 
