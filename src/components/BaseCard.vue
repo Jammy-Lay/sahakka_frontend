@@ -1,94 +1,205 @@
 <template>
-  <div
-    class="card border-0 position-relative mt-5 bg-transparent"
-    :style="{
-      '--badge': product?.category ? `'${product.category}'` : `'Unknown'`,
-    }"
-  >
-    <div
-      class="author ps-3 pt-2 d-flex justify-content-start align-items-center gap-3 bg-light"
-    >
-      <img :src="Logo" class="img-fluid" width="30px" alt="" />
-      <div class="d-flex flex-column gap-0 fw-bold">
-        <p class="m-0">Vue</p>
-        <p class="m-0">JS</p>
+  <div class="project-card">
+    <!-- Header -->
+    <div class="project-header">
+      <div class="d-flex gap-3 align-items-center">
+        <div class="project-icon">
+          <Layers />
+        </div>
+
+        <div>
+          <h5>{{ project.name }}</h5>
+          <p>Owner: {{ project.owner }}</p>
+        </div>
+      </div>
+
+      <i class="pi pi-ellipsis-v menu"></i>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats mt-3">
+      <div class="stat-box" v-for="stat in stats" :key="stat.label">
+        <component :is="stat.icon" :style="{ color: stat.color }" />
+        <span>{{ stat.label }}</span>
+        <b>{{ stat.value }}</b>
       </div>
     </div>
-    <div class="item bg-light pt-5 pb-1 px-5" style="height: 280px">
-      <img
-        src="https://static.vecteezy.com/system/resources/previews/035/575/252/non_2x/men-s-t-shirt-isolated-on-transparent-background-free-png.png"
-        class="w-100 h-100 object-fit-contain"
-        alt=""
-      />
+
+    <div class="mt-3">
+      <n-avatar-group :options="mapMembers(members)" :size="25" :max="4">
+        <template #avatar="{ option: { name, src } }">
+          <n-tooltip :style="{
+            fontSize: '11px',
+            padding: '4px 8px',
+            borderRadius: '8px',
+          }">
+            <template #trigger>
+              <n-avatar :src="src" />
+            </template>
+
+            {{ name }}
+          </n-tooltip>
+        </template>
+
+        <template #rest="{ options: restOptions, rest }">
+          <n-dropdown :options="createDropdownOptions(restOptions)" placement="top" size="small">
+            <n-avatar class="fs-14 text-dark bg-mute"> +{{ rest }} </n-avatar>
+          </n-dropdown>
+        </template>
+      </n-avatar-group>
     </div>
-    <div class="detail bg-light py-3">
-      <h6 class="text-center">T-shirt</h6>
+
+    <!-- Progress -->
+    <div class="progress-area">
+      <div class="progress-title">
+        <span>Progress</span>
+        <b>{{ project.progress }}%</b>
+      </div>
+
+      <div class="progress">
+        <div class="bar" :style="{ width: project.progress + '%' }"></div>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import Logo from "@/assets/logo.svg";
-import "@/assets/card.css";
-const ellipsisText = (text, limit = 15) => {
-  return text.slice(0, limit) + "...";
-};
+import { Layers } from "lucide-vue-next";
 
 defineProps({
-  product: Object,
-  index: Number,
+  project: {
+    type: Object,
+    default: () => ({}),
+  },
+  stats: {
+    type: Array,
+    default: () => [],
+  },
+  members: {
+    type: Array,
+    default: () => [],
+  },
 });
+function mapMembers(members = []) {
+  return members.map((m) => ({
+    name: m.name,
+    src: m.avatar,
+  }));
+}
 
-const getType = (index) => {
-  const types = ["popular", "new", "trend"];
-  return types[index % types.length];
-};
+function createDropdownOptions(options) {
+  return options.map((o) => ({
+    key: o.name,
+    label: o.name,
+    props: { style: "font-size: 11px;" },
+  }));
+}
 </script>
 
 <style scoped>
-.card::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  right: 0;
-  width: 45%;
-  height: 50px;
-  background-color: transparent !important;
-  border-bottom-left-radius: 30px;
-  box-shadow: -30px 25px 0 #f8f9fa;
+.project-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
 }
-.card::after {
-  content: var(--badge);
-  position: absolute;
-  top: 0;
-  right: 0;
-  width: calc(45% - 6px);
-  height: 45px;
-  background-color: #f8f9fa;
-  border-radius: 30px;
-  color: black;
+
+.project-card {
+  background: white;
+  border-radius: 18px;
+  padding: 24px;
+
+  border: 1px solid #e8e8e8;
+
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+}
+
+.project-header {
   display: flex;
-  justify-content: center;
+  justify-content: space-between;
   align-items: center;
+}
+
+.project-icon {
+  align-items: center;
+  background: #9e9e9e23;
+  border-radius: 14px;
+  color: #171717;
+  display: flex;
+  height: 48px;
+  justify-content: center;
+  width: 48px;
+}
+
+.project-header h5 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+  color: #27364d;
+}
+
+.project-header p {
+  margin: 4px 0 0;
+  color: #94a3b8;
+  font-size: 13px;
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.stat-box {
+  background: #e1eaf1a2;
+  border-radius: 12px;
+  padding: 14px;
+  text-align: center;
+}
+
+.stat-box span {
+  display: block;
+  color: #94a3b8;
   font-size: 14px;
-  font-weight: 500;
-  color: #66d19e;
 }
-.author {
-  width: 55%;
-  height: 50px;
-  border-top-left-radius: 30px;
-  border-top-right-radius: 30px;
+
+.stat-box b {
+  font-size: 18px;
+  color: #27364d;
 }
-.author p {
-  font-size: 12px !important;
+
+.member {
+  color: #b05cff;
 }
-.item {
-  border-top-right-radius: 30px;
+
+.team {
+  color: #3b82f6;
 }
-.detail {
-  border-bottom-left-radius: 30px;
-  border-bottom-right-radius: 30px;
-  box-shadow: 0 5px 0 #42b883;
+
+.task {
+  color: #10b981;
+}
+
+.progress-area {
+  margin-top: 10px;
+}
+
+.progress-title {
+  display: flex;
+  justify-content: space-between;
+  color: #94a3b8;
+  font-size: 14px;
+}
+
+.progress {
+  height: 7px;
+  background: #eef2f7;
+  border-radius: 20px;
+  margin-top: 12px;
+}
+
+.bar {
+  height: 100%;
+  border-radius: 20px;
+  background: #34c759;
 }
 </style>

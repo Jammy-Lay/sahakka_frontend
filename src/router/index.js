@@ -71,6 +71,49 @@ const router = createRouter({
       name: "about",
       component: () => import("../views/AboutView.vue"),
     },
+        {
+      path: "/admin/",
+      component: () => import("../layouts/AdminLayout.vue"),
+      children: [
+        {
+          path: "dashboard",
+          component: () => import('../views/admin/DashboardView.vue')
+        },
+        {
+          path: "users",
+          component: () => import('../views/admin/UsersView.vue')
+        },
+        {
+          path: "workspaces",
+          component: () => import('../views/admin/WorkspacesView.vue')
+        },
+        {
+          path: "/admin/workspaces/:id",
+          name: "workspace-detail",
+          component: () => import("../views/admin/WorkspaceDetail.vue"),
+        },
+        {
+          path: "teams",
+          component: () => import('../views/admin/TeamsView.vue')
+        },
+        {
+          path: "/admin/workspace/:workspace_id/teams/:id",
+          component: () => import('../views/admin/TeamDetail.vue')
+        },
+        {
+          path: "activities-team",
+          component: () => import('../views/admin/ActivitiesTeamView.vue')
+        },
+        {
+          path: "tasks",
+          component: () => import('../views/admin/TaskView.vue')
+        },
+        {
+          path: "setting",
+          component: () => import('../views/admin/SettingView.vue')
+        },
+      ],
+    },
   ],
 });
 
