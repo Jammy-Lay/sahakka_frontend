@@ -67,11 +67,13 @@
                 input-class="py-1 fs-13 rounded-btn-sm my-2"
               />
               <!-- Create Workspace -->
-              <BaseButton
-                btnName="Create workspace"
-                class="w-100 fs-13 rounded-btn-sm py-1"
-                @click="handleCreateWorkspace"
-              />
+               <span class="text-danger">{{ newWorkspaceNameErr }}</span>
+              <BaseBtn
+              btnName="Create workspace"
+              class="w-100 fs-13 rounded-btn-sm py-1"
+              :loading = "isLoading"
+              @click="handleCreateWorkspace"
+            />
             </div>
           </n-popover>
         </div>
@@ -125,13 +127,19 @@
             <div class="p-1 fs-13">
               <div
                 class="d-flex align-items-center rounded gap-2 px-2 py-1 fw-bold workspace-item"
-                @click="showRenameModal = true"
+                @click="
+                  selectedWs = ws;
+                  renameName = ws.workspace_name;
+                  showRenameModal = true;"
               >
                 <Pencil size="13" /> Rename
               </div>
               <div
                 class="d-flex align-items-center rounded gap-2 px-2 py-1 text-danger fw-bold workspace-item"
-                @click="showDeleteModal = true"
+                @click="
+                  selectedWs = ws;
+                  showDeleteModal = true;
+                "
               >
                 <Trash2 size="13" /> Delete
               </div>
@@ -387,6 +395,7 @@
             input-placeholder="New name"
             input-class="py-1 fs-13 rounded-btn-sm mb-4"
           />
+          <span class="text-danger">{{ renameErr }}</span>
           <BaseButton
             btnName="Save"
             class="w-100 fs-13 rounded-btn py-2"
@@ -476,9 +485,28 @@ const {
 const teamStore = useTeamStore();
 const { getTeamByWorkspace } = storeToRefs(teamStore);
 
-onMounted(async () => {
+// =======================================================by sothatt
+
+import { notify } from "@/utils/toast";
+import { useCrudWorkspaceStore } from "@/stores/workspaces/workspaces";
+import BaseBtn from "../BaseBtn.vue";
+const toast = notify(router);
+
+const crudWorkspaceStore = useCrudWorkspaceStore();
+// const newWorkspaceName = ref("");
+const newWorkspaceNameErr = ref("");
+const isLoading = ref(false);
+
+const maxWorkspace = myWorkspaces.value
+
+// ==========================end
+const reuseonMount = async()=>{
   await authStore.getMeStore();
   await workspaceStore.getMyWorkspaceStore();
+}
+
+onMounted(async () => {
+  reuseonMount();
 });
 
 const switchWorkspace = async (id) => {
@@ -492,30 +520,141 @@ const switchWorkspace = async (id) => {
   }
 };
 
+// ==============================handle create workspace
 const handleCreateWorkspace = async () => {
-  if (!newWorkspaceName.value.trim()) return;
-  await workspaceStore.createWorkspace(newWorkspaceName.value);
-  newWorkspaceName.value = "";
+  const name = newWorkspaceName.value.trim();
+  if (!name) {
+    newWorkspaceNameErr.value = "Name is required";
+    toast.error("Workspace name is required");
+    return;
+  }
+  if (name.length < 3) {
+    newWorkspaceNameErr.value =
+      "Must be at least 3 characters";
+    toast.error("Workspace name must be at least 3 characters");
+    return;
+  }
+  if(maxWorkspace.length >= 5){
+   
+  newWorkspaceNameErr.value = "Maximum 5 ";
+  toast.error(" Maximum 5 workspaces allowed");
+  return;
+  }
+
+  try {
+    isLoading.value = true;
+    newWorkspaceNameErr.value = "";
+    const res = await crudWorkspaceStore.createWorkspace(name);
+    newWorkspaceName.value = "";
+
+    toast.success("Workspace created successfully");
+    reuseonMount();
+  } catch (error) {
+    newWorkspaceNameErr.value = error.message;
+    toast.error(error.message);
+  }finally{
+    isLoading.value = false
+  }
 };
 
+// ==============================================handle Rename workspace
+const renameErr = ref("");
 const handleRename = async () => {
-  if (!renameName.value.trim()) return;
-  // your rename logic here
-  showRenameModal.value = false;
+  const reName = renameName.value.trim();
+
+  if (!reName) {
+    renameErr.value = "Name is required";
+    toast.error("Workspace name is required");
+    return;
+  }
+
+  if (reName.length < 3) {
+    renameErr.value = "Must be at least 3 characters";
+    toast.error("Workspace name must be at least 3 characters");
+    return;
+  }
+
+  try {
+    renameErr.value = "";
+
+    await crudWorkspaceStore.updateWorkspace(
+      selectedWs.value.workspace_id,
+      reName
+    );
+
+    toast.success("Workspace updated successfully");
+
+    showRenameModal.value = false;
+    renameName.value = "";
+    selectedWs.value = null;
+
+    await reuseonMount();
+  } catch (error) {
+    renameErr.value = error.message;
+    toast.error(error.message);
+  }
 };
 
+// ================================================handle delete workspace
+const deleteErr = ref('')
 const handleDelete = async () => {
-  // your delete logic here
+  if(myWorkspaces.value.length == 1){
+    deleteErr.value = "Cannot delete the last workspace";
+    toast.error("Cannot delete the last workspace");
+    return;
+  }
+  try {
+    
+    await crudWorkspaceStore.deleteWorkspace(
+      selectedWs.value.workspace_id
+    );
+
+    toast.success("Workspace deleted successfully");
+
+    showDeleteModal.value = false;
+    selectedWs.value = null;
+
+    await reuseonMount();
+  } catch (error) {
+    toast.error(error.message);
+  }
 };
+
 
 const handleLeave = (ws) => {
   console.log("leave", ws);
 };
 
+// ==================================================handlejoin
+const joinErr = ref("");
 const handleJoin = async () => {
-  if (!joinCode.value.trim()) return;
-  joinCode.value = "";
-  showJoinPopover.value = false;
+  const token = joinCode.value.trim();
+  console.log(token);
+  
+
+  if (!token) {
+    joinErr.value = "Token is required";
+    toast.error("Token is required");
+    return;
+  }
+
+  try {
+    joinErr.value = "";
+
+    await crudWorkspaceStore.joinByToken(token);
+
+    toast.success("Joined workspace successfully");
+
+    joinCode.value = "";
+    showJoinPopover.value = false;
+
+    await reuseonMount();
+  } catch (error) {
+    joinErr.value = error.message;
+    toast.error(error.message);
+  } finally {
+
+  }
 };
 
 const handleInvite = async () => {
