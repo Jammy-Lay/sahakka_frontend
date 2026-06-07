@@ -7,8 +7,9 @@ export function isEmail(value, message = "This field is require") {
     ? ""
     : message;
 }
+
 export function isPassword(value, message) {
-  return /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]).{8,}$/.test(
+  return /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]).*$/.test(
     String(value).trim(),
   )
     ? ""
@@ -19,7 +20,11 @@ export function checkContent(value, message) {
   return value.trim().length >= 10 ? "" : message;
 }
 
-export function checkFileSize(value, message = "File size must be less than 1MB", maxSizeMB = 1) {
+export function checkFileSize(
+  value,
+  message = "File size must be less than 1MB",
+  maxSizeMB = 1,
+) {
   const sizeInMB = value.size / 1024 / 1024; // convert bytes to MB
   return sizeInMB <= maxSizeMB ? "" : message;
 }
@@ -35,18 +40,14 @@ export function validates(value, rules = []) {
 }
 export function minlength(value, min, message) {
   return String(value).trim().length >= min ? "" : message;
-} 
-
-export function inputvalidate(value, rules = []) {
-  
 }
- 
+
 export function validateUsername(value, message) {
   const text = String(value).trim();
 
-  return /^[a-zA-Z0-9_]{3,30}$/.test(text)
+  return /^[a-zA-Z0-9_]+(?: [a-zA-Z0-9_]+)?$/.test(text)
     ? ""
-    : message || "Only letters, numbers and _ allowed";
+    : message || "Only one space is allowed";
 }
 
 export function isMatch(value, compareTo, message) {

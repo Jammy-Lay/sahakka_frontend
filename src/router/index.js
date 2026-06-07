@@ -27,7 +27,7 @@ const router = createRouter({
     {
       path: "/new-password",
       name: "new-password",
-      component: () => import("../views/auth/newPassword.vue")
+      component: () => import("../views/auth/newPassword.vue"),
     },
     {
       path: "/workspace",
@@ -60,6 +60,11 @@ const router = createRouter({
       path: "/login",
       name: "login",
       component: () => import("../views/LoginView.vue"),
+    },
+    {
+      path: "/verify-email",
+      name: "verify-email",
+      component: () => import("@/views/VerifyEmail.vue"),
     },
     {
       path: "/about",

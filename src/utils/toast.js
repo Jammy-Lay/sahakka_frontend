@@ -21,7 +21,7 @@ export const notify = (router) => {
     error(text) {
       toast.error(text, {
         position: "bottom-left",
-        timeout: 1500,
+        timeout: 2000,
       });
     },
   };

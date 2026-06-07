@@ -1,76 +1,95 @@
 <template>
-  <main class="body-login">
-    <div class="container-fluid p-0 h-100">
-      <div class="row g-0 h-100">
-        <div class="col-lg-6 d-none d-lg-block left-panel"></div>
-
-        <div class="col-lg-6 col-md-12 right-panel d-flex align-items-center justify-content-center">
-          <div class="form-wrapper">
-            <!-- Compact Brand Logo Header -->
-            <div class="form-header d-flex align-items-center gap-2 mb-4">
-              <img src="../assets/image/image.png" class="logo" alt="Logo" />
-              <h2 class="brand-name m-0">Sahakka</h2>
+  <div class="min-vh-100 overflow-hidden">
+    <div class="row g-0">
+      <div class="col-lg-6">
+        <img
+          src="../assets/image/style 1.png"
+          alt=""
+          class="object-fit-cover w-100 vh-100"
+        />
+      </div>
+      <div class="col-lg-6">
+        <div class="d-flex justify-content-center align-items-center min-vh-100">
+          <div style="width: 468px">
+            <div class="d-flex align-items-center gap-2 mb-4">
+              <n-avatar :src="Logo" :size="60" class="bg-white" />
+              <h3 class="mb-0 fw-bold">Sahakka</h3>
             </div>
 
-            <!-- Header Title Section -->
-            <div class="title-section mb-4">
-              <h3 class="form-title mb-1">login in to your account .</h3>
-              <p class="form-subtitle">Enter your credentials to access your account.</p>
-            </div>
+            <h3 class="fw-semibold mb-3">Log in to your account</h3>
+            <h6 class="text-mute mb-6">Enter your account to complete your work.</h6>
 
-            <!-- Form Main -->
-            <form id="loginFormMain" @submit.prevent="handleLogin">
-              <!-- EMAIL -->
-              <div class="input-group-custom">
-                <label for="email">Email</label>
-                <input id="email" v-model="email" type="email" class="form-control" placeholder="Enter email" />
-                <p v-if="err.email" class="text-danger mt-1 tiny-text">{{ err.email }}</p>
-              </div>
+            <form @submit.prevent="handleLogin">
+              <label class="mb-2 text-dark">Email</label>
+              <BaseInput
+                input-style="padding: 12px 0"
+                input-class="ps-3 rounded-btn text-dark fs-15"
+                input-placeholder="Enter email"
+                v-model="email"
+              />
+              <p v-if="err.email" class="text-danger mt-1 fs-14">{{ err.email }}</p>
 
-              <!-- PASSWORD (No Confirm Password Field Below This) -->
-              <div class="input-group-custom">
-                <label for="password">Password</label>
-                <div class="password-wrapper">
-                  <input id="password" v-model="password" :type="showPassword ? 'text' : 'password'"
-                    class="form-control" placeholder="Enter Password" />
-                  <i class="bi" :class="showPassword ? 'bi-eye-slash' : 'bi-eye'"
-                    @click="showPassword = !showPassword"></i>
+              <div :class="err.email ? 'mt-3' : 'mt-4'">
+                <label class="mb-2 text-dark">Password</label>
+                <div class="position-relative">
+                  <BaseInput
+                    :input-type="showPassword ? 'text' : 'password'"
+                    input-style="padding: 12px 0"
+                    input-class="ps-3 pe-5 rounded-btn text-dark fs-15"
+                    input-placeholder="Enter password"
+                    v-model="password"
+                  />
+                  <span
+                    class="position-absolute top-50 end-0 translate-middle-y pe-3 cursor-pointer"
+                    @click="showPassword = !showPassword"
+                  >
+                    <Eye v-if="!showPassword" :size="18" color="#aaa" />
+                    <EyeOff v-else :size="18" color="#aaa" />
+                  </span>
                 </div>
-                <p v-if="err.password" class="text-danger mt-1 tiny-text">
+                <p v-if="err.password" class="text-danger mt-1 fs-14">
                   {{ err.password }}
                 </p>
               </div>
-              <div class="forgot-password-wrapper mb-1 ">
-                <router-link to="/forgot-password" class="forgot-password-link">Forgot password?</router-link>
+
+              <div :class="err.password ? 'mt-3' : 'mt-4'">
+                <router-link to="/forgot-password" class="text-dark text-decoration-none">
+                  Forgot password?
+                </router-link>
               </div>
 
-              <!-- ACTION BUTTON -->
-              <button type="submit" class="btn btn-submit mt-4" :disabled="isLoading">
-                <span v-if="isLoading" class="spinner-border spinner-border-sm me-2"></span>
-                {{ isLoading ? "Logging in..." : "Sign in" }}
+              <button
+                type="submit"
+                class="btn bg-btn w-100 mt-4 rounded-btn py-2"
+                :disabled="isLoading"
+              >
+                <span v-if="isLoading" class="spinner-border spinner-border-sm me-2" />
+                {{ isLoading ? "Signing..." : "Sign in" }}
               </button>
             </form>
-
-            <!-- LINK TO LOGIN -->
-            <div class="signup-prompt mt-4">
-              Already have an account?
-              <router-link to="/register">Sign up</router-link>
+            <div class="d-flex mt-4 justify-content-center gap-2">
+              <p class="text-dark mb-0">Don't have an account?</p>
+              <router-link to="/register" class="text-decoration-none"
+                >Sign up</router-link
+              >
             </div>
           </div>
         </div>
       </div>
     </div>
-  </main>
+  </div>
 </template>
 
 <script setup>
-import { reactive, ref } from "vue";
+import { reactive, ref, watch } from "vue";
 import { useAuthStore } from "@/stores/auth";
 import { useRouter } from "vue-router";
 import { isEmail, require, validates } from "@/utils/validate";
 import { notify } from "@/utils/toast";
 import { UseWorkspaceStore } from "@/stores/user/workspace";
 import { useTeamStore } from "@/stores/user/team";
+import BaseInput from "@/components/BaseInput.vue";
+import Logo from "@/assets/image/image.png";
 
 // import { useToast } from "vue-toastification";
 // let toast = useToast();
@@ -86,15 +105,12 @@ const auth = useAuthStore();
 const workspaceStore = UseWorkspaceStore();
 const teamStore = useTeamStore();
 
-// toast.error("Something went wrong!");
-
 const err = reactive({
   email: "",
   password: "",
 });
 
 function validate() {
-  // err.email = require(email.value, "Email is require");
   err.email = validates(email.value, [
     (v) => require(v, "Email is require"),
     (v) => isEmail(v, "Wrong Format Email"),
@@ -104,6 +120,17 @@ function validate() {
 
   return !err.email && !err.password;
 }
+
+watch(email, (val) => {
+  err.email = validates(val, [
+    (v) => require(v, "Email is require"),
+    (v) => isEmail(v, "Wrong Format Email"),
+  ]);
+});
+
+watch(password, (val) => {
+  err.password = require(val, "Password is require");
+});
 
 async function handleLogin() {
   if (!validate()) return;
@@ -116,7 +143,11 @@ async function handleLogin() {
     if (lastVisited) {
       // returning user → go to last visited
       const { workspace_id, team_id } = lastVisited;
-      router.push(`/workspace/${workspace_id}/team/${team_id}/tasks`);
+      toast.success(
+        "Signin Successfully",
+        `/workspace/${workspace_id}/team/${team_id}/tasks`
+      );
+      // router.push(`/workspace/${workspace_id}/team/${team_id}/tasks`);
     } else {
       await workspaceStore.getMyWorkspaceStore();
       const workspace = workspaceStore.myWorkspaces[0];
@@ -131,205 +162,11 @@ async function handleLogin() {
       }
     }
   } catch (error) {
-    toast.error(error.message);
+    toast.error(error.message || "Signin fail");
   } finally {
     isLoading.value = false;
   }
 }
 </script>
 
-<style scoped>
-/* BASE VIEWPORT SETUP */
-.body-login {
-  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  /* background: #ffffff; */
-  height: 100vh;
-  width: 100vw;
-  overflow: hidden;
-}
-
-.forgot-password-link {
-  color: #000000;
-  font-size: 0.9rem;
-  text-decoration: none;
-}
-
-.h-100 {
-  height: 100% !important;
-}
-
-.left-panel {
-  width: 50%;
-  /* position: relative; */
-  height: 100%;
-  /* width: fit-content; */
-  background-image: url("../assets/image/style 2.jpg");
-  overflow: hidden;
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  object-fit: cover;
-  height: 100%;
-}
-
-.left-brand-header {
-  position: absolute;
-  top: 45px;
-  left: 45px;
-  z-index: 10;
-}
-
-.left-logo {
-  width: 44px;
-  height: 44px;
-  object-fit: contain;
-}
-
-.left-brand-name {
-  font-size: 1.85rem;
-  font-weight: 500;
-  color: #111111;
-  letter-spacing: -0.03em;
-}
-
-/* RIGHT SIDE FORM PANEL */
-.right-panel {
-  background: #ffffff;
-  height: 100%;
-  margin: 0 auto;
-}
-
-.form-wrapper {
-  width: 100%;
-  max-width: 375px;
-}
-
-.logo {
-    width: 40px;
-    height: 40px;
-    object-fit: contain;
-}
-
-
-.brand-name {
-  font-size: 1.5rem;
-  font-weight: 500;
-  color: #000000;
-  letter-spacing: -0.02em;
-}
-
-.form-title {
-  font-size: 1.65rem;
-  font-weight: 500;
-  color: #111111;
-  letter-spacing: -0.02em;
-}
-
-.form-header {
-  padding-left: -50px;
-}
-
-.form-subtitle {
-  color: #71717a;
-  font-size: 0.95rem;
-  font-weight: 400;
-}
-
-.input-group-custom {
-  margin-bottom: 1.15rem;
-}
-
-.input-group-custom label {
-  font-size: 0.9rem;
-  font-weight: 400;
-  color: #1c1c1e;
-  margin-bottom: 0.5rem;
-  display: block;
-}
-
-.input-group-custom .form-control {
-  border-radius: 8px;
-  border: 1px solid #d1d1d6;
-  padding: 0.75rem 1rem;
-  font-size: 0.95rem;
-  color: #111111;
-  background-color: #ffffff;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
-}
-
-.input-group-custom .form-control::placeholder {
-  color: #c7c7cc;
-}
-
-.input-group-custom .form-control:focus {
-  border-color: #111111;
-  box-shadow: none;
-  outline: none;
-}
-
-.password-wrapper {
-  position: relative;
-  display: flex;
-  align-items: center;
-  width: 100%;
-}
-
-.password-wrapper .form-control {
-  padding-right: 2.5rem;
-}
-
-.password-wrapper i {
-  position: absolute;
-  right: 1rem;
-  cursor: pointer;
-  color: #aeaeae;
-  font-size: 1.1rem;
-}
-
-.btn-submit {
-  background-color: #141416;
-  color: #ffffff;
-  border: none;
-  padding: 0.75rem;
-  font-weight: 400;
-  border-radius: 8px;
-  width: 100%;
-  font-size: 0.95rem;
-  transition: background-color 0.15s ease;
-}
-
-.btn-submit:hover:not(:disabled) {
-  background-color: #232326;
-}
-
-.signup-prompt {
-  text-align: center;
-  font-size: 0.9rem;
-  color: #111111;
-}
-
-.signup-prompt a {
-  color: #007aff;
-  font-weight: 400;
-  text-decoration: none;
-}
-
-.signup-prompt a:hover {
-  text-decoration: underline;
-}
-
-.tiny-text {
-  font-size: 0.75rem;
-}
-
-/* MOBILE VIEW RESPONSIVENESS OVERRIDES */
-@media (max-width: 991.98px) {
-  .body-login {
-    overflow-y: auto;
-  }
-
-  .right-panel {
-    padding: 3rem 1.5rem;
-  }
-}
-</style>
+<style scoped></style>

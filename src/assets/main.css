@@ -12,6 +12,10 @@ body {
   font-family: "Poppins", "Hanuman", sans-serif !important;
 }
 
+/* body {
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+} */
+
 /* Error toast */
 .Vue-Toastification__toast--error {
   background: #e02424 !important;
@@ -28,6 +32,11 @@ body {
 .Vue-Toastification__toast--info {
   background: #2563eb !important;
   color: #fff !important;
+}
+
+::placeholder {
+  color: #aaa !important;
+  font-weight: 100 !important;
 }
 
 .w-fit {
@@ -152,6 +161,10 @@ body {
 
 .bg-red {
   background-color: #FFC3C4 !important;
+}
+
+.text-dark {
+  color: #171717 !important;
 }
 
 .text-danger {
