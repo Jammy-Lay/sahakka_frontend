@@ -4,6 +4,7 @@
       :type="inputType"
       class="base-input form-control"
       :class="inputClass"
+      :style="inputStyle"
       :placeholder="inputPlaceholder"
       v-model="model"
       :disabled="isDisabled"
@@ -30,12 +31,16 @@ defineProps({
     type: String,
     default: "",
   },
+  inputStyle: {
+    type: [String, Object],
+    default: "",
+  },
 });
 </script>
 
 <style scoped>
 .base-input {
-  border: 1.5px solid #E4E4E7;
+  border: 1.5px solid #e4e4e7;
   transition: border-color 0.2s ease;
   box-shadow: none !important;
 }
