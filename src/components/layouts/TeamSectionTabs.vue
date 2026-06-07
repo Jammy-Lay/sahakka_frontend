@@ -1,45 +1,25 @@
 <template>
-  <router-link
-    v-for="(section, index) in getTeamSection"
-    :key="section.id"
-    :to="`/workspace/${currentRouteWorkspaceId}/team/${currentRouteTeamId}/${section.name.toLowerCase()}`"
-    :class="[
+  <router-link v-for="(section, index) in getTeamSection" :key="section.id"
+    :to="`/workspace/${currentRouteWorkspaceId}/team/${currentRouteTeamId}/${section.name.toLowerCase()}`" :class="[
       'team-section text-decoration-none text-mute fs-15 d-flex justify-content-center align-items-center bg-white',
       getSectionClass(section.name),
-    ]"
-    :style="{ borderRightColor: getBorderColor(index) }"
-    active-class="active-section"
-  >
+    ]" :style="{ borderRightColor: getBorderColor(index) }" active-class="active-section">
     {{ section.name }}
   </router-link>
 
-  <n-popover
-    trigger="click"
-    placement="bottom"
-    :show-arrow="false"
-    v-model:show="showInvitePopover"
-    style="border-radius: 12px; width: 400px; padding: 0; margin-right: 12px; margin-top: 12px;"
-  >
+  <n-popover trigger="click" placement="bottom" :show-arrow="false" v-model:show="showInvitePopover"
+    style="border-radius: 12px; width: 400px; padding: 0; margin-right: 12px; margin-top: 12px;">
     <template #trigger>
       <div
-        class="team-section d-flex justify-content-center align-items-center gap-2 cursor-pointer fw-medium invite-hover"
-      >
+        class="team-section d-flex justify-content-center align-items-center gap-2 cursor-pointer fw-medium invite-hover">
         <Mail size="14" />
         <span class="fs-14">Invite</span>
       </div>
     </template>
 
-    <div
-      class="d-flex align-items-center justify-content-between"
-      style="padding: 0 10px; padding-top: 10px"
-    >
+    <div class="d-flex align-items-center justify-content-between" style="padding: 0 10px; padding-top: 10px">
       <span class="fw-bold fs-15 ps-1 m-0">Invite people</span>
-      <n-button
-        text
-        size="small"
-        @click="showInvitePopover = false"
-        class="text-dark hover-circle p-2 rounded-circle"
-      >
+      <n-button text size="small" @click="showInvitePopover = false" class="text-dark hover-circle p-2 rounded-circle">
         <x size="16" />
       </n-button>
     </div>
@@ -48,19 +28,11 @@
     <div style="padding: 10px">
       <div class="row pe-5 g-0 gx-2">
         <div class="col-11">
-          <BaseInput
-            v-model="inviteEmail"
-            input-placeholder="Email"
-            input-class="fs-14 w-100 rounded-btn-sm"
-          />
+          <BaseInput v-model="inviteEmail" input-placeholder="Email" input-class="fs-14 w-100 rounded-btn-sm" />
         </div>
         <div class="col-1">
           <!-- Invite by email -->
-          <BaseButton
-            btnName="Invite"
-            class="fs-13 rounded-btn-sm fw-medium text-nowrap h-100"
-            @click="handleInvite"
-          />
+          <BaseButton btnName="Invite" class="fs-13 rounded-btn-sm fw-medium text-nowrap h-100" @click="handleInvite" />
         </div>
       </div>
 
@@ -68,28 +40,19 @@
         <p class="fs-13 fw-semibold mb-2 ps-1">Passcode</p>
         <div class="row my-2 pe-4 g-0 gx-2">
           <div class="col-10">
-            <BaseInput
-              v-model="passcode"
-              input-placeholder="XXXXXXXX"
-              isDisabled
-              input-class="fs-14 bg-white rounded-btn-sm"
-            />
+            <BaseInput v-model="passcode" input-placeholder="XXXXXXXX" isDisabled
+              input-class="fs-14 bg-white rounded-btn-sm" />
           </div>
           <div class="col-1">
             <button
               class="btn btn-outline border rounded-btn py-2 h-100 fs-13 fw-semibold text-nowrap d-flex align-items-center gap-1"
-              @click="handleCopy"
-            >
+              @click="handleCopy">
               <copy size="13" /> Copy
             </button>
           </div>
         </div>
         <!-- Generate token -->
-        <BaseButton
-          btnName="Generate passcode"
-          class="w-100 fs-14 rounded-btn-sm py-2"
-          @click="handleGenerate"
-        />
+        <BaseButton btnName="Generate passcode" class="w-100 fs-14 rounded-btn-sm py-2" @click="handleGenerate" />
       </div>
     </div>
   </n-popover>
@@ -101,6 +64,7 @@ import { useRoute } from "vue-router";
 import { storeToRefs } from "pinia";
 import { useTeamStore } from "@/stores/user/team";
 import { Mail, X, Copy } from "lucide-vue-next";
+import { useInviteStore } from "@/stores/user/invite";
 import BaseInput from "@/components/BaseInput.vue";
 import BaseButton from "@/components/BaseButton.vue";
 
@@ -108,7 +72,7 @@ const route = useRoute();
 const currentRouteWorkspaceId = computed(() => route.params.workspace_id);
 const currentRouteTeamId = computed(() => route.params.team_id);
 const currentSection = computed(() => route.path.split("/").pop()?.toLowerCase());
-
+const inviteStore = useInviteStore();
 const teamStore = useTeamStore();
 const { getTeamSection } = storeToRefs(teamStore);
 
@@ -154,15 +118,43 @@ function getBorderColor(index) {
 }
 
 const handleInvite = async () => {
+  // console.log(currentRouteTeamId.value, currentRouteWorkspaceId.value, inviteEmail.value);
+
   if (!inviteEmail.value.trim()) return;
-  inviteEmail.value = "";
-};
 
-const handleCopy = () => {
-  navigator.clipboard.writeText(passcode.value);
-};
+  try {
+    await inviteStore.inviteByEmail(
+      currentRouteWorkspaceId.value,
+      currentRouteTeamId.value,
+      inviteEmail.value
+    );
 
-const handleGenerate = async () => {};
+    inviteEmail.value = "";
+    showInvitePopover.value = false;
+  } catch (error) {
+    console.error(error);
+  }
+};
+const handleGenerate = async () => {
+  try {
+    const res = await inviteStore.generatePasscode(
+      currentRouteWorkspaceId.value,
+      currentRouteTeamId.value
+    );
+
+    // console.log("res:", res);
+
+    passcode.value = res.data.token;
+
+    // console.log("passcode:", passcode.value);
+  } catch (error) {
+    console.error(error);
+  }
+};
+const handleCopy = async () => {
+  await navigator.clipboard.writeText(passcode.value);
+  // console.log("Copied:", passcode.value);
+};
 </script>
 
 <style scoped>
@@ -173,26 +165,32 @@ const handleGenerate = async () => {};
   padding: 0;
   margin: 0;
 }
+
 .section-task.active-section {
   color: #0088ff !important;
   background-color: #b2dbff !important;
 }
+
 .section-issue.active-section {
   color: #ff383c !important;
   background-color: #ffc3c4 !important;
 }
+
 .section-document.active-section {
   color: #00c3d0 !important;
   background-color: #b2ecf8 !important;
 }
+
 .section-activity.active-section {
   color: #6155f5 !important;
   background-color: #cfccfc !important;
 }
+
 .invite-hover {
   transition: 0.3s;
   background-color: white;
 }
+
 .invite-hover:hover {
   background-color: #171717 !important;
   color: white !important;
