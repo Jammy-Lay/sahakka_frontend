@@ -1,278 +1,107 @@
 <template>
-  <main class="body-login">
-    <div class="container-fluid p-0 h-100">
-      <div class="row g-0 h-100">
-
-        <div class="col-lg-6 d-none d-lg-block left-panel">
-         
-        </div>
-
-        <div class="col-lg-6 col-md-12 right-panel d-flex align-items-center justify-content-center">
-          <div class="form-wrapper">
-            <div class="form-header d-flex align-items-center gap-2 mb-4">
-              <img src="../../assets/image/image.png" alt="Sahakka Logo" class="logo" />
-              <h2 class="brand-name m-0">Sahakka</h2>
+  <div class="min-vh-100 overflow-hidden">
+    <div class="row g-0">
+      <div class="col-lg-6">
+        <img
+          src="../../assets/image/style 2.jpg"
+          alt=""
+          class="object-fit-cover w-100 vh-100"
+        />
+      </div>
+      <div class="col-lg-6">
+        <div class="d-flex justify-content-center align-items-center min-vh-100">
+          <div style="width: 468px">
+            <div class="d-flex align-items-center gap-2 mb-4">
+              <n-avatar :src="Logo" :size="60" class="bg-white" />
+              <h3 class="mb-0 fw-bold">Sahakka</h3>
             </div>
 
-            <div class="title-section mb-4">
-              <h3 class="form-title mb-1">Forgot your password?</h3>
-              <p class="form-subtitle">We'll send you a reset password via your gmail.</p>
-            </div>
+            <h3 class="fw-semibold" style="margin-bottom: 12px;">Forgot your password?</h3>
+            <h6 class="text-mute mb-6">We'll send a reset link to your email.</h6>
 
-            <form id="forgotFormMain" @submit.prevent="forgotPassword">
+            <form @submit.prevent="forgotPassword">
+              <label class="mb-2 text-dark">Email</label>
+              <BaseInput
+                input-style="padding: 12px 0"
+                input-class="ps-3 rounded-btn text-dark fs-15"
+                input-placeholder="Enter email"
+                v-model="email"
+              />
+              <p v-if="err.email" class="text-danger mt-1 fs-14">{{ err.email }}</p>
 
-              <div class="input-group-custom mb-4">
-                <label for="email">Email</label>
-                <input 
-                  id="email" 
-                  v-model="email" 
-                  type="email" 
-                  class="form-control" 
-                  placeholder="Enter email"
-                  required
+              <div :class="err.email ? 'mt-3' : 'mt-4'">
+                <button
+                  type="submit"
+                  class="btn bg-btn w-100 rounded-btn py-2"
+                  :disabled="isLoading"
                 >
-                <p v-if="err.email" class="text-danger mt-1 tiny-text">{{ err.email }}</p>
+                  <span v-if="isLoading" class="spinner-border spinner-border-sm me-2" />
+                  {{ isLoading ? "Sending..." : "Send reset link" }}
+                </button>
               </div>
-
-              <button type="submit" class="btn btn-submit" :disabled="isLoading">
-                <span v-if="isLoading" class="spinner-border spinner-border-sm me-2"></span>
-                {{ isLoading ? "Sending code…" : "Send code to email" }}
-              </button>
             </form>
 
-            <div class="signup-prompt mt-4">
-              Remember your password?
-              <router-link to="/login">Go back to sign in</router-link>
+            <div class="d-flex mt-4 justify-content-center gap-2">
+              <p class="text-dark mb-0">Remember your password?</p>
+              <router-link to="/login" class="text-decoration-none">Sign in</router-link>
             </div>
           </div>
         </div>
-
       </div>
     </div>
-  </main>
+  </div>
 </template>
 
 <script setup>
-import { reactive, ref } from "vue";
-import { useAuthStore } from "@/stores/auth";
+import { reactive, ref, watch } from "vue";
 import { useRouter } from "vue-router";
-import { notify } from "@/utils/toast";
+import { useAuthStore } from "@/stores/auth";
 import { require, isEmail, validates } from "@/utils/validate";
+import { notify } from "@/utils/toast";
+import BaseInput from "@/components/BaseInput.vue";
+import Logo from "@/assets/image/image.png";
 
-const auth = useAuthStore();
+const authStore = useAuthStore();
 const router = useRouter();
 const toast = notify(router);
 
 const email = ref("");
 const isLoading = ref(false);
+
 const err = reactive({
-  email: ""
+  email: "",
 });
 
-const validate = () => {
+watch(
+  () => email.value,
+  (val) => {
+    err.email = validates(val, [
+      (v) => require(v, "Email is required."),
+      (v) => isEmail(v, "Please enter a valid email address."),
+    ]);
+  }
+);
+
+function validate() {
   err.email = validates(email.value, [
-    (v) => require(v, "Email is required"),
-    (v) => isEmail(v, "Wrong email format"),
+    (v) => require(v, "Email is required."),
+    (v) => isEmail(v, "Please enter a valid email address."),
   ]);
   return !err.email;
-};
+}
 
-const forgotPassword = async () => {
-  if (!validate()) {
-    return;
-  }
-  
+async function forgotPassword() {
+  if (!validate()) return;
   isLoading.value = true;
   try {
-    await auth.forgotPassword(email.value);
-    toast.success("Reset password link sent successfully", "/otp");
+    await authStore.forgotPassword(email.value);
+    toast.success("Reset link sent successfully", "/otp");
   } catch (error) {
     toast.error(error.message || "Something went wrong");
   } finally {
     isLoading.value = false;
   }
-};
+}
 </script>
 
-<style scoped>
-*{
-    box-sizing: border-box;
-    margin: 0%;
-    padding: 0;
-}
-.body-login {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    height: 100vh;
-    width: 100vw;
-    overflow: hidden;
-}
-.h-100 {
-    height: 100% !important;
-}
-.left-panel {
-    width: 50%;
-    /* position: relative; */
-    height: 100%;
-    /* width: fit-content; */
-    background-image: url("../../assets/image/style\ 1.png");
-    overflow: hidden;
-    background-size: cover;
-    background-position: center;
-    background-repeat:no-repeat;
-    object-fit:cover;
-    height: 100%;
-}
-
-.left-brand-header {
-    position: absolute;
-    top: 45px;
-    left: 45px;
-    z-index: 10;
-}
-
-.left-logo {
-    width: 44px;
-    height: 44px;
-    object-fit: contain;
-}
-
-.left-brand-name {
-    font-size: 1.85rem;
-    font-weight: 500;
-    color: #111111;
-    letter-spacing: -0.03em;
-}
-.right-panel {
-
-    background: #ffffff;
-    /* padding: 3rem; */
-    height: 100%;
-    margin: 0 auto;
-}
-
-.form-wrapper {
-    width: 100%;
-    max-width: 375px;
-}
-
-.logo {
-  width: 40px;
-  height: 40px;
-  object-fit: contain;
-}
-
-.brand-name {
-  font-size: 1.5rem;
-  font-weight: 500;
-  color: #000000;
-  letter-spacing: -0.02em;
-}
-
-.form-title {
-    font-size: 1.65rem;
-    font-weight: 500;
-    color: #111111;
-    letter-spacing: -0.02em;
-}
-
-.form-subtitle {
-    color: #71717a;
-    font-size: 0.95rem;
-    font-weight: 400;
-}
-
-.input-group-custom {
-    margin-bottom: 1.15rem;
-}
-
-.input-group-custom label {
-    font-size: 0.9rem;
-    font-weight: 400;
-    color: #1c1c1e;
-    margin-bottom: 0.5rem;
-    display: block;
-}
-
-.input-group-custom .form-control {
-    border-radius: 8px;
-    border: 1px solid #d1d1d6;
-    padding: 0.75rem 1rem;
-    font-size: 0.95rem;
-    color: #111111;
-    background-color: #ffffff;
-    transition: border-color 0.15s ease, box-shadow 0.15s ease;
-}
-
-.input-group-custom .form-control::placeholder {
-    color: #c7c7cc;
-}
-
-.input-group-custom .form-control:focus {
-    border-color: #111111;
-    box-shadow: none;
-    outline: none;
-}
-.password-wrapper {
-    position: relative;
-    display: flex;
-    align-items: center;
-    width: 100%;
-}
-
-.password-wrapper .form-control {
-    padding-right: 2.5rem;
-}
-
-.password-wrapper i {
-    position: absolute;
-    right: 1rem;
-    cursor: pointer;
-    color: #aeaeae;
-    font-size: 1.1rem;
-}
-.btn-submit {
-    background-color: #141416;
-    color: #ffffff;
-    border: none;
-    padding: 0.75rem;
-    font-weight: 400;
-    border-radius: 8px;
-    width: 100%;
-    font-size: 0.95rem;
-    transition: background-color 0.15s ease;
-}
-
-.btn-submit:hover:not(:disabled) {
-    background-color: #232326;
-}
-
-.signup-prompt {
-    text-align: center;
-    font-size: 0.9rem;
-    color: #111111;
-}
-
-.signup-prompt a {
-    color: #007aff;
-    font-weight: 400;
-    text-decoration: none;
-}
-
-.signup-prompt a:hover {
-    text-decoration: underline;
-}
-
-.tiny-text {
-    font-size: 0.75rem;
-}
-
-@media (max-width: 991.98px) {
-    .body-login {
-        overflow-y: auto;
-    }
-
-    .right-panel {
-        padding: 3rem 1.5rem;
-    }
-}
-</style>
+<style scoped></style>

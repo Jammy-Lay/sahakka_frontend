@@ -684,11 +684,14 @@ const handleLogout = () => {
   user-select: none;
 }
 .workspace-item:hover {
-  background: #f5f5f5;
+  background: #f5f5f5 !important;
   cursor: pointer;
 }
 .workspace-item--active {
-  background: #f5f5f5;
+  background: #f5f5f5 !important;
+}
+.btn-option {
+  background-color: transparent !important;
 }
 .btn-option:hover {
   background-color: #e4e4e7 !important;

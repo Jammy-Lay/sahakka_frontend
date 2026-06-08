@@ -16,7 +16,7 @@
               <h3 class="mb-0 fw-bold">Sahakka</h3>
             </div>
 
-            <h3 class="fw-semibold mb-3">Create an account</h3>
+            <h3 class="fw-semibold" style="margin-bottom: 12px;">Create an account</h3>
             <h6 class="text-mute mb-6">Create your account and manage your task.</h6>
 
             <form @submit.prevent="handleRegister">
@@ -156,7 +156,7 @@ watch(
   (val) => {
     err.email = validates(val, [
       (v) => require(v, "Email is require"),
-      (v) => isEmail(v, "Wrong Format Email"),
+      (v) => isEmail(v, "Please enter a valid email address."),
     ]);
   }
 );
