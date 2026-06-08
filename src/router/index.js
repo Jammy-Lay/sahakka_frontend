@@ -71,7 +71,7 @@ const router = createRouter({
       name: "about",
       component: () => import("../views/AboutView.vue"),
     },
-        {
+    {
       path: "/admin/",
       component: () => import("../layouts/AdminLayout.vue"),
       children: [
@@ -113,6 +113,11 @@ const router = createRouter({
           component: () => import('../views/admin/SettingView.vue')
         },
       ],
+    },
+    {
+      path: "/loading",
+      name: "loading",
+      component: () => import('../components/layouts/Loading.vue')
     },
   ],
 });

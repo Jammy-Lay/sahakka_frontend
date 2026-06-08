@@ -1,5 +1,8 @@
 <template>
-    <div class="page-bg p-4">
+    <div v-if="loading">
+        <Loading></Loading>
+    </div>
+    <div v-else class="page-bg p-4">
         <router-link to="/admin/teams" class="btn btn-outline-dark mb-3 d-flex align-items-center gap-2 w-fit">
             <ArrowLeft size="16" />
             Back to Teams
@@ -99,6 +102,11 @@ import {
     Building2,
     MoreVertical,
 } from "lucide-vue-next";
+import Loading from "@/components/layouts/Loading.vue";
+import { useToast } from "vue-toastification";
+
+const toast = useToast();
+const loading = ref(false);
 
 const route = useRoute();
 const useTeam = useTeamstore();
@@ -107,7 +115,14 @@ const team_id = Number(route.params.id);
 const team = computed(() => useTeam.currentTeam);
 
 onMounted(async () => {
-    await useTeam.teamId(team_id);
+    loading.value = true;
+    try {
+        await useTeam.teamId(team_id);
+    } catch (error) {
+        toast.error("Failed to load");
+    } finally {
+        loading.value = false;
+    }
 });
 </script>
 

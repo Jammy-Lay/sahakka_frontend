@@ -9,7 +9,7 @@ export const useUserStore = defineStore ('user', () =>{
             const res = await api.get("/api/sahakka-admin/users");
             users.value = res.data.data
         } catch (error) {
-            
+            throw new Error(error.response?.data?.message || "Invalid Data");
         }
         
     }

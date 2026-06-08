@@ -8,9 +8,8 @@ export const useTaskstore = defineStore ('task', () =>{
         try {
             const res = await api.get("/api/sahakka-admin/tasks");
             tasks.value = res.data.data
-            console.log(tasks.value);
         } catch (error) {
-            
+            throw new Error(error.response?.data?.message || "Invalid Tasks");
         }
         
     }
