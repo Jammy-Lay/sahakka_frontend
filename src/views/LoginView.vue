@@ -16,7 +16,9 @@
               <h3 class="mb-0 fw-bold">Sahakka</h3>
             </div>
 
-            <h3 class="fw-semibold mb-3">Log in to your account</h3>
+            <h3 class="fw-semibold" style="margin-bottom: 12px">
+              Log in to your account
+            </h3>
             <h6 class="text-mute mb-6">Enter your account to complete your work.</h6>
 
             <form @submit.prevent="handleLogin">
@@ -81,18 +83,19 @@
 </template>
 
 <script setup>
-import { reactive, ref, watch } from "vue";
+import { reactive, ref, watch, h } from "vue";
 import { useAuthStore } from "@/stores/auth";
 import { useRouter } from "vue-router";
 import { isEmail, require, validates } from "@/utils/validate";
 import { notify } from "@/utils/toast";
+import { useNotification, NButton, NAvatar } from "naive-ui";
 import { UseWorkspaceStore } from "@/stores/user/workspace";
 import { useTeamStore } from "@/stores/user/team";
 import BaseInput from "@/components/BaseInput.vue";
 import Logo from "@/assets/image/image.png";
 
-// import { useToast } from "vue-toastification";
-// let toast = useToast();
+const notification = useNotification();
+const nRef = ref(null);
 
 const email = ref("");
 const password = ref("");
@@ -114,7 +117,7 @@ const err = reactive({
 function validate() {
   err.email = validates(email.value, [
     (v) => require(v, "Email is require"),
-    (v) => isEmail(v, "Wrong Format Email"),
+    (v) => isEmail(v, "Please enter a valid email address."),
   ]);
 
   err.password = require(password.value, "Password is require");
@@ -125,7 +128,7 @@ function validate() {
 watch(email, (val) => {
   err.email = validates(val, [
     (v) => require(v, "Email is require"),
-    (v) => isEmail(v, "Wrong Format Email"),
+    (v) => isEmail(v, "Please enter a valid email address."),
   ]);
 });
 
@@ -180,7 +183,52 @@ async function handleLogin() {
       }
     }
   } catch (error) {
-    toast.error(error.message || "Signin fail");
+    const msg = error.message || "";
+
+    if (msg.toLowerCase().includes("email not verify")) {
+      nRef.value = notification.warning({
+        title: "Email Not Verified",
+        content: "Your email hasn't been verified yet. Please check your inbox.",
+        duration: 0,
+        avatar: () => h(NAvatar, { size: "small", round: true, src: Logo }),
+        action: () =>
+          h("div", { class: "d-flex gap-2" }, [
+            h(
+              NButton,
+              {
+                type: "default",
+                size: "small",
+                style: "border-radius: 8px;",
+                onClick: () => {
+                  nRef.value?.destroy();
+                  nRef.value = null;
+                  window.open("https://mail.google.com", "_blank");
+                },
+              },
+              { default: () => "Go to Mail" }
+            ),
+            h(
+              NButton,
+              {
+                type: "default",
+                size: "small",
+                style: "border-radius: 8px;",
+                onClick: () => {
+                  nRef.value?.destroy();
+                  nRef.value = null;
+                  router.push("/verify-email?status=resend");
+                },
+              },
+              { default: () => "Resend Link" }
+            ),
+          ]),
+        onClose: () => {
+          nRef.value = null;
+        },
+      });
+    } else {
+      toast.error(msg || "Sign in fail");
+    }
   } finally {
     isLoading.value = false;
   }

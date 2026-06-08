@@ -43,6 +43,20 @@
           Resend Verification Email
         </button>
       </template>
+
+      <!-- Resend -->
+      <template v-else-if="status === 'resend'">
+        <div class="d-flex align-items-center justify-content-center gap-2 mb-3">
+          <Refresh-ccw :size="45" class="mb-3 text-dark" />
+          <h4 class="fw-semibold mb-2">Resend Verification Link</h4>
+        </div>
+        <p class="text-mute fs-14 mb-4">
+          Didn't receive the verification email?
+        </p>
+        <button class="btn bg-btn w-100 rounded-btn py-2" @click="showModal = true">
+          Resend Verification Email
+        </button>
+      </template>
     </div>
   </div>
 

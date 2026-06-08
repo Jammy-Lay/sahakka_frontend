@@ -9,6 +9,8 @@
 
 <template>
   <div>
-    <RouterView />
+    <n-notification-provider>
+      <router-view />
+    </n-notification-provider>
   </div>
 </template>
