@@ -10,7 +10,7 @@
       <template #trigger>
         <div class="workspace-trigger d-flex align-items-center gap-2">
           <img
-            src="https://i.pinimg.com/control1/1200x/80/41/85/804185369bb31d52a4c279c6202fca14.jpg"
+            :src="currentWorkspace?.creator?.avatar"
             alt=""
             style="width: 25px; height: 25px"
             class="rounded-circle object-fit-cover"

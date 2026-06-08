@@ -1,4 +1,5 @@
 <script setup>
+import { NNotificationProvider } from "naive-ui";
 // import { onMounted } from "vue";
 // import { initSocket } from "../services/socketService";
 
