@@ -224,7 +224,7 @@ body {
   height: calc(var(--n-scroll-item-height) * 0.15);
 }
 
-button.n-button.n-button--primary-type:not(.n-button--disabled):hover {
+/* button.n-button.n-button--primary-type:not(.n-button--disabled):hover {
   --n-color-hover: #ea6607 !important;
   --n-border-hover: 1px solid #ea6607 !important;
   --n-text-color-hover: #ffffff !important;
@@ -243,7 +243,7 @@ button.n-button.n-button--default-type:hover .n-button__border {
 
 button.n-button.n-button--default-type:hover .n-button__content {
   color: #ffffff !important;
-}
+} */
 
 /* 1. Force the container to respect the gap */
 .n-scrollbar-container{
@@ -317,7 +317,7 @@ button.n-button.n-button--default-type:hover .n-button__content {
 }
 
 
-.overlay {
+/* .overlay {
   position: absolute;
   top: 0;
   left: 0;
@@ -333,7 +333,7 @@ button.n-button.n-button--default-type:hover .n-button__content {
 
 .preview-box:hover .overlay {
   opacity: 1;
-}
+} */
 
 .icon-group {
   display: flex;
@@ -356,44 +356,33 @@ button.n-button.n-button--default-type:hover .n-button__content {
   background-color: rgba(255, 255, 255, 0.25);
 }
 
-.n-button .n-button__border,
-.n-button .n-button__state-border {
-  box-shadow: none !important;
-}
-
-.n-button:focus::before, 
-.n-button:active::before {
-  box-shadow: none !important;
-  border: none !important;
-}
-
 .n-base-wave {
   display: none !important;
 }
 
 
-.n-dropdown-menu {
+/* .n-dropdown-menu {
   border-radius: 12px !important;
   padding: 6px !important;
-}
+} */
 
-.n-dropdown-option-body {
+/* .n-dropdown-option-body {
   border-radius: 8px !important;
-}
+} */
 
-.n-menu .n-popover .n-menu-item-content--selected,
+/* .n-menu .n-popover .n-menu-item-content--selected,
 .n-menu-item-content--selected {
   background-color: #F3F4F6 !important;
   border-radius: 8px !important;
-}
+} */
 
-.n-popover.n-menu-tooltip {
+/* .n-popover.n-menu-tooltip {
   border-radius: 8px !important;
 }
 
 .n-menu-tooltip .n-menu-item-content {
   border-radius: 8px !important;
-}
+} */
 
 .navbar-wrapper {
   padding: 12px 12px 0 12px;

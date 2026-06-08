@@ -84,7 +84,7 @@
   </div>
 
   <!-- Verify Email Modal -->
-  <n-modal v-model:show="showModal" :mask-closable="false" :closable="false">
+  <n-modal v-model:show="showModal" :mask-closable="true">
     <n-card style="width: 420px; border-radius: 16px" :bordered="false">
       <div class="text-center py-2">
         <div class="mb-3">
