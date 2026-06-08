@@ -1,27 +1,33 @@
 <template>
-    <div>
+    <div v-if="loading">
+        <Loading></Loading>
+    </div>
+    <div v-else style="height: 89vh;">
         <div class="d-flex align-items-center justify-content-between mb-3">
             <BaseTitle title="Dashboard" />
             <n-tag round :bordered="false" type="warning">
                 {{ todayLabel }}
             </n-tag>
-            
+
         </div>
 
         <div class="row g-4">
             <div v-for="item in stats" :key="item.label" class="col-12 col-sm-6 col-xl-3">
-                <div class="card dashboard-card shadow-box rounded-4 border-3">
+                <div class="card dashboard-card shadow-box rounded-4 border-0 shadow-sm">
                     <div class="d-flex justify-content-between align-items-start">
                         <div>
                             <p class="text-secondary fs-7 mb-2">{{ item.label }}</p>
                             <h3 class="fw-bold mb-1">{{ item.value }}</h3>
-                            <div class="d-flex align-items-center gap-1 fs-7"
-                                :class="item.trendType === 'up' ? 'text-success' : 'text-prime'">
-                                <component :is="item.trendType === 'up' ? TrendingUp : Clock" :size="14" />
-                                <span>{{ item.note }}</span>
-                            </div>
+
+                            <n-ellipsis style="max-width: 240px">
+                                <div class="d-flex align-items-center gap-1 fs-7"
+                                    :class="item.trendType === 'up' ? 'text-success' : 'text-prime'">
+                                    <component :is="item.trendType === 'up' ? TrendingUp : Clock" :size="14" />
+                                    <span>{{ item.note }}</span>
+                                </div>
+                            </n-ellipsis>
                         </div>
-                        <div class="stat-icon">
+                        <div class="stat-icon bg-accent">
                             <component :is="item.icon" :size="22" />
                         </div>
                     </div>
@@ -31,10 +37,11 @@
 
         <div class="row g-4 mt-1">
             <div class="col-12 col-xl-6">
-                <div class="card p-4 rounded-4 shadow-box border-3 h-100">
+                <div class="card p-4 rounded-4 shadow-box border-0 shadow-sm h-100">
                     <div class="d-flex align-items-center justify-content-between mb-4">
                         <h5 class="fw-bold mb-0">Project Overview</h5>
-                        <router-link to="/admin/user-monitoring" class="view-link text-decoration-none">View All Users</router-link>
+                        <router-link to="/admin/user-monitoring" class="view-link text-decoration-none">View All
+                            Users</router-link>
                     </div>
 
                     <div class="project-overview">
@@ -71,7 +78,7 @@
             </div>
 
             <div class="col-12 col-xl-6">
-                <div class="card p-4 rounded-4 shadow-box border-3">
+                <div class="card p-4 rounded-4 shadow-box border-0 shadow-sm">
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <div>
                             <h5 class="fw-bold mb-1">Recent Daily New Users</h5>
@@ -106,7 +113,11 @@ import {
 import api from "@/api/https";
 import BaseTitle from "@/components/BaseTitle.vue";
 import { useUserStore } from "@/stores/admin/users";
+import Loading from "@/components/layouts/Loading.vue";
+import { useToast } from "vue-toastification";
 
+const toast = useToast();
+const loading = ref(false);
 
 const todayLabel = new Intl.DateTimeFormat("en-US", {
     weekday: "short",
@@ -131,6 +142,7 @@ let users = ref(0);
 let workspaces = ref(0);
 
 const fetchDashboard = async () => {
+    loading.value = true;
     try {
         const res = await api.get('/api/sahakka-admin/dashboard');
         let data = res.data.data;
@@ -141,7 +153,9 @@ const fetchDashboard = async () => {
         tasks.value = data.total_tasks;
 
     } catch (error) {
-        console.log(error);
+        toast.error("Failed to load");
+    } finally{
+        loading.value = false;
     }
 }
 
@@ -192,7 +206,7 @@ const getUserStats = async () => {
 
     let verifiedProgress =
         totalUsers === 0 ? 0 : (verifiedUsers / totalUsers) * 100;
-    
+
     let newUsersProgress =
         totalUsers === 0 ? 0 : (newUsers / totalUsers) * 100;
 
@@ -205,7 +219,7 @@ const getUserStats = async () => {
         verifiedProgress: Number(verifiedProgress.toFixed(2)),
         newUsersProgress: Number(newUsersProgress.toFixed(2))
     };
-    
+
 };
 
 const projectSummary = ref([]);
@@ -254,7 +268,7 @@ const recentUsersList = computed(() => {
         .slice(0, 3)
         .map(u => ({
             username: u.name,
-            email: u.email, 
+            email: u.email,
             date: formatDate(u.created_at),
             status: "New",
             type: "info",

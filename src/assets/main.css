@@ -184,7 +184,7 @@ body {
 }
 
 .text-aqua {
- color: #00C3D0 !important;
+  color: #00C3D0 !important;
 }
 
 .bg-purple {
@@ -212,19 +212,6 @@ body {
 }
 
 
-body > .n-image-preview-container .n-image-preview-toolbar {
-  padding: 30px !important;
-  padding-left: 18px !important;
-  gap: 20px !important;
-  display: flex !important;
-  align-items: center !important;
-  border-radius: 100px !important;
-  cursor: pointer;
-}
-
-body > .n-image-preview-container .n-image-preview-toolbar .n-base-icon {
-  font-size: 30px !important;
-}
 
 .n-select-menu .n-base-select-option .n-base-select-option__check {
   margin-right: 16px !important;
@@ -259,6 +246,9 @@ button.n-button.n-button--default-type:hover .n-button__content {
 }
 
 /* 1. Force the container to respect the gap */
+.n-scrollbar-container{
+  background-color: #f5f5f5 !important;
+}
 .n-pagination {
   display: flex !important;
   gap: 8px !important;
@@ -326,38 +316,6 @@ button.n-button.n-button--default-type:hover .n-button__content {
   pointer-events: none !important;
 }
 
-.upload-trigger-box {
-  width: 120px;
-  height: 120px;
-  border: 1px dashed #d9d9d9;
-  border-radius: 8px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  gap: 10px;
-  transition: border-color 0.3s;
-}
-
-.upload-trigger-box:hover {
-  border-color: #171717;
-  color: #171717;
-}
-
-.preview-box {
-  position: relative;
-  width: 120px;
-  height: 120px;
-  border-radius: 8px;
-  overflow: hidden;
-}
-
-.img-preview {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
 
 .overlay {
   position: absolute;
@@ -391,7 +349,6 @@ button.n-button.n-button--default-type:hover .n-button__content {
   width: 35px;
   height: 35px;
   border-radius: 50%;
-
   transition: all 0.3s ease;
 }
 
@@ -440,7 +397,6 @@ button.n-button.n-button--default-type:hover .n-button__content {
 
 .navbar-wrapper {
   padding: 12px 12px 0 12px;
-  background-color: #f3f4f6;
   flex-shrink: 0;
 }
 
@@ -460,7 +416,7 @@ button.n-button.n-button--default-type:hover .n-button__content {
 .layout-wrapper {
   flex: 1;
   padding: 8px 12px;
-  background-color: #f3f4f6;
+  background-color: #f5f5f5;
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -676,4 +632,23 @@ button.n-button.n-button--default-type:hover .n-button__content {
 .n-base-select-menu {
   padding: 6px 0 !important;
   border-radius: 15px;
+}
+.text-truncate-1 {
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.text-truncate-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.text-truncate-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }

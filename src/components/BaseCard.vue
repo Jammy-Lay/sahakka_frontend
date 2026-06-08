@@ -1,63 +1,60 @@
 <template>
-  <div class="project-card">
+  <div class="card border rounded-4 p-4 border-0 shadow-sm" style="cursor: pointer !important; ">
     <!-- Header -->
-    <div class="project-header">
+    <div class="d-flex justify-content-between align-items-center">
       <div class="d-flex gap-3 align-items-center">
-        <div class="project-icon">
-          <Layers />
+        <div class="d-flex align-items-center justify-content-center rounded-3 bg-light"
+          style="width:48px; height:48px;">
+          <Layers color="#171717" />
         </div>
-
         <div>
-          <h5>{{ project.name }}</h5>
-          <p>Owner: {{ project.owner }}</p>
+          <h5 class="mb-0 fw-bold text-truncate-1" style="font-size:18px; color:#27364d;">{{ project.name }}</h5>
+          <p class="mb-0 mt-1 text-secondary text-truncate-1" style="font-size:13px;">Owner: {{ project.owner }}</p>
         </div>
       </div>
-
-      <i class="pi pi-ellipsis-v menu"></i>
+      <i class="pi pi-ellipsis-v text-secondary" style="cursor:pointer;"></i>
     </div>
 
     <!-- Stats -->
-    <div class="stats mt-3">
-      <div class="stat-box" v-for="stat in stats" :key="stat.label">
-        <component :is="stat.icon" :style="{ color: stat.color }" />
-        <span>{{ stat.label }}</span>
-        <b>{{ stat.value }}</b>
+    <div class="row g-3 mt-2">
+      <div :class="`col-${12 / stats.length}`" v-for="stat in stats" :key="stat.label">
+        <div class="rounded-3 p-3 text-center w-100 overflow-hidden bg-accent">
+          <component :is="stat.icon" :style="{ color: stat.color }" />
+          <span class="d-block text-secondary mt-1 text-truncate" style="font-size:14px;">{{ stat.label }}</span>
+          <b style="font-size:18px; color:#27364d;">{{ stat.value }}</b>
+        </div>
       </div>
     </div>
 
+    <!-- Members -->
     <div class="mt-3">
       <n-avatar-group :options="mapMembers(members)" :size="25" :max="4">
         <template #avatar="{ option: { name, src } }">
-          <n-tooltip :style="{
-            fontSize: '11px',
-            padding: '4px 8px',
-            borderRadius: '8px',
-          }">
+          <n-tooltip :style="{ fontSize: '11px', padding: '4px 8px', borderRadius: '8px' }">
             <template #trigger>
               <n-avatar :src="src" />
             </template>
-
             {{ name }}
           </n-tooltip>
         </template>
-
         <template #rest="{ options: restOptions, rest }">
           <n-dropdown :options="createDropdownOptions(restOptions)" placement="top" size="small">
-            <n-avatar class="fs-14 text-dark bg-mute"> +{{ rest }} </n-avatar>
+            <n-avatar class="fs-6 text-dark bg-light"> +{{ rest }} </n-avatar>
           </n-dropdown>
         </template>
       </n-avatar-group>
     </div>
 
     <!-- Progress -->
-    <div class="progress-area">
-      <div class="progress-title">
+    <div class="mt-3">
+      <div class="d-flex justify-content-between text-secondary mb-2" style="font-size:14px;">
         <span>Progress</span>
         <b>{{ project.progress }}%</b>
       </div>
-
-      <div class="progress">
-        <div class="bar" :style="{ width: project.progress + '%' }"></div>
+      <div class="progress rounded-pill" style="height:7px; background:#eef2f7;">
+        <div class="progress-bar rounded-pill" role="progressbar"
+          :style="{ width: project.progress + '%', background: '#34c759' }" :aria-valuenow="project.progress"
+          aria-valuemin="0" aria-valuemax="100"></div>
       </div>
     </div>
   </div>
@@ -67,24 +64,13 @@
 import { Layers } from "lucide-vue-next";
 
 defineProps({
-  project: {
-    type: Object,
-    default: () => ({}),
-  },
-  stats: {
-    type: Array,
-    default: () => [],
-  },
-  members: {
-    type: Array,
-    default: () => [],
-  },
+  project: { type: Object, default: () => ({}) },
+  stats: { type: Array, default: () => [] },
+  members: { type: Array, default: () => [] },
 });
+
 function mapMembers(members = []) {
-  return members.map((m) => ({
-    name: m.name,
-    src: m.avatar,
-  }));
+  return members.map((m) => ({ name: m.name, src: m.avatar }));
 }
 
 function createDropdownOptions(options) {
@@ -95,111 +81,25 @@ function createDropdownOptions(options) {
   }));
 }
 </script>
-
 <style scoped>
-.project-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 24px;
+.text-truncate-1 {
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
-.project-card {
-  background: white;
-  border-radius: 18px;
-  padding: 24px;
-
-  border: 1px solid #e8e8e8;
-
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+.text-truncate-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
-.project-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.project-icon {
-  align-items: center;
-  background: #9e9e9e23;
-  border-radius: 14px;
-  color: #171717;
-  display: flex;
-  height: 48px;
-  justify-content: center;
-  width: 48px;
-}
-
-.project-header h5 {
-  margin: 0;
-  font-size: 18px;
-  font-weight: 700;
-  color: #27364d;
-}
-
-.project-header p {
-  margin: 4px 0 0;
-  color: #94a3b8;
-  font-size: 13px;
-}
-
-.stats {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
-}
-
-.stat-box {
-  background: #e1eaf1a2;
-  border-radius: 12px;
-  padding: 14px;
-  text-align: center;
-}
-
-.stat-box span {
-  display: block;
-  color: #94a3b8;
-  font-size: 14px;
-}
-
-.stat-box b {
-  font-size: 18px;
-  color: #27364d;
-}
-
-.member {
-  color: #b05cff;
-}
-
-.team {
-  color: #3b82f6;
-}
-
-.task {
-  color: #10b981;
-}
-
-.progress-area {
-  margin-top: 10px;
-}
-
-.progress-title {
-  display: flex;
-  justify-content: space-between;
-  color: #94a3b8;
-  font-size: 14px;
-}
-
-.progress {
-  height: 7px;
-  background: #eef2f7;
-  border-radius: 20px;
-  margin-top: 12px;
-}
-
-.bar {
-  height: 100%;
-  border-radius: 20px;
-  background: #34c759;
+.text-truncate-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 </style>

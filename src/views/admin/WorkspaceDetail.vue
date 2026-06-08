@@ -1,37 +1,60 @@
 <template>
-    <div class="container-fluid">
-        <router-link to="/admin/workspaces" class="btn btn-outline-dark mb-3 align-items-center"><ArrowLeft />Back to Workspace</router-link>
+    <div v-if="loading">
+        <Loading></Loading>
+    </div>
+    <div v-else class="container-fluid">
+        <router-link to="/admin/workspaces" class="btn btn-outline-dark mb-3 align-items-center">
+            <ArrowLeft />Back to Workspace
+        </router-link>
         <div class="row">
-            <div class="col-8">
-                <BaseCard v-if="workspace" :project="workspaceCard" :stats="workspaceStats" :members="workspaceCard.membersList"/>
+            <!-- Left Panel -->
+            <div class="col-xl-8">
+                <div class="row g-3">
 
-                <div class="team-section">
-                    <h3>Teams</h3>
-                    <div class="team-grid">
-                        <BaseCard v-for="team in teamCards" :key="team.project.team_id" :project="team.project"
-                            :stats="team.stats" :members="team.project.membersList" @click="goDetail(workspace_id, team.project.team_id)" />
+                    <!-- Workspace Card -->
+                    <div class="col-12">
+                        <BaseCard v-if="workspace" :project="workspaceCard" :stats="workspaceStats"
+                            :members="workspaceCard.membersList" />
                     </div>
+
+                    <!-- Teams Section -->
+                    <div class="col-12">
+                        <h3>Teams</h3>
+                        <div class="row g-3 mt-1">
+                            <div v-for="team in teamCards" :key="team.project.team_id" class="col-12 col-md-6 col-lg-4">
+                                <BaseCard :project="team.project" :stats="team.stats"
+                                    :members="team.project.membersList" class="cursor-pointer h-100"
+                                    @click="goDetail(workspace_id, team.project.team_id)" />
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
             </div>
 
-            <div class="col-4">
-                <div class="row g-4">
-                    <BaseTitle title="Activities"></BaseTitle>
+            <!-- Right Panel -->
+            <div class="col-xl-4">
+                <div class="row g-4 pt-4">
 
+                    <!-- Title -->
                     <div class="col-12">
-                        <div class="card p-4 rounded-4 shadow-box border-3">
+                        <BaseTitle title="Activities" />
+                    </div>
+
+                    <!-- Recent Teams Table -->
+                    <div class="col-12">
+                        <div class="card p-4 rounded-4 shadow-sm border-0">
                             <div class="d-flex justify-content-between align-items-center mb-3">
                                 <div>
                                     <h5 class="fw-bold mb-1">Recent Daily Created Teams</h5>
-                                    <p class="m-0 text-secondary fs-7">
-                                        Latest created
-                                    </p>
+                                    <p class="m-0 text-secondary fs-7">Latest created</p>
                                 </div>
                             </div>
                             <n-data-table :columns="reportColumns" :data="recentUsersList" :pagination="false"
                                 :bordered="false" class="dashboard-table" />
                         </div>
                     </div>
+
                 </div>
             </div>
         </div>
@@ -52,9 +75,13 @@ import BaseCard from "@/components/BaseCard.vue";
 import BaseTitle from "@/components/BaseTitle.vue";
 import { NTag } from "naive-ui";
 import router from "@/router";
+import Loading from "@/components/layouts/Loading.vue";
+import { useToast } from "vue-toastification";
 
 
 const route = useRoute();
+const loading = ref(false);
+const toast = useToast();
 
 const useWorkspace = useWorkspaceStore();
 const useTeam = useTeamstore();
@@ -73,19 +100,26 @@ const truncateText = (text, length = 18) => {
 const workspace_id = Number(route.params.id);
 /* LOAD DATA */
 const loadData = async () => {
-    await useWorkspace.fetchWorkspaces();
-    await useTeam.fetchTeams();
-    await useTask.fetchTasks();
+    loading.value = true
+    try {
+        await useWorkspace.fetchWorkspaces();
+        await useTeam.fetchTeams();
+        await useTask.fetchTasks();
 
-    workspace.value = useWorkspace.workspaces.find(
-        w => w.workspace_id === workspace_id
-    );
+        workspace.value = useWorkspace.workspaces.find(
+            w => w.workspace_id === workspace_id
+        );
 
-    teams.value = useTeam.teams.filter(
-        t => t.workspace?.workspace_id === workspace_id
-    );
+        teams.value = useTeam.teams.filter(
+            t => t.workspace?.workspace_id === workspace_id
+        );
 
-    tasks.value = useTask.tasks;
+        tasks.value = useTask.tasks;
+    } catch (error) {
+        toast.error("Failed to load");
+    } finally {
+        loading.value = false;
+    }
 };
 
 /* TOTALS */
@@ -211,24 +245,10 @@ const reportColumns = [
             );
         },
     },
-];const goDetail = (workspace_id, team_id) =>
+]; const goDetail = (workspace_id, team_id) =>
     router.push(`/admin/workspace/${workspace_id}/teams/${team_id}`);
 
 onMounted(loadData);
 </script>
 
-<style scoped>
-.dashboard-card {
-    min-height: 135px;
-    padding: 22px;
-}
-.team-section h3 {
-    margin: 32px 0 16px;
-}
-
-.team-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 24px;
-}
-</style>
+<style scoped></style>

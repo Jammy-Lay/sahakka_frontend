@@ -1,5 +1,8 @@
 <template>
-    <div>
+    <div v-if="loading">
+        <Loading></Loading>
+    </div>
+    <div v-else style="height: 90vh;">
         <div class="d-flex align-items-center mb-1">
             <BaseTitle title="View Users" />
         </div>
@@ -9,7 +12,7 @@
                 <div class="row pt-3 g-4">
                     <div class="col-lg-12">
                         <n-data-table :columns="columnsAllUsers" :data="dataAllUsers"
-                            :pagination="dataAllUsers.length >= 7 ? { pageSize: 6 } : false" :bordered="false"
+                            :pagination="dataAllUsers.length >= 9 ? { pageSize: 9, } : false" :bordered="false"
                             class="task-table" />
                     </div>
                 </div>
@@ -18,7 +21,7 @@
                 <div class="row pt-3 g-4">
                     <div class="col-lg-12">
                         <n-data-table :columns="columnsUserActive" :data="dataUsersActive"
-                            :pagination="dataUsersActive.length >= 7 ? { pageSize: 6 } : false" :bordered="false"
+                            :pagination="dataUsersActive.length >= 9 ? { pageSize: 9 } : false" :bordered="false"
                             class="task-table" />
                     </div>
                 </div>
@@ -27,7 +30,7 @@
                 <div class="row pt-3 g-4">
                     <div class="col-lg-12">
                         <n-data-table :columns="columnsNewRegister" :data="dataNewRegister"
-                            :pagination="dataNewRegister.length >= 7 ? { pageSize: 6 } : false" :bordered="false"
+                            :pagination="dataNewRegister.length >= 9 ? { pageSize: 9 } : false" :bordered="false"
                             class="task-table" />
                     </div>
                 </div>
@@ -36,7 +39,7 @@
                 <div class="row pt-3 g-4">
                     <div class="col-lg-12">
                         <n-data-table :columns="columnsUserBlock" :data="dataUserBlock"
-                            :pagination="dataUserBlock.length >= 7 ? { pageSize: 6 } : false" :bordered="false"
+                            :pagination="dataUserBlock.length >= 9 ? { pageSize: 9 } : false" :bordered="false"
                             class="task-table" />
                     </div>
                 </div>
@@ -58,7 +61,9 @@ import { computed } from "vue";
 import { useUserStore } from "@/stores/admin/users";
 import api from "@/api/https";
 import { useToast } from "vue-toastification";
+import Loading from "@/components/layouts/Loading.vue";
 
+const loading = ref(false)
 const toast = useToast();
 const usersStore = useUserStore();
 
@@ -72,9 +77,17 @@ const formatDate = (date) => {
     }).format(new Date(date));
 };
 
-const getAllUsers = async () =>{
-    await usersStore.fetchUsers();
-}
+const getAllUsers = async () => {
+    loading.value = true;
+
+    try {
+        await usersStore.fetchUsers();
+    } catch (error) {
+        toast.error("Failed to load");
+    } finally {
+        loading.value = false;
+    }
+};
 
 const dataAllUsers = computed(() => {
     return [...(usersStore.users || [])]
@@ -118,31 +131,38 @@ const options = (row) => {
 };
 
 const handleAction = async (key, row) => {
-    if (key === "active" && row.is_active === 0) {
-        try {
-            await api.patch(`/api/sahakka-admin/users/${row.id}/activate`);
-            await usersStore.fetchUsers();
+    loading.value = true;
+    try {
+        if (key === "active" && row.is_active === 0) {
+            try {
+                await api.patch(`/api/sahakka-admin/users/${row.id}/activate`);
+                await usersStore.fetchUsers();
 
-            toast.success(`${row.name} activated successfully`);
-        } catch (error) {
-            toast.error(error.response?.data?.message || "Activation failed");
+                toast.success(`${row.name} activated successfully`);
+            } catch (error) {
+                toast.error(error.response?.data?.message || "Activation failed");
+            }
+        } else if (key === "active" && row.is_active === 1) {
+            toast.info("This user is already activated");
         }
-    } else if (key === "active" && row.is_active === 1) {
-        toast.info("This user is already activated");
-    }
 
-    if (key === "block" && row.is_active === 1) {
-        try {
-            await api.patch(`/api/sahakka-admin/users/${row.id}/suspend`);
-            await usersStore.fetchUsers();
+        if (key === "block" && row.is_active === 1) {
+            try {
+                await api.patch(`/api/sahakka-admin/users/${row.id}/suspend`);
+                await usersStore.fetchUsers();
 
-            toast.warning(`${row.name} has been blocked`);
-        } catch(error) {
-            toast.error(error.response?.data?.message || "Block failed");
+                toast.warning(`${row.name} has been blocked`);
+            } catch (error) {
+                toast.error(error.response?.data?.message || "Block failed");
+            }
+        } else if (key === "block" && row.is_active === 0) {
+            toast.info("This user is already blocked");
+
         }
-    } else if (key === "block" && row.is_active === 0) {
-        toast.info("This user is already blocked");
-
+    } catch (error) {
+        toast.error(error.response?.data?.message || "Action failed");
+    } finally {
+        loading.value = false;
     }
 
 };
@@ -178,11 +198,11 @@ const columnsAllUsers = [
             if (row.is_active === 1 && row.is_verified === 0) {
                 type = "info";
                 label = "New Register";
-            } 
+            }
             else if (row.is_active === 1 && row.is_verified === 1) {
                 type = "success";
                 label = "Active";
-            } 
+            }
             else {
                 type = "error";
                 label = "Blocked";
@@ -215,7 +235,7 @@ const columnsAllUsers = [
                             EllipsisVertical,
                             {
                                 size: 18,
-                                    style: {
+                                style: {
                                     cursor: "pointer",
                                     border: "none",
                                     outline: "none",
@@ -268,11 +288,11 @@ const columnsUserActive = [
             if (row.is_active === 1 && row.is_verified === 0) {
                 type = "info";
                 label = "New Register";
-            } 
+            }
             else if (row.is_active === 1 && row.is_verified === 1) {
                 type = "success";
                 label = "Active";
-            } 
+            }
             else {
                 type = "error";
                 label = "Blocked";
@@ -295,7 +315,7 @@ const columnsUserActive = [
             return h(
                 NDropdown,
                 {
-                    options: options(row), 
+                    options: options(row),
                     trigger: "click",
                     onSelect: (key) => handleAction(key, row),
                 },
@@ -305,7 +325,7 @@ const columnsUserActive = [
                             EllipsisVertical,
                             {
                                 size: 18,
-                                    style: {
+                                style: {
                                     cursor: "pointer",
                                     border: "none",
                                     outline: "none",
@@ -320,7 +340,7 @@ const columnsUserActive = [
 ];
 
 const dataNewRegister = computed(() => {
-return [...(usersStore.users || [])]
+    return [...(usersStore.users || [])]
         .filter(user => user.is_active === 1 && user.is_verified === 0)
         .sort((a, b) => a.id - b.id);
 });
@@ -357,11 +377,11 @@ const columnsNewRegister = [
             if (row.is_active === 1 && row.is_verified === 0) {
                 type = "info";
                 label = "New Register";
-            } 
+            }
             else if (row.is_active === 1 && row.is_verified === 1) {
                 type = "success";
                 label = "Active";
-            } 
+            }
             else {
                 type = "error";
                 label = "Blocked";
@@ -377,7 +397,7 @@ const columnsNewRegister = [
             );
         },
     },
-    
+
 ];
 
 const dataUserBlock = computed(() => {
@@ -418,11 +438,11 @@ const columnsUserBlock = [
             if (row.is_active === 1 && row.is_verified === 0) {
                 type = "info";
                 label = "New Register";
-            } 
+            }
             else if (row.is_active === 1 && row.is_verified === 1) {
                 type = "success";
                 label = "Active";
-            } 
+            }
             else {
                 type = "error";
                 label = "Blocked";
@@ -455,7 +475,7 @@ const columnsUserBlock = [
                             EllipsisVertical,
                             {
                                 size: 18,
-                                    style: {
+                                style: {
                                     cursor: "pointer",
                                     border: "none",
                                     outline: "none",
@@ -501,7 +521,6 @@ onMounted(async () => {
     overflow: hidden;
     background-color: #ffff;
     box-shadow: 0 1px 8px rgba(0, 0, 0, 0.06);
-    border: 3px solid #ebebeb;
     border-radius: 12px;
 }
 

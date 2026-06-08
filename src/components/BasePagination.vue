@@ -95,7 +95,7 @@ const to = computed(() => {
 }
 
 .pagination-modern .page-item.active .page-link {
-  background-color: #0d6efd;
+  background-color: #171717;
   color: #fff;
   border-color: #0d6efd;
 }

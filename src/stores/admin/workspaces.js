@@ -9,7 +9,7 @@ export const useWorkspaceStore = defineStore ('workspace', () =>{
             const res = await api.get("/api/sahakka-admin/workspaces");
             workspaces.value = res.data.data
         } catch (error) {
-            
+            throw new Error(error.response?.data?.message || "Invalid Workspaces");
         }
         
     }
