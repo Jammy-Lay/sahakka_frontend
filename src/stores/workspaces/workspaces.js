@@ -44,7 +44,7 @@ export const useCrudWorkspaceStore = defineStore("works", () => {
 
 const joinByToken = async (token) => {
   try {
-    const res = await api.post("/api/workspace/join", {
+    const res = await api.post("/api/invite/join", {
       token,
     });
 
