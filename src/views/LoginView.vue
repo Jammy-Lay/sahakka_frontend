@@ -100,6 +100,7 @@ const router = useRouter();
 const toast = notify(router);
 const isLoading = ref(false);
 const showPassword = ref(false);
+import { jwtDecode } from "jwt-decode";
 
 const auth = useAuthStore();
 const workspaceStore = UseWorkspaceStore();
@@ -134,31 +135,48 @@ watch(password, (val) => {
 
 async function handleLogin() {
   if (!validate()) return;
+
   isLoading.value = true;
+
   try {
     await auth.login(email.value, password.value);
 
+    // Decode token
+    const decoded = jwtDecode(auth.token);
+
+    // console.log("Decoded Token:", decoded);
+
+    // Admin
+    if (decoded.role === "admin") {
+      toast.success("Signin Successfully", "/admin/dashboard");
+      return;
+    }
+
+    // Normal User
     const lastVisited = JSON.parse(localStorage.getItem("lastVisited"));
 
     if (lastVisited) {
-      // returning user → go to last visited
       const { workspace_id, team_id } = lastVisited;
+
       toast.success(
         "Signin Successfully",
         `/workspace/${workspace_id}/team/${team_id}/tasks`
       );
-      // router.push(`/workspace/${workspace_id}/team/${team_id}/tasks`);
-    } else {
-      await workspaceStore.getMyWorkspaceStore();
-      const workspace = workspaceStore.myWorkspaces[0];
 
-      if (workspace) {
-        await teamStore.getTeamByWorkspaceStore(workspace.workspace_id);
-        const team = teamStore.getTeamByWorkspace[0];
+      return;
+    }
 
-        if (team) {
-          router.push(`/workspace/${workspace.workspace_id}/team/${team.team_id}/tasks`);
-        }
+    await workspaceStore.getMyWorkspaceStore();
+
+    const workspace = workspaceStore.myWorkspaces[0];
+
+    if (workspace) {
+      await teamStore.getTeamByWorkspaceStore(workspace.workspace_id);
+
+      const team = teamStore.getTeamByWorkspace[0];
+
+      if (team) {
+        router.push(`/workspace/${workspace.workspace_id}/team/${team.team_id}/tasks`);
       }
     }
   } catch (error) {
