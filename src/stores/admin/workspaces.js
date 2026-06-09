@@ -6,7 +6,7 @@ export const useWorkspaceStore = defineStore ('workspace', () =>{
     const workspaces = ref([]);
     async function fetchWorkspaces() {
         try {
-            const res = await api.get("/sahakka-api/v2/sahakka-admin/workspaces");
+            const res = await api.get("/sahakka-admin/workspaces");
             workspaces.value = res.data.data
         } catch (error) {
             throw new Error(error.response?.data?.message || "Invalid Workspaces");
