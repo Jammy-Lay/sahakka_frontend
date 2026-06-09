@@ -67,7 +67,7 @@
                 input-class="py-1 fs-13 rounded-btn-sm my-2"
               />
               <!-- Create Workspace -->
-               <span class="text-danger">{{ newWorkspaceNameErr }}</span>
+
               <BaseBtn
               btnName="Create workspace"
               class="w-100 fs-13 rounded-btn-sm py-1"
@@ -395,7 +395,6 @@
             input-placeholder="New name"
             input-class="py-1 fs-13 rounded-btn-sm mb-4"
           />
-          <span class="text-danger">{{ renameErr }}</span>
           <BaseBtn
             btnName="Save"
             class="w-100 fs-13 rounded-btn py-2"
@@ -497,7 +496,7 @@ const toast = notify(router);
 
 const crudWorkspaceStore = useCrudWorkspaceStore();
 // const newWorkspaceName = ref("");
-const newWorkspaceNameErr = ref("");
+
 let isLoading = ref(false);
 
 const maxWorkspace = myWorkspaces.value
@@ -527,33 +526,27 @@ const switchWorkspace = async (id) => {
 const handleCreateWorkspace = async () => {
   const name = newWorkspaceName.value.trim();
   if (!name) {
-    newWorkspaceNameErr.value = "Name is required";
     toast.error("Workspace name is required");
     return;
   }
   if (name.length < 3) {
-    newWorkspaceNameErr.value =
-      "Must be at least 3 characters";
     toast.error("Workspace name must be at least 3 characters");
     return;
   }
   if(maxWorkspace.length >= 5){
    
-  newWorkspaceNameErr.value = "Maximum 5 ";
   toast.error(" Maximum 5 workspaces allowed");
   return;
   }
 
   try {
     isLoading.value = true;
-    newWorkspaceNameErr.value = "";
     const res = await crudWorkspaceStore.createWorkspace(name);
     newWorkspaceName.value = "";
 
     toast.success("Workspace created successfully");
     reuseonMount();
   } catch (error) {
-    newWorkspaceNameErr.value = error.message;
     toast.error(error.message);
   }finally{
     isLoading.value = false
@@ -562,24 +555,22 @@ const handleCreateWorkspace = async () => {
 };
 
 // ==============================================handle Rename workspace
-const renameErr = ref("");
+
 const handleRename = async () => {
   let reName = renameName.value.trim();
 
   if (!reName) {
-    renameErr.value = "Name is required";
     toast.error("Workspace name is required");
     return;
   }
 
   if (reName.length < 3) {
-    renameErr.value = "Must be at least 3 characters";
     toast.error("Workspace name must be at least 3 characters");
     return;
   }
 
   try {
-    renameErr.value = "";
+
     await crudWorkspaceStore.updateWorkspace(
       selectedWs.value.workspace_id,
       reName
@@ -593,7 +584,6 @@ const handleRename = async () => {
 
     await reuseonMount();
   } catch (error) {
-    renameErr.value = error.message;
     toast.error(error.message);
   }finally{
     isLoading.value = false;
