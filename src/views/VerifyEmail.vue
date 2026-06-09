@@ -139,7 +139,7 @@ async function handleResend() {
   if (!validate()) return;
   isLoading.value = true;
   try {
-    await api.put("/api/resend", { email: email.value });
+    await api.put("/resend", { email: email.value });
     toast.success("Verification email sent successfully.");
     showModal.value = false;
     email.value = "";

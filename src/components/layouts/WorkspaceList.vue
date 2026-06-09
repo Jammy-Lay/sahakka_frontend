@@ -318,19 +318,20 @@
 
           <n-divider style="margin: 5px 0; --n-color: #e4e4e7" />
           <div style="padding: 10px">
-            <div class="row pe-5 g-0 gx-2">
-              <div class="col-11">
+            <div class="d-flex gap-2">
+              <div class="w-100">
                 <BaseInput
                   v-model="inviteEmail"
                   input-placeholder="Email"
                   input-class="fs-14 w-100 rounded-btn-sm"
                 />
               </div>
-              <div class="col-1">
+              <div>
                 <!-- Invite by email -->
                 <BaseButton
-                  btnName="Invite"
+                  :btnName="isInviteLoading ? 'Inviting...' : 'Invite'"
                   class="fs-13 rounded-btn-sm fw-medium text-nowrap h-100"
+                  :disabled="isInviteLoading"
                   @click="handleInvite"
                 />
               </div>
@@ -706,17 +707,6 @@ const handleLogout = () => {
 </script>
 
 <style scoped>
-.workspace-trigger {
-  cursor: pointer;
-  user-select: none;
-}
-.workspace-item:hover {
-  background: #f5f5f5 !important;
-  cursor: pointer;
-}
-.workspace-item--active {
-  background: #f5f5f5 !important;
-}
 .btn-option {
   background-color: transparent !important;
 }
