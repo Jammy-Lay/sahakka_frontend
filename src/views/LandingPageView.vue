@@ -364,7 +364,7 @@ import HowItWorkCard from '@/components/HowItWorkCard.vue';
       bottom: 40px;
       left: 30px;
     }
-  }
+  } 
 
 
 </style>
