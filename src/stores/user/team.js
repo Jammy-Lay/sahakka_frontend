@@ -8,7 +8,7 @@ export const useTeamStore = defineStore("team", () => {
 
   const getTeamSectionStore = async (team_id) => {
     try {
-      const res = await api.get(`/api/team/${team_id}/sections`);
+      const res = await api.get(`/sahakka-api/v2/team/${team_id}/sections`);
       getTeamSection.value = res.data.data;
       //   console.log(getTeamSection.value);
     } catch (error) {
@@ -18,7 +18,7 @@ export const useTeamStore = defineStore("team", () => {
 
   const getTeamByWorkspaceStore = async (workspace_id) => {
     try {
-      const res = await api.get(`/api/workspace/${workspace_id}/teams`);
+      const res = await api.get(`/sahakka-api/v2/workspace/${workspace_id}/teams`);
       getTeamByWorkspace.value = res.data.data.team;
       // console.log(getTeamByWorkspace.value);
     } catch (error) {
@@ -28,7 +28,7 @@ export const useTeamStore = defineStore("team", () => {
 
   const createTeam = async (workspace_id,title,description) => {
     try {
-      const res = await api.post(`/api/workspace/${workspace_id}/team`, { title, description });
+      const res = await api.post(`/sahakka-api/v2/workspace/${workspace_id}/team`, { title, description });
 
       return res.data;
     } catch (error) {

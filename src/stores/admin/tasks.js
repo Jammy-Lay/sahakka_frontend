@@ -6,7 +6,7 @@ export const useTaskstore = defineStore ('task', () =>{
     const tasks = ref([]);
     async function fetchTasks() {
         try {
-            const res = await api.get("/api/sahakka-admin/tasks");
+            const res = await api.get("/sahakka-api/v2/sahakka-admin/tasks");
             tasks.value = res.data.data
         } catch (error) {
             throw new Error(error.response?.data?.message || "Invalid Tasks");

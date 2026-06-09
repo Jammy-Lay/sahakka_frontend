@@ -35,7 +35,7 @@ export const UseWorkspaceStore = defineStore("workspace", () => {
 
   const getMyWorkspaceStore = async () => {
     try {
-      const res = await api.get("/api/getMyWorkspace");
+      const res = await api.get("/sahakka-api/v2/getMyWorkspace");
       const data = res.data.data;
       myWorkspaces.value = data.filter((w) => w.my_role === "owner");
       joinedWorkspaces.value = data.filter(
