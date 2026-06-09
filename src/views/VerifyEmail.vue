@@ -43,52 +43,62 @@
           Resend Verification Email
         </button>
       </template>
+
+      <!-- Resend -->
+      <template v-else-if="status === 'resend'">
+        <div class="d-flex align-items-center justify-content-center gap-2 mb-3">
+          <Refresh-ccw :size="45" class="mb-3 text-dark" />
+          <h4 class="fw-semibold mb-2">Resend Verification Link</h4>
+        </div>
+        <p class="text-mute fs-14 mb-4">Didn't receive the verification email?</p>
+        <button class="btn bg-btn w-100 rounded-btn py-2" @click="showModal = true">
+          Resend Verification Email
+        </button>
+      </template>
     </div>
-  </div>
+    <!-- Resend Modal -->
+    <n-modal v-model:show="showModal" :mask-closable="true">
+      <div class="bg-white rounded-card" style="width: 450px; margin-top: 15px">
+        <div class="d-flex align-items-center justify-content-between px-4 py-3 pb-2">
+          <span class="fw-medium fs-15">Resend Verification Email</span>
+          <n-button
+            text
+            size="small"
+            @click="showModal = false"
+            class="text-dark hover-circle p-1 rounded-circle"
+          >
+            <X :size="18" />
+          </n-button>
+        </div>
 
-  <!-- Resend Modal -->
-  <n-modal v-model:show="showModal" :mask-closable="true">
-    <div class="bg-white rounded-card" style="width: 400px; margin-top: 15px">
-      <div class="d-flex align-items-center justify-content-between px-4 py-3 pb-2">
-        <span class="fw-medium fs-15">Resend Verification Email</span>
-        <n-button
-          text
-          size="small"
-          @click="showModal = false"
-          class="text-dark hover-circle p-1 rounded-circle"
-        >
-          <X :size="18" />
-        </n-button>
-      </div>
+        <n-divider style="margin: 5px 0; --n-color: #e4e4e7" />
 
-      <n-divider style="margin: 5px 0; --n-color: #e4e4e7" />
-
-      <div class="px-4 pt-2 pb-3">
-        <label class="mb-2 fs-13 fw-medium text-dark d-block">Email</label>
-        <BaseInput
-          v-model="email"
-          input-placeholder="Enter your email"
-          input-class="py-2 fs-13 rounded-btn-sm"
-        />
-        <p v-if="err.email" class="text-danger fs-13 mt-1">{{ err.email }}</p>
-
-        <div class="mt-3">
-          <BaseButton
-            :btnName="isLoading ? 'Sending...' : 'Send Verification Email'"
-            class="w-100 fs-13 rounded-btn py-2"
-            :disabled="isLoading"
-            @click="handleResend"
+        <div class="px-4 pt-2 pb-3">
+          <label class="mb-2 fs-13 fw-medium text-dark d-block">Email</label>
+          <BaseInput
+            v-model="email"
+            input-placeholder="Enter your email"
+            input-class="py-2 fs-13 rounded-btn-sm"
           />
+          <p v-if="err.email" class="text-danger fs-13 mt-1">{{ err.email }}</p>
+
+          <div class="mt-3">
+            <BaseButton
+              :btnName="isLoading ? 'Sending...' : 'Send Verification Email'"
+              class="w-100 fs-13 rounded-btn py-2"
+              :disabled="isLoading"
+              @click="handleResend"
+            />
+          </div>
         </div>
       </div>
-    </div>
-  </n-modal>
+    </n-modal>
+  </div>
 </template>
 
 <script setup>
 import { computed, reactive, ref, watch } from "vue";
 import { useRouter, useRoute } from "vue-router";
-import { CircleCheck, Clock, Info, X } from "lucide-vue-next";
 import Logo from "@/assets/image/image.png";
 import BaseInput from "@/components/BaseInput.vue";
 import BaseButton from "@/components/BaseButton.vue";

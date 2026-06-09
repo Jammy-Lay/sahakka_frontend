@@ -2,8 +2,8 @@
   <button :disabled="loading" class="btn bg-btn text-white px-2 py-1 rounded-btn text-nowrap">
     <component v-if="icon" :is="icon" size="14" class="me-1" />
     
-    <span v-if="loading == true" class="spinner-border spinner-border-sm me-2"></span>
-    {{ loading ? "Create..." : btnName }}
+    <span v-if="loading " class="spinner-border spinner-border-sm me-2"></span>
+    {{ loading ? "Loading..." : btnName }}
   </button>
 </template>
 
@@ -19,7 +19,7 @@ defineProps({
   },
   loading: {
     type: Boolean,
-    default: true,
+    default: false,
   }
 });
 </script>

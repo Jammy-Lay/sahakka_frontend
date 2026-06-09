@@ -20,7 +20,7 @@ export const useTeamStore = defineStore("team", () => {
     try {
       const res = await api.get(`/api/workspace/${workspace_id}/teams`);
       getTeamByWorkspace.value = res.data.data.team;
-      console.log(getTeamByWorkspace.value);
+      // console.log(getTeamByWorkspace.value);
     } catch (error) {
       console.log(error);
     }
