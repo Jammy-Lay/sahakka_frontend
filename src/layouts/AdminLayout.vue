@@ -10,7 +10,7 @@
                             aria-label="Open menu">
                             <Menu :size="18" />
                         </button>
-                        <router-link to="/admin/dashborad">
+                        <router-link to="/admin/dashboard">
                             <img class="ls responsive-title" style="width: 140px;" src="../assets/image/logo.svg"
                                 alt="">
                         </router-link>
