@@ -1,9 +1,9 @@
 <template>
   <div class="px-3">
     <div class="d-flex align-items-center justify-content-between py-3">
-      <h6 class="fs-13 mb-0">Team</h6>
+      <h6 class="fs-13 fw-semibold mb-0">Team</h6>
       <button
-        class="btn px-2 py-1 rounded-btn text-nowrap fs-12 btn-ghost"
+        class="btn px-2 py-1 rounded-btn text-nowrap fs-13 fw-semibold btn-ghost"
         v-if="isOwner"
         @click="showCreateTeam = true"
       >
@@ -121,14 +121,17 @@
 
 <script setup>
 import { computed, onMounted, ref } from "vue";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import { storeToRefs } from "pinia";
 import { useTeamStore } from "@/stores/user/team";
 import { UseWorkspaceStore } from "@/stores/user/workspace";
+import { notify } from "@/utils/toast";
 import BaseInput from "../BaseInput.vue";
 import BaseButton from "../BaseButton.vue";
 
 const route = useRoute();
+const router = useRouter();
+const toast = notify(router);
 const currentRouteWorkspaceId = computed(() => route.params.workspace_id);
 const currentRouteTeamId = computed(() => route.params.team_id);
 const currentSection = computed(() => route.path.split("/").pop()?.toLowerCase());
@@ -189,15 +192,13 @@ const handleCreateTeam = async () => {
       description.value
     );
 
-    
+    toast.success("Create team successfully");
+
     teamName.value = "";
     description.value = "";
     showCreateTeam.value = false;
 
-    
-    await teamStore.getTeamByWorkspaceStore(
-      currentRouteWorkspaceId.value
-    );
+    await teamStore.getTeamByWorkspaceStore(currentRouteWorkspaceId.value);
   } catch (error) {
     console.error("Failed to create team:", error);
   }
