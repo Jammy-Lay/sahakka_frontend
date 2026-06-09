@@ -2,7 +2,7 @@
     <div v-if="loading">
         <Loading></Loading>
     </div>
-    <div v-else style="height: 90vh;">
+    <div v-else>
         <div class="d-flex align-items-center mb-1">
             <BaseTitle title="View Users" />
         </div>

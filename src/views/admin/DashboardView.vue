@@ -2,7 +2,7 @@
     <div v-if="loading">
         <Loading></Loading>
     </div>
-    <div v-else style="height: 89vh;">
+    <div v-else>
         <div class="d-flex align-items-center justify-content-between mb-3">
             <BaseTitle title="Dashboard" />
             <n-tag round :bordered="false" type="warning">

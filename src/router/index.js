@@ -114,7 +114,7 @@ const router = createRouter({
         },
       ],
     },
-    {
+    {   
       path: "/loading",
       name: "loading",
       component: () => import('../components/layouts/Loading.vue')
