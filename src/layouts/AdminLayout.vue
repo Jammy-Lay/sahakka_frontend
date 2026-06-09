@@ -2,7 +2,7 @@
     <n-config-provider :theme-overrides="themeOverrides">
         <div class="d-flex flex-column vh-100">
             <!-- NAVBAR -->
-            <div class="navbar-wrapper">
+            <div class="navbar-wrapper bg-body">
                 <div class="navbar-inner shadow-box">
                     <div class="d-flex align-items-center gap-2">
                         <!-- Hamburger: only on small screens -->
@@ -10,21 +10,21 @@
                             aria-label="Open menu">
                             <Menu :size="18" />
                         </button>
-                        <h5 class="fw-bold m-0 text-prime ls responsive-title">
-                            Sahakka
-                        </h5>
+                        <router-link to="/admin/dashborad">
+                            <img class="ls responsive-title" style="width: 140px;" src="../assets/image/logo.svg" alt="">
+                        </router-link>
                     </div>
 
                 </div>
             </div>
 
             <!-- SIDEBAR + CONTENT (desktop) -->
-            <div class="layout-wrapper">
-                <n-layout has-sider class="layout-card shadow-box">
+            <div class="layout-wrapper bg-body">
+                <n-layout has-sider class="layout-card shadow-box bg-body">
                     <!-- SIDEBAR -->
                     <n-layout-sider bordered collapse-mode="width" :collapsed-width="70" :width="240"
                         :collapsed="collapsed" @collapse="collapsed = true" @expand="collapsed = false"
-                        class="py-2 d-none d-lg-flex position-relative">
+                        class="py-2 d-none d-lg-flex position-relative rounded-top-4">
                         <n-menu v-model:value="activeKey" :collapsed="collapsed" :collapsed-width="64"
                             :collapsed-icon-size="18" :options="menuOptions" :expanded-keys="expandedKeys"
                             @update:expanded-keys="onUpdateExpandedKeys" @update:value="handleMenuClick" />
@@ -39,8 +39,8 @@
 
                     <n-layout>
                         <n-scrollbar>
-                            <div class="content-area">
-                                <div class="container-fluid p-3">
+                            <div class="content-area bg-body">
+                                <div class="container-fluid px-3">
                                     <router-view />
                                 </div>
                             </div>

@@ -1,474 +1,181 @@
 <template>
-    <main class="body-login">
-        <div class="container-fluid p-0 h-100">
-            <div class="row g-0 h-100">
-
-                <!-- LEFT -->
-                <div class="col-lg-6 d-none d-lg-block left-panel">
-                    <img src="../../assets/image/style 1.png" class="panel-image-asset" alt="Background" />
-                </div>
-
-                <!-- RIGHT -->
-                <div class="col-lg-6 col-md-12 right-panel d-flex align-items-center justify-content-center">
-                    <div class="form-wrapper">
-
-                        <!-- HEADER -->
-                        <div class="form-header d-flex align-items-center gap-2 mb-4">
-                            <img src="../../assets/image/image.png" class="logo" alt="Logo" />
-                            <h2 class="brand-name m-0">Sahakka</h2>
-                        </div>
-
-                        <!-- TITLE -->
-                        <div class="title-section mb-4">
-                            <h3 class="form-title mb-1">OTP Reset Password</h3>
-                            <p class="form-subtitle">
-                                We sent an OTP to your email
-                            </p>
-                        </div>
-
-                        <!-- FORM -->
-                        <form @submit.prevent="handleOtp">
-
-                            <!-- OTP INPUT -->
-                            <div class="input-group-custom mt-3">
-                                <n-input-otp v-model:value="value" :length="6" class="custom-otp" />
-                            </div>
-
-                            <!-- TIMER / RESEND -->
-                            <div class="timer-section d-flex justify-content-center align-items-center mt-4">
-                                <span v-if="countdown > 0" class="timer-text">
-                                    Resend code in {{ formatTime() }}
-                                </span>
-
-                                <span v-else class="text-black fw-semibold">
-                                    Did u get OTP?
-                                </span>
-
-                                <button type="button" class="btn-resend ms-3" :disabled="countdown > 0" @click="Resend">
-                                    Resend OTP
-                                </button>
-                            </div>
-
-                            <!-- VERIFY BUTTON -->
-                            <button type="submit" class="btn btn-submit mt-3" :disabled="isLoading">
-                                {{ isLoading ? "Verifying..." : "Verify Code" }}
-                            </button>
-
-                            <!-- BACK TO LOGIN -->
-                            <div class="signup-prompt mt-4">
-                                Remember your password?
-                                <router-link to="/login">
-                                    Go back to sign in
-                                </router-link>
-                            </div>
-
-                        </form>
-
-                    </div>
-                </div>
-
+  <div class="min-vh-100 overflow-hidden">
+    <div class="row g-0">
+      <div class="col-lg-6">
+        <img
+          src="../../assets/image/style 1.png"
+          alt=""
+          class="object-fit-cover w-100 vh-100"
+        />
+      </div>
+      <div class="col-lg-6">
+        <div class="d-flex justify-content-center align-items-center min-vh-100">
+          <div style="width: 400px">
+            <div class="d-flex align-items-center gap-2 mb-4">
+              <n-avatar :src="Logo" :size="60" class="bg-white" />
+              <h3 class="mb-0 fw-bold">Sahakka</h3>
             </div>
+
+            <h3 class="fw-semibold" style="margin-bottom: 12px">OTP Verification</h3>
+            <h6 class="text-muted mb-6">We send you OTP via your gmail.</h6>
+
+            <form @submit.prevent="handleOtp">
+              <n-input-otp v-model:value="value" :length="6" class="custom-otp" />
+
+              <div
+                class="d-flex justify-content-center align-items-center gap-2 my-3 text-dark"
+                style="min-height: 30px"
+              >
+                <span v-if="countdown > 0" class="fs-14">
+                  Resend code in {{ formatTime() }}
+                </span>
+
+                <div v-else class="d-flex gap-2 align-items-center">
+                  <span class="text-dark fs-13">Didn't get code?</span>
+                  <button
+                    type="button"
+                    class="btn btn-outline rounded-btn-sm px-2 py-1 fs-13 text-dark"
+                    @click="resend"
+                  >
+                    <span
+                      v-if="isResend"
+                      class="spinner-border spinner-border-sm me-2"
+                    />
+                    {{ isResend ? "Sending..." : "Resent" }}
+                  </button>
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                class="btn bg-btn w-100 rounded-btn py-2"
+                :disabled="isLoading"
+              >
+                <span v-if="isLoading" class="spinner-border spinner-border-sm me-2" />
+                {{ isLoading ? "Verifying..." : "Verify Code" }}
+              </button>
+            </form>
+          </div>
         </div>
-    </main>
+      </div>
+    </div>
+  </div>
 </template>
+
 <script setup>
-import { useAuthStore } from '@/stores/auth'
-import { useRouter } from 'vue-router'
-import { ref, onMounted, onUnmounted } from 'vue'
-import { notify } from "@/utils/toast"
+import { ref, onMounted, onUnmounted } from "vue";
+import { useRouter } from "vue-router";
+import { useAuthStore } from "@/stores/auth";
+import { notify } from "@/utils/toast";
+import Logo from "@/assets/image/image.png";
 
-const auth = useAuthStore()
-const router = useRouter()
-const toast = notify(router)
-const isLoading = ref(false)
+const auth = useAuthStore();
+const router = useRouter();
+const toast = notify(router);
 
-const email = auth.ForgotEmail
-// console.log(email);
+const isLoading = ref(false);
+const isResend = ref(false);
+const value = ref([]);
+let forgotEmail = ref(sessionStorage.getItem("forgot_email"));
 
-
-// OTP value from Naive UI
-const value = ref([])
-
-
-
-const OTP_TIME = 50
-const countdown = ref(0)
-let timer = null
-
-// Format time
+const OTP_TIME = 15;
+const countdown = ref(0);
+let timer = null;
 
 function formatTime() {
-    const m = Math.floor(countdown.value / 60)
-    const s = countdown.value % 60
-    return `${m}:${s < 10 ? '0' : ''}${s}s`
+  const m = Math.floor(countdown.value / 60);
+  const s = countdown.value % 60;
+  return `${m}:${s < 10 ? "0" : ""}${s}s`;
 }
-
-
-// Start persistent timer
 
 function startTimer(reset = false) {
-    clearInterval(timer)
+  clearInterval(timer);
 
-    let expiry
-
-    if (reset) {
-        expiry = Date.now() + OTP_TIME * 1000
-        localStorage.setItem('otp_expiry', expiry)
-    } else {
-        expiry = localStorage.getItem('otp_expiry')
-
-        if (!expiry) {
-            expiry = Date.now() + OTP_TIME * 1000
-            localStorage.setItem('otp_expiry', expiry)
-        }
+  let expiry;
+  if (reset) {
+    expiry = Date.now() + OTP_TIME * 1000;
+    localStorage.setItem("otp_expiry", expiry);
+  } else {
+    expiry = localStorage.getItem("otp_expiry");
+    if (!expiry) {
+      expiry = Date.now() + OTP_TIME * 1000;
+      localStorage.setItem("otp_expiry", expiry);
     }
+  }
 
-    // SET IMMEDIATELY
-    countdown.value = Math.max(
-        0,
-        Math.floor((Number(expiry) - Date.now()) / 1000)
-    )
+  countdown.value = Math.max(0, Math.floor((Number(expiry) - Date.now()) / 1000));
 
-    timer = setInterval(() => {
-        const remaining = Math.max(
-            0,
-            Math.floor((Number(expiry) - Date.now()) / 1000)
-        )
-
-        countdown.value = remaining
-
-        if (remaining <= 0) {
-            clearInterval(timer)
-            localStorage.removeItem('otp_expiry')
-        }
-    }, 1000)
-}
-const Resend = async () => {
-    try {
-        await auth.forgotPassword(email)
-
-        // toast.success('OTP resent to your email')
-
-        startTimer(true)
-
-        // Optional: clear old OTP input
-        value.value = []
-    } catch (err) {
-        toast.error(err?.message || 'Failed to resend OTP')
+  timer = setInterval(() => {
+    const remaining = Math.max(0, Math.floor((Number(expiry) - Date.now()) / 1000));
+    countdown.value = remaining;
+    if (remaining <= 0) {
+      clearInterval(timer);
+      localStorage.removeItem("otp_expiry");
     }
-}
-// Submit OTP
-const handleOtp = async () => {
-
-    if (countdown.value <= 0) {
-        toast.error('OTP expired. Please click Resend OTP.')
-        return
-    }
-
-    const otp = value.value.join('')
-
-    if (otp.length !== 6) {
-        toast.error('Enter full 6-digit OTP')
-        return
-    }
-
-    try {
-        isLoading.value = true
-
-        await auth.otp(email, otp)
-
-        localStorage.removeItem('otp_expiry')
-
-        router.push('/new-password')
-    } catch (err) {
-        toast.error(err?.message || 'Verification failed')
-    } finally {
-        isLoading.value = false
-    }
+  }, 1000);
 }
 
+async function resend() {
+  try {
+    isResend.value = true;
+    await auth.resentOtp(forgotEmail.value);
+    startTimer(true);
+    value.value = [];
+  } catch (err) {
+    toast.error(err?.message || "Failed to resend OTP");
+  } finally {
+    isResend.value = false;
+  }
+}
 
-onMounted(() => startTimer())
+async function handleOtp() {
+  const otp = value.value.join("");
+  if (otp.length !== 6) {
+    toast.error("Please enter 6-digit code.");
+    return;
+  }
 
-onUnmounted(() => clearInterval(timer))
+  try {
+    isLoading.value = true;
+    await auth.verifyOtp(forgotEmail.value, otp);
+    localStorage.removeItem("otp_expiry");
+    toast.success("Verify Successfully", "/new-password");
+  } catch (err) {
+    toast.error(err.message);
+  } finally {
+    isLoading.value = false;
+  }
+}
+
+onMounted(() => startTimer());
+onUnmounted(() => clearInterval(timer));
 </script>
 
 <style scoped>
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-/* REMOVE GREEN FOCUS BORDER */
-:deep(.custom-otp .n-input.n-input--focus) {
-    box-shadow: none !important;
-}
-
-/* REMOVE INTERNAL GREEN BORDER */
 :deep(.custom-otp .n-input__border),
 :deep(.custom-otp .n-input__state-border) {
-    border: 2px solid #d9d9d9 !important;
-    box-shadow: none !important;
+  border: 1.5px solid #e4e4e7 !important;
+  box-shadow: none !important;
 }
 
-/* OTP BOX SIZE */
 :deep(.custom-otp .n-input) {
-    width: 64px !important;
-    height: 64px !important;
-    border-radius: 12px !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
+  width: 60px !important;
+  height: 65px !important;
+  border-radius: 12px !important;
 }
 
-/* THE REAL INPUT INSIDE */
 :deep(.custom-otp input) {
-    height: 100% !important;
-    text-align: center !important;
-    font-size: 26px !important;
-    font-weight: 600 !important;
-    line-height: 64px !important;
-    /* THIS FIXES VERTICAL CENTER */
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
+  text-align: center !important;
+  font-size: 26px !important;
+  font-weight: 500 !important;
+  height: 100% !important;
+  line-height: 70px !important;
+  caret-color: #171717 !important;
 }
 
-/* fallback Naive UI internal class (important) */
-:deep(.custom-otp .n-input__input-el) {
-    text-align: center !important;
-}
-
-/* TIMER */
-.timer-text {
-    font-size: 0.9rem;
-    font-weight: 500;
-    color: #1c1c1e;
-}
-
-/* BUTTON */
-.btn-submit {
-    width: 100%;
-    padding: 12px;
-    background: #141416;
-    color: #fff;
-    border-radius: 8px;
-    border: none;
-}
-
-/* BASE VIEWPORT SETUP */
-.body-login {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    height: 100vh;
-    width: 100vw;
-    overflow: hidden;
-}
-
-.h-100 {
-    height: 100% !important;
-}
-
-/* LEFT PANEL ADAPTIVE SCALING CONSTRAINTS */
-.left-panel {
-    position: relative;
-    width: 50%;
-    height: 100%;
-    overflow: hidden;
-    background-color: #e6f0fa;
-}
-
-.panel-image-asset {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    object-position: 18% center;
-    /* Locks mockup graphic focus dynamically across sizes */
-}
-
-.left-brand-header {
-    position: absolute;
-    top: 45px;
-    left: 45px;
-    z-index: 10;
-}
-
-.left-logo {
-    width: 44px;
-    height: 44px;
-    object-fit: contain;
-}
-
-.left-brand-name {
-    font-size: 1.85rem;
-    font-weight: 500;
-    color: #111111;
-    letter-spacing: -0.03em;
-}
-
-/* RIGHT SIDE FORM PANEL */
-.right-panel {
-    background: #ffffff;
-    height: 100%;
-    margin: 0 auto;
-}
-
-.form-wrapper {
-    width: 100%;
-    max-width: 375px;
-}
-
-.logo {
-    width: 40px;
-    height: 40px;
-    object-fit: contain;
-}
-
-.brand-name {
-    font-size: 1.5rem;
-    font-weight: 500;
-    color: #000000;
-    letter-spacing: -0.02em;
-}
-
-/* TYPOGRAPHY */
-.form-title {
-    font-size: 1.65rem;
-    font-weight: 500;
-    color: #111111;
-    letter-spacing: -0.02em;
-}
-
-.form-subtitle {
-    color: #71717a;
-    font-size: 0.95rem;
-    font-weight: 400;
-}
-
-/* INPUT COMPONENT BLOCKS */
-.input-group-custom {
-    margin-bottom: 1.15rem;
-}
-
-.input-group-custom label {
-    font-size: 0.9rem;
-    font-weight: 400;
-    color: #1c1c1e;
-    margin-bottom: 0.5rem;
-    display: block;
-}
-
-.input-group-custom .form-control {
-    border-radius: 8px;
-    border: 1px solid #d1d1d6;
-    padding: 0.75rem 1rem;
-    font-size: 0.95rem;
-    color: #111111;
-    background-color: #ffffff;
-    transition: border-color 0.15s ease, box-shadow 0.15s ease;
-}
-
-.input-group-custom .form-control:focus {
-    border-color: #111111;
-    box-shadow: none;
-    outline: none;
-}
-
-/* INDIVIDUAL SEPARATED OTP BOX STYLES */
-.otp-input-box {
-    width: 48px;
-    height: 48px;
-    text-align: center;
-    font-size: 1.25rem;
-    font-weight: 500;
-    border-radius: 10px !important;
-    border: 1px solid #d1d1d6 !important;
-    background-color: #f2f2f7 !important;
-    padding: 0 !important;
-    color: #111111;
-}
-
-.otp-input-box::placeholder {
-    color: #111111;
-    opacity: 0.3;
-}
-
-.otp-input-box:focus {
-    border-color: #111111 !important;
-    background-color: #ffffff !important;
-    box-shadow: none !important;
-}
-
-/* TIMER & RESEND SUBELEMENTS */
-.timer-text {
-    font-size: 0.9rem;
-    font-weight: 500;
-    color: #1c1c1e;
-}
-
-.btn-resend {
-    background: #f2f2f7;
-    border: 1px solid #e5e5ea;
-    padding: 0.2rem 0.6rem;
-    font-size: 0.75rem;
-    font-weight: 500;
-    color: #1c1c1e;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: background-color 0.15s ease;
-}
-
-.btn-resend:hover:not(:disabled) {
-    background-color: #e5e5ea;
-}
-
-.btn-resend:disabled {
-    cursor: default;
-    opacity: 0.6;
-}
-
-/* SUBMIT BUTTON ACCENT */
-.btn-submit {
-    background-color: #141416;
-    color: #ffffff;
-    border: none;
-    padding: 0.75rem;
-    font-weight: 400;
-    border-radius: 8px;
-    width: 100%;
-    font-size: 0.95rem;
-    transition: background-color 0.15s ease;
-}
-
-.btn-submit:hover:not(:disabled) {
-    background-color: #232326;
-}
-
-/* PROMPTS */
-.signup-prompt {
-    text-align: center;
-    font-size: 0.9rem;
-    color: #111111;
-}
-
-.signup-prompt a {
-    color: #007aff;
-    font-weight: 400;
-    text-decoration: none;
-    margin-left: 0.25rem;
-}
-
-.signup-prompt a:hover {
-    text-decoration: underline;
-}
-
-/* MOBILE VIEW RESPONSIVENESS OVERRIDES */
-@media (max-width: 991.98px) {
-    .body-login {
-        overflow-y: auto;
-    }
-
-    .right-panel {
-        padding: 3rem 1.5rem;
-    }
+.btn-outline:hover {
+  background-color: white !important;
+  color: #171717 !important;
+  border: 1px solid grey !important;
 }
 </style>

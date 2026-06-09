@@ -9,9 +9,8 @@ export const useTeamstore = defineStore ('team', () =>{
         try {
             const res = await api.get("/api/sahakka-admin/teams");
             teams.value = res.data.data
-            console.log(teams.value);
         } catch (error) {
-            console.error("Failed to fetch teams:", error);
+            throw new Error(error.response?.data?.message || "Invalid Teams");
         }
         
     }
@@ -20,7 +19,7 @@ export const useTeamstore = defineStore ('team', () =>{
             const res = await api.get(`/api/sahakka-admin/workspace/${workspace_id}/teams/${team_id}`)
             currentTeam.value = res.data.data[0];
         } catch (error) {
-            console.error("Failed to fetch team:", error);
+            throw new Error(error.response?.data?.message || "Invalid Teams");
         }
     }
     return{

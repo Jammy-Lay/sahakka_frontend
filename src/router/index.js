@@ -8,6 +8,7 @@ const router = createRouter({
       path: "/",
       name: "home",
       component: HomeView,
+      redirect: "/login",
     },
     {
       path: "/register",
@@ -71,21 +72,21 @@ const router = createRouter({
       name: "about",
       component: () => import("../views/AboutView.vue"),
     },
-        {
+    {
       path: "/admin/",
       component: () => import("../layouts/AdminLayout.vue"),
       children: [
         {
           path: "dashboard",
-          component: () => import('../views/admin/DashboardView.vue')
+          component: () => import("../views/admin/DashboardView.vue"),
         },
         {
           path: "users",
-          component: () => import('../views/admin/UsersView.vue')
+          component: () => import("../views/admin/UsersView.vue"),
         },
         {
           path: "workspaces",
-          component: () => import('../views/admin/WorkspacesView.vue')
+          component: () => import("../views/admin/WorkspacesView.vue"),
         },
         {
           path: "/admin/workspaces/:id",
@@ -94,25 +95,30 @@ const router = createRouter({
         },
         {
           path: "teams",
-          component: () => import('../views/admin/TeamsView.vue')
+          component: () => import("../views/admin/TeamsView.vue"),
         },
         {
           path: "/admin/workspace/:workspace_id/teams/:id",
-          component: () => import('../views/admin/TeamDetail.vue')
+          component: () => import("../views/admin/TeamDetail.vue"),
         },
         {
           path: "activities-team",
-          component: () => import('../views/admin/ActivitiesTeamView.vue')
+          component: () => import("../views/admin/ActivitiesTeamView.vue"),
         },
         {
           path: "tasks",
-          component: () => import('../views/admin/TaskView.vue')
+          component: () => import("../views/admin/TaskView.vue"),
         },
         {
           path: "setting",
-          component: () => import('../views/admin/SettingView.vue')
+          component: () => import("../views/admin/SettingView.vue"),
         },
       ],
+    },
+    {
+      path: "/loading",
+      name: "loading",
+      component: () => import('../components/layouts/Loading.vue')
     },
   ],
 });

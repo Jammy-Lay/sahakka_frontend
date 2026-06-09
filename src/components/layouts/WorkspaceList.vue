@@ -10,7 +10,7 @@
       <template #trigger>
         <div class="workspace-trigger d-flex align-items-center gap-2">
           <img
-            src="https://i.pinimg.com/control1/1200x/80/41/85/804185369bb31d52a4c279c6202fca14.jpg"
+            :src="currentWorkspace?.creator?.avatar"
             alt=""
             style="width: 25px; height: 25px"
             class="rounded-circle object-fit-cover"
@@ -67,7 +67,7 @@
                 input-class="py-1 fs-13 rounded-btn-sm my-2"
               />
               <!-- Create Workspace -->
-               <span class="text-danger">{{ newWorkspaceNameErr }}</span>
+
               <BaseBtn
               btnName="Create workspace"
               class="w-100 fs-13 rounded-btn-sm py-1"
@@ -395,12 +395,12 @@
             input-placeholder="New name"
             input-class="py-1 fs-13 rounded-btn-sm mb-4"
           />
-          <span class="text-danger">{{ renameErr }}</span>
-          <BaseButton
+          <BaseBtn
             btnName="Save"
             class="w-100 fs-13 rounded-btn py-2"
             @click="handleRename"
           />
+          
         </div>
       </div>
     </n-modal>
@@ -436,7 +436,9 @@
               class="btn btn-danger rounded-btn-sm fs-13 fw-medium w-50"
               @click="handleDelete"
             >
-              Delete
+            
+              <span v-if="loading " class="spinner-border spinner-border-sm me-2"></span>
+              {{ isLoading? "Loading..." : "Delete" }}
             </button>
           </div>
         </div>
@@ -494,8 +496,8 @@ const toast = notify(router);
 
 const crudWorkspaceStore = useCrudWorkspaceStore();
 // const newWorkspaceName = ref("");
-const newWorkspaceNameErr = ref("");
-const isLoading = ref(false);
+
+let isLoading = ref(false);
 
 const maxWorkspace = myWorkspaces.value
 
@@ -524,58 +526,50 @@ const switchWorkspace = async (id) => {
 const handleCreateWorkspace = async () => {
   const name = newWorkspaceName.value.trim();
   if (!name) {
-    newWorkspaceNameErr.value = "Name is required";
     toast.error("Workspace name is required");
     return;
   }
   if (name.length < 3) {
-    newWorkspaceNameErr.value =
-      "Must be at least 3 characters";
     toast.error("Workspace name must be at least 3 characters");
     return;
   }
   if(maxWorkspace.length >= 5){
    
-  newWorkspaceNameErr.value = "Maximum 5 ";
   toast.error(" Maximum 5 workspaces allowed");
   return;
   }
 
   try {
     isLoading.value = true;
-    newWorkspaceNameErr.value = "";
     const res = await crudWorkspaceStore.createWorkspace(name);
     newWorkspaceName.value = "";
 
     toast.success("Workspace created successfully");
     reuseonMount();
   } catch (error) {
-    newWorkspaceNameErr.value = error.message;
     toast.error(error.message);
   }finally{
     isLoading.value = false
+
   }
 };
 
 // ==============================================handle Rename workspace
-const renameErr = ref("");
+
 const handleRename = async () => {
-  const reName = renameName.value.trim();
+  let reName = renameName.value.trim();
 
   if (!reName) {
-    renameErr.value = "Name is required";
     toast.error("Workspace name is required");
     return;
   }
 
   if (reName.length < 3) {
-    renameErr.value = "Must be at least 3 characters";
     toast.error("Workspace name must be at least 3 characters");
     return;
   }
 
   try {
-    renameErr.value = "";
 
     await crudWorkspaceStore.updateWorkspace(
       selectedWs.value.workspace_id,
@@ -590,8 +584,10 @@ const handleRename = async () => {
 
     await reuseonMount();
   } catch (error) {
-    renameErr.value = error.message;
     toast.error(error.message);
+  }finally{
+    isLoading.value = false;
+    reName = "";
   }
 };
 
@@ -604,7 +600,7 @@ const handleDelete = async () => {
     return;
   }
   try {
-    
+     isLoading.value = true;
     await crudWorkspaceStore.deleteWorkspace(
       selectedWs.value.workspace_id
     );
@@ -617,6 +613,8 @@ const handleDelete = async () => {
     await reuseonMount();
   } catch (error) {
     toast.error(error.message);
+  }finally{
+     isLoading.value = false;
   }
 };
 
@@ -630,7 +628,6 @@ const joinErr = ref("");
 const handleJoin = async () => {
   const token = joinCode.value.trim();
   console.log(token);
-  
 
   if (!token) {
     joinErr.value = "Token is required";
@@ -684,11 +681,14 @@ const handleLogout = () => {
   user-select: none;
 }
 .workspace-item:hover {
-  background: #f5f5f5;
+  background: #f5f5f5 !important;
   cursor: pointer;
 }
 .workspace-item--active {
-  background: #f5f5f5;
+  background: #f5f5f5 !important;
+}
+.btn-option {
+  background-color: transparent !important;
 }
 .btn-option:hover {
   background-color: #e4e4e7 !important;

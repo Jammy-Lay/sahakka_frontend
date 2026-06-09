@@ -1,0 +1,62 @@
+<template>
+    <div class="body-loader py-15">
+        <div class="loader"></div>
+    </div>
+</template>
+
+<script setup></script>
+
+<style scoped>
+.body-loader {
+    width: 85vw;       /* full width */
+    height: 80vh;      /* full height */
+    display: flex;      /* enable flexbox */
+    justify-content: center; /* horizontal center */
+    align-items: center;     /* vertical center */
+}
+.loader {
+    width: 75px;
+    aspect-ratio: 1;
+    display: grid;
+}
+
+.loader:before,
+.loader:after {
+    content: "";
+    grid-area: 1/1;
+    width: 35px;
+    aspect-ratio: 1;
+    box-shadow: 0 0 0 3px #171717 inset;
+    filter: drop-shadow(40px 40px 0 #171717);
+    animation: l8 2s infinite alternate;
+}
+
+.loader:after {
+    margin: 0 0 0 auto;
+    filter: drop-shadow(-40px 40px 0 #171717);
+    animation-delay: -1s;
+}
+
+@keyframes l8 {
+
+    0%,
+    10% {
+        border-radius: 0;
+    }
+
+    30%,
+    40% {
+        border-radius: 50% 0;
+    }
+
+    60%,
+    70% {
+        border-radius: 50%;
+    }
+
+    90%,
+    100% {
+        border-radius: 0 50%;
+    }
+}
+</style>
