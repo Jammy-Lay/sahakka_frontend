@@ -26,13 +26,18 @@
 
     <n-divider style="margin: 5px 0; --n-color: #e4e4e7" />
     <div style="padding: 10px">
-      <div class="row pe-5 g-0 gx-2">
-        <div class="col-11">
+      <div class="d-flex gap-2">
+        <div class="w-100">
           <BaseInput v-model="inviteEmail" input-placeholder="Email" input-class="fs-14 w-100 rounded-btn-sm" />
         </div>
-        <div class="col-1">
+        <div>
           <!-- Invite by email -->
-          <BaseButton btnName="Invite" class="fs-13 rounded-btn-sm fw-medium text-nowrap h-100" @click="handleInvite" />
+          <BaseButton
+            :btnName="isInviteLoading ? 'Inviting...' : 'Invite'"
+            class="fs-13 rounded-btn-sm fw-medium text-nowrap h-100"
+            :disabled="isInviteLoading"
+            @click="handleInvite"
+          />
         </div>
       </div>
 
@@ -52,7 +57,12 @@
           </div>
         </div>
         <!-- Generate token -->
-        <BaseButton btnName="Generate passcode" class="w-100 fs-14 rounded-btn-sm py-2" @click="handleGenerate" />
+        <BaseButton
+          :btnName="isGenerateLoading ? 'Generating...' : 'Generate passcode'"
+          class="w-100 fs-14 rounded-btn-sm py-2"
+          :disabled="isGenerateLoading"
+          @click="handleGenerate"
+        />
       </div>
     </div>
   </n-popover>
@@ -79,6 +89,8 @@ const { getTeamSection } = storeToRefs(teamStore);
 const showInvitePopover = ref(false);
 const inviteEmail = ref("");
 const passcode = ref("");
+const isInviteLoading = ref(false);
+const isGenerateLoading = ref(false);
 
 const activeBorderColor = computed(() => {
   const map = {
@@ -118,10 +130,9 @@ function getBorderColor(index) {
 }
 
 const handleInvite = async () => {
-  // console.log(currentRouteTeamId.value, currentRouteWorkspaceId.value, inviteEmail.value);
-
   if (!inviteEmail.value.trim()) return;
 
+  isInviteLoading.value = true;
   try {
     await inviteStore.inviteByEmail(
       currentRouteWorkspaceId.value,
@@ -133,27 +144,29 @@ const handleInvite = async () => {
     showInvitePopover.value = false;
   } catch (error) {
     console.error(error);
+  } finally {
+    isInviteLoading.value = false;
   }
 };
+
 const handleGenerate = async () => {
+  isGenerateLoading.value = true;
   try {
     const res = await inviteStore.generatePasscode(
       currentRouteWorkspaceId.value,
       currentRouteTeamId.value
     );
 
-    // console.log("res:", res);
-
     passcode.value = res.data.token;
-
-    // console.log("passcode:", passcode.value);
   } catch (error) {
     console.error(error);
+  } finally {
+    isGenerateLoading.value = false;
   }
 };
+
 const handleCopy = async () => {
   await navigator.clipboard.writeText(passcode.value);
-  // console.log("Copied:", passcode.value);
 };
 </script>
 

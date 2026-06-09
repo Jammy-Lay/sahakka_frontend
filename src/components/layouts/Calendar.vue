@@ -1,6 +1,6 @@
 <template>
-  <div class="p-3 bg-body">
-    <div class="p-2">
+  <div class="py-3 pe-3 bg-body">
+    <div class="py-2 pe-2">
       <VCalendar
         v-model="selectedDate"
         expanded

@@ -1,14 +1,17 @@
 <template>
   <div>
     <n-popover
-      trigger="click"
+      trigger="manual"
       placement="bottom-start"
       :show-arrow="false"
       v-model:show="showPopover"
       style="padding: 0; border-radius: 16px; width: 267px; margin-top: 12px"
     >
       <template #trigger>
-        <div class="workspace-trigger d-flex align-items-center gap-2">
+        <div
+          class="workspace-trigger d-flex align-items-center gap-2"
+          @click="showPopover = !showPopover"
+        >
           <img
             :src="currentWorkspace?.creator?.avatar"
             alt=""
@@ -69,11 +72,11 @@
               <!-- Create Workspace -->
 
               <BaseBtn
-              btnName="Create workspace"
-              class="w-100 fs-13 rounded-btn-sm py-1"
-              :loading = "isLoading"
-              @click="handleCreateWorkspace"
-            />
+                btnName="Create workspace"
+                class="w-100 fs-13 rounded-btn-sm py-1"
+                :loading="isLoading"
+                @click="handleCreateWorkspace"
+              />
             </div>
           </n-popover>
         </div>
@@ -130,7 +133,8 @@
                 @click="
                   selectedWs = ws;
                   renameName = ws.workspace_name;
-                  showRenameModal = true;"
+                  showRenameModal = true;
+                "
               >
                 <Pencil size="13" /> Rename
               </div>
@@ -366,7 +370,7 @@
 
         <!-- logout -->
         <button
-          @click="handleLogout"
+          @click="showLogoutModal = true"
           class="btn bg-danger text-white rounded-btn w-100 fs-14 mt-2 text-nowrap"
         >
           <Log-out size="18" /> Log out
@@ -400,7 +404,6 @@
             class="w-100 fs-13 rounded-btn py-2"
             @click="handleRename"
           />
-          
         </div>
       </div>
     </n-modal>
@@ -420,8 +423,8 @@
           </n-button>
         </div>
         <n-divider style="margin: 5px 0; --n-color: #e4e4e7" />
-        <div class="px-4 pt-2 pb-3">
-          <p class="fs-13 text-mute mb-4">
+        <div class="px-4 pt-3 pb-3">
+          <p class="fs-13 text-mute mb-4 text-center">
             Are you sure you want to delete
             <span class="fw-semibold text-dark">{{ selectedWs?.name }}</span> ?
           </p>
@@ -436,9 +439,44 @@
               class="btn btn-danger rounded-btn-sm fs-13 fw-medium w-50"
               @click="handleDelete"
             >
-            
-              <span v-if="loading " class="spinner-border spinner-border-sm me-2"></span>
-              {{ isLoading? "Loading..." : "Delete" }}
+              <span v-if="loading" class="spinner-border spinner-border-sm me-2"></span>
+              {{ isLoading ? "Loading..." : "Delete" }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </n-modal>
+
+    <n-modal v-model:show="showLogoutModal" :mask-closable="true">
+      <div class="bg-white rounded-card" style="width: 380px">
+        <div class="d-flex align-items-center justify-content-between px-4 py-3 pb-2">
+          <span class="fw-medium fs-15">Log Out</span>
+          <n-button
+            text
+            size="small"
+            @click="showLogoutModal = false"
+            class="text-dark hover-circle p-1 rounded-circle"
+          >
+            <X size="18" />
+          </n-button>
+        </div>
+        <n-divider style="margin: 5px 0; --n-color: #e4e4e7" />
+        <div class="px-4 pt-3 pb-3">
+          <p class="fs-13 text-mute mb-4 text-center">
+            Are you sure you want to log out?
+          </p>
+          <div class="d-flex gap-2">
+            <button
+              class="btn btn-outline border rounded-btn-sm fs-13 fw-medium w-50"
+              @click="showLogoutModal = false"
+            >
+              Cancel
+            </button>
+            <button
+              class="btn btn-danger rounded-btn-sm fs-13 fw-medium w-50"
+              @click="handleLogout"
+            >
+              Log out
             </button>
           </div>
         </div>
@@ -464,7 +502,9 @@ const showRenameModal = ref(false);
 const showDeleteModal = ref(false);
 const showJoinPopover = ref(false);
 const showInvitePopover = ref(false);
+
 const openOptionId = ref(null);
+const showLogoutModal = ref(false);
 
 const renameName = ref("");
 const selectedWs = ref(null);
@@ -499,13 +539,13 @@ const crudWorkspaceStore = useCrudWorkspaceStore();
 
 let isLoading = ref(false);
 
-const maxWorkspace = myWorkspaces.value
+const maxWorkspace = myWorkspaces.value;
 
 // ==========================end
-const reuseonMount = async()=>{
+const reuseonMount = async () => {
   await authStore.getMeStore();
   await workspaceStore.getMyWorkspaceStore();
-}
+};
 
 onMounted(async () => {
   reuseonMount();
@@ -533,10 +573,9 @@ const handleCreateWorkspace = async () => {
     toast.error("Workspace name must be at least 3 characters");
     return;
   }
-  if(maxWorkspace.length >= 5){
-   
-  toast.error(" Maximum 5 workspaces allowed");
-  return;
+  if (maxWorkspace.length >= 5) {
+    toast.error(" Maximum 5 workspaces allowed");
+    return;
   }
 
   try {
@@ -548,9 +587,8 @@ const handleCreateWorkspace = async () => {
     reuseonMount();
   } catch (error) {
     toast.error(error.message);
-  }finally{
-    isLoading.value = false
-
+  } finally {
+    isLoading.value = false;
   }
 };
 
@@ -570,11 +608,7 @@ const handleRename = async () => {
   }
 
   try {
-
-    await crudWorkspaceStore.updateWorkspace(
-      selectedWs.value.workspace_id,
-      reName
-    );
+    await crudWorkspaceStore.updateWorkspace(selectedWs.value.workspace_id, reName);
 
     toast.success("Workspace updated successfully");
 
@@ -585,25 +619,23 @@ const handleRename = async () => {
     await reuseonMount();
   } catch (error) {
     toast.error(error.message);
-  }finally{
+  } finally {
     isLoading.value = false;
     reName = "";
   }
 };
 
 // ================================================handle delete workspace
-const deleteErr = ref('')
+const deleteErr = ref("");
 const handleDelete = async () => {
-  if(myWorkspaces.value.length == 1){
+  if (myWorkspaces.value.length == 1) {
     deleteErr.value = "Cannot delete the last workspace";
     toast.error("Cannot delete the last workspace");
     return;
   }
   try {
-     isLoading.value = true;
-    await crudWorkspaceStore.deleteWorkspace(
-      selectedWs.value.workspace_id
-    );
+    isLoading.value = true;
+    await crudWorkspaceStore.deleteWorkspace(selectedWs.value.workspace_id);
 
     toast.success("Workspace deleted successfully");
 
@@ -613,11 +645,10 @@ const handleDelete = async () => {
     await reuseonMount();
   } catch (error) {
     toast.error(error.message);
-  }finally{
-     isLoading.value = false;
+  } finally {
+    isLoading.value = false;
   }
 };
-
 
 const handleLeave = (ws) => {
   console.log("leave", ws);
@@ -650,7 +681,6 @@ const handleJoin = async () => {
     joinErr.value = error.message;
     toast.error(error.message);
   } finally {
-
   }
 };
 
