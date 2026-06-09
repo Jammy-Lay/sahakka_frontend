@@ -40,7 +40,7 @@
                 <div class="card p-4 rounded-4 shadow-box border-0 shadow-sm h-100">
                     <div class="d-flex align-items-center justify-content-between mb-4">
                         <h5 class="fw-bold mb-0">Project Overview</h5>
-                        <router-link to="/admin/user-monitoring" class="view-link text-decoration-none">View All
+                        <router-link to="/admin/users" class="view-link text-decoration-none">View All
                             Users</router-link>
                     </div>
 
