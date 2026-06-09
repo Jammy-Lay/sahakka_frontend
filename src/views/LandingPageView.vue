@@ -261,7 +261,7 @@ import HowItWorkCard from '@/components/HowItWorkCard.vue';
     display: inline-flex;
     align-items: center;
     justify-content: space-between;
-    padding: 20px 20px;
+    padding: 20px;
     gap: 20px;
     border-radius: 999px;
     transition: width 0.2s ease-in-out;
