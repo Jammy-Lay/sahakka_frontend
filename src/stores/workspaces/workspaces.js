@@ -5,7 +5,7 @@ export const useCrudWorkspaceStore = defineStore("works", () => {
 
   const createWorkspace = async (name) => {
     try {
-      const res = await api.post("/sahakka-api/v2/create-workspace", {
+      const res = await api.post("/create-workspace", {
         name: name.trim(),
       });
 
@@ -19,7 +19,7 @@ export const useCrudWorkspaceStore = defineStore("works", () => {
 
   const deleteWorkspace = async (id) => {
     try {
-      const res = await api.delete(`/sahakka-api/v2/workspace/${id}`);
+      const res = await api.delete(`/workspace/${id}`);
       return res.data;
     } catch (err) {
       throw new Error(
@@ -30,7 +30,7 @@ export const useCrudWorkspaceStore = defineStore("works", () => {
 
   const updateWorkspace = async (id, name) => {
     try {
-      const res = await api.put(`/sahakka-api/v2/workspace/${id}`, {
+      const res = await api.put(`/workspace/${id}`, {
         name: name.trim(),
       });
 
@@ -44,7 +44,7 @@ export const useCrudWorkspaceStore = defineStore("works", () => {
 
 const joinByToken = async (token) => {
   try {
-    const res = await api.post("/sahakka-api/v2/invite/join", {
+    const res = await api.post("/invite/join", {
       token,
     });
 
