@@ -90,7 +90,7 @@
                 <template #trigger>
                   <div
                     style="width: 25px; height: 25px; cursor: pointer"
-                   
+                    class="btn-option d-flex justify-content-center align-items-center rounded-circle"
                   >
                     <ellipsis size="18" />
                   </div>
