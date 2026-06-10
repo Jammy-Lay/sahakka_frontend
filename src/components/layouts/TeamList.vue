@@ -2,8 +2,11 @@
   <div class="px-3">
     <div class="d-flex align-items-center justify-content-between py-3">
       <h6 class="fs-13 fw-semibold mb-0">Team</h6>
-      <button class="btn px-2 py-1 rounded-btn text-nowrap fs-13 fw-semibold btn-ghost" v-if="isOwner"
-        @click="showCreateTeam = true">
+      <button
+        class="btn px-2 py-1 rounded-btn text-nowrap fs-13 fw-semibold btn-ghost"
+        v-if="isOwner"
+        @click="showCreateTeam = true"
+      >
         <Plus size="15" class="me-1" /> New Team
       </button>
 
@@ -12,8 +15,12 @@
           <!-- Header -->
           <div class="d-flex align-items-center justify-content-between px-4 py-3 pb-2">
             <span class="fw-medium fs-15">Create Team</span>
-            <n-button text size="small" @click="showCreateTeam = false"
-              class="text-dark hover-circle p-1 rounded-circle">
+            <n-button
+              text
+              size="small"
+              @click="showCreateTeam = false"
+              class="text-dark hover-circle p-1 rounded-circle"
+            >
               <x size="18" />
             </n-button>
           </div>
@@ -22,59 +29,90 @@
 
           <div class="px-4 pt-2 pb-3">
             <label class="mb-2 fs-12 fw-medium d-block">Team Name</label>
-            <BaseInput v-model="teamName" input-placeholder="Team name" input-class="py-1 fs-13 rounded-btn-sm mb-3" />
+            <BaseInput
+              v-model="teamName"
+              input-placeholder="Team name"
+              input-class="py-1 fs-13 rounded-btn-sm mb-3"
+            />
 
             <label class="mb-2 fs-12 fw-medium d-block">Description</label>
-            <BaseInput v-model="description" input-placeholder="Description"
-              input-class="py-1 fs-13 rounded-btn-sm mb-4" />
+            <BaseInput
+              v-model="description"
+              input-placeholder="Description"
+              input-class="py-1 fs-13 rounded-btn-sm mb-4"
+            />
             <!-- Create team -->
-            <BaseButton btnName="Create team" class="w-100 fs-13 rounded-btn py-2" @click="handleCreateTeam" />
+            <BaseButton
+              btnName="Create team"
+              class="w-100 fs-13 rounded-btn py-2"
+              @click="handleCreateTeam"
+            />
           </div>
         </div>
       </n-modal>
     </div>
     <n-scrollbar style="max-height: 635px">
       <div class="d-flex flex-column gap-2">
-        <router-link v-for="t in teamList" :key="t.team_id"
+        <router-link
+          v-for="t in teamList"
+          :key="t.team_id"
           :to="`/workspace/${currentRouteWorkspaceId}/team/${t.team_id}/${currentSection}`"
-          class="text-decoration-none">
-          <div class="card py-2 px-3 rounded-btn text-nowrap" :style="String(t.team_id) === String(currentRouteTeamId)
-            ? {
-              borderColor: activeBorderColor,
-              borderWidth: '1.5px',
-              borderStyle: 'solid',
-            }
-            : {
-              borderWidth: '1.5px',
-              borderStyle: 'solid',
-              borderColor: 'transparent',
-            }
-            ">
+          class="text-decoration-none"
+        >
+          <div
+            class="card py-2 px-3 rounded-btn text-nowrap"
+            :style="
+              String(t.team_id) === String(currentRouteTeamId)
+                ? {
+                    borderColor: activeBorderColor,
+                    borderWidth: '1.5px',
+                    borderStyle: 'solid',
+                  }
+                : {
+                    borderWidth: '1.5px',
+                    borderStyle: 'solid',
+                    borderColor: 'transparent',
+                  }
+            "
+          >
             <div class="d-flex justify-content-between align-items-center mb-1">
               <div>
                 <h6 class="mb-1 fw-semibold">{{ t.title }}</h6>
                 <p class="mb-0 fs-11 text-mute">{{ t.description }}</p>
               </div>
-              <n-popover trigger="click" placement="right" :show-arrow="false"
-                style="border-radius: 12px; width: 135px; padding: 0; margin-left: 18px">
+              <n-popover
+                trigger="click"
+                placement="right"
+                :show-arrow="false"
+                v-if="isOwner"
+                style="border-radius: 12px; width: 135px; padding: 0; margin-left: 18px"
+              >
                 <template #trigger>
-                  <div class="btn-option rounded-circle d-flex justify-content-center align-items-center"
-                    style="width: 25px; height: 25px; cursor: pointer">
+                  <div
+                    style="width: 25px; height: 25px; cursor: pointer"
+                   
+                  >
                     <ellipsis size="18" />
                   </div>
                 </template>
 
                 <div class="p-1 fs-13">
-                  <div class="d-flex align-items-center rounded gap-2 px-2 py-1 fw-bold workspace-item"
-                    @click.prevent="openRename(t)">
+                  <div
+                    class="d-flex align-items-center rounded gap-2 px-2 py-1 fw-bold workspace-item"
+                    @click.prevent="openRename(t)"
+                  >
                     <Pencil size="15" /> Rename
                   </div>
-                  <div class="d-flex align-items-center rounded gap-2 px-2 py-1 fw-bold workspace-item"
-                    @click="showSubmissionModal = true">
+                  <div
+                    class="d-flex align-items-center rounded gap-2 px-2 py-1 fw-bold workspace-item"
+                    @click="showSubmissionModal = true"
+                  >
                     <ClipboardList size="15" /> Submissions
                   </div>
-                  <div class="d-flex align-items-center rounded gap-2 px-2 py-1 text-danger fw-bold workspace-item"
-                    @click.prevent="openDelete(t)">
+                  <div
+                    class="d-flex align-items-center rounded gap-2 px-2 py-1 text-danger fw-bold workspace-item"
+                    @click.prevent="openDelete(t)"
+                  >
                     <Trash2 size="15" /> Delete
                   </div>
                 </div>
@@ -82,17 +120,30 @@
             </div>
             <div class="d-flex align-items-center gap-2 mb-1">
               <p class="mb-0 fs-12">60%</p>
-              <n-progress type="line" :percentage="60" color="#34C759" :height="5" processing :show-indicator="false" />
+              <n-progress
+                type="line"
+                :percentage="60"
+                color="#34C759"
+                :height="5"
+                processing
+                :show-indicator="false"
+              />
             </div>
             <n-avatar-group :options="mapMembers(t.members)" :size="25" :max="4">
               <template #avatar="{ option: { name, src } }">
-                <n-tooltip :style="{ fontSize: '11px', padding: '4px 8px', borderRadius: '8px' }">
+                <n-tooltip
+                  :style="{ fontSize: '11px', padding: '4px 8px', borderRadius: '8px' }"
+                >
                   <template #trigger><n-avatar :src="src" /></template>
                   {{ name }}
                 </n-tooltip>
               </template>
               <template #rest="{ options: restOptions, rest }">
-                <n-dropdown :options="createDropdownOptions(restOptions)" placement="top" size="small">
+                <n-dropdown
+                  :options="createDropdownOptions(restOptions)"
+                  placement="top"
+                  size="small"
+                >
                   <n-avatar class="fs-14 text-dark bg-mute">+{{ rest }}</n-avatar>
                 </n-dropdown>
               </template>
@@ -106,19 +157,34 @@
       <div class="bg-white rounded-card" style="width: 400px">
         <div class="d-flex align-items-center justify-content-between px-4 py-3 pb-2">
           <span class="fw-medium fs-15">Rename Team</span>
-          <n-button text size="small" @click="showRenameModal = false"
-            class="text-dark hover-circle p-1 rounded-circle">
+          <n-button
+            text
+            size="small"
+            @click="showRenameModal = false"
+            class="text-dark hover-circle p-1 rounded-circle"
+          >
             <X size="18" />
           </n-button>
         </div>
         <n-divider style="margin: 5px 0; --n-color: #e4e4e7" />
         <div class="px-4 pt-2 pb-3">
           <label class="mb-2 fs-12 fw-medium d-block">Team Name</label>
-          <BaseInput v-model="renameName" input-placeholder="Team name" input-class="py-1 fs-13 rounded-btn-sm mb-3" />
+          <BaseInput
+            v-model="renameName"
+            input-placeholder="Team name"
+            input-class="py-1 fs-13 rounded-btn-sm mb-3"
+          />
           <label class="mb-2 fs-12 fw-medium d-block">Description</label>
-          <BaseInput v-model="renameDescription" input-placeholder="Description"
-            input-class="py-1 fs-13 rounded-btn-sm mb-4" />
-          <BaseButton btnName="Save" class="w-100 fs-13 rounded-btn py-2" @click="handleRename" />
+          <BaseInput
+            v-model="renameDescription"
+            input-placeholder="Description"
+            input-class="py-1 fs-13 rounded-btn-sm mb-4"
+          />
+          <BaseButton
+            btnName="Save"
+            class="w-100 fs-13 rounded-btn py-2"
+            @click="handleRename"
+          />
         </div>
       </div>
     </n-modal>
@@ -128,8 +194,12 @@
       <div class="bg-white rounded-card" style="width: 380px">
         <div class="d-flex align-items-center justify-content-between px-4 py-3 pb-2">
           <span class="fw-medium fs-15">Delete Team</span>
-          <n-button text size="small" @click="showDeleteModal = false"
-            class="text-dark hover-circle p-1 rounded-circle">
+          <n-button
+            text
+            size="small"
+            @click="showDeleteModal = false"
+            class="text-dark hover-circle p-1 rounded-circle"
+          >
             <X size="18" />
           </n-button>
         </div>
@@ -140,10 +210,16 @@
             <span class="fw-semibold text-dark">{{ selectedTeam?.title }}</span> ?
           </p>
           <div class="d-flex gap-2">
-            <button class="btn btn-outline border rounded-btn-sm fs-13 fw-medium w-50" @click="showDeleteModal = false">
+            <button
+              class="btn btn-outline border rounded-btn-sm fs-13 fw-medium w-50"
+              @click="showDeleteModal = false"
+            >
               Cancel
             </button>
-            <button class="btn btn-danger rounded-btn-sm fs-13 fw-medium w-50" @click="handleDelete">
+            <button
+              class="btn btn-danger rounded-btn-sm fs-13 fw-medium w-50"
+              @click="handleDelete"
+            >
               <span v-if="isLoading" class="spinner-border spinner-border-sm me-2"></span>
               {{ isLoading ? "Loading..." : "Delete" }}
             </button>
@@ -171,7 +247,6 @@ const toast = notify(router);
 const currentRouteWorkspaceId = computed(() => route.params.workspace_id);
 const currentRouteTeamId = computed(() => route.params.team_id);
 const currentSection = computed(() => route.path.split("/").pop()?.toLowerCase());
-
 
 const activeBorderColor = computed(() => {
   const map = {
@@ -233,11 +308,21 @@ const teamName = ref("");
 const description = ref("");
 
 const handleCreateTeam = async () => {
-  if (!teamName.value.trim()) return;
+  if (!teamName.value.trim()) {
+    toast.error("Name is required");
+    return;
+  }
+
+  if (!description.value.trim()) {
+    toast.error("Description is required");
+    return;
+  }
+
   if (teamList.value.length >= 5) {
     toast.error("Maximum 5 teams allowed");
     return;
   }
+
   try {
     await teamStore.createTeam(
       currentRouteWorkspaceId.value,
@@ -251,6 +336,7 @@ const handleCreateTeam = async () => {
     await teamStore.getTeamByWorkspaceStore(currentRouteWorkspaceId.value);
   } catch (error) {
     console.error("Failed to create team:", error);
+    toast.error(error.message);
   }
 };
 
@@ -268,7 +354,16 @@ const openRename = (t) => {
 };
 
 const handleRename = async () => {
-  if (!renameName.value.trim()) return;
+  if (!teamName.value.trim()) {
+    toast.error("Name is required");
+    return;
+  }
+
+  if (!description.value.trim()) {
+    toast.error("Description is required");
+    return;
+  }
+
   try {
     await teamStore.updateTeam(
       currentRouteWorkspaceId.value,
@@ -288,6 +383,7 @@ const handleRename = async () => {
     await teamStore.getTeamByWorkspaceStore(currentRouteWorkspaceId.value);
   } catch (error) {
     console.error("Failed to rename team:", error);
+    toast.error(error.message);
   }
 };
 
@@ -309,6 +405,7 @@ const handleDelete = async () => {
     await teamStore.getTeamByWorkspaceStore(currentRouteWorkspaceId.value);
   } catch (error) {
     console.error("Failed to delete team:", error);
+    console.log(error.toast);
   } finally {
     isLoading.value = false;
   }

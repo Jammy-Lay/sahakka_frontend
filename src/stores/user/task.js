@@ -12,7 +12,7 @@ export const useTaskStore = defineStore("task", () => {
         { workspace_id, team_id, status },
       );
       getTaskByTeam.value = res.data.data.tasks;
-      console.log(getTaskByTeam.value);
+      // console.log(getTaskByTeam.value);
     } catch (err) {
       throw new Error(err.response?.data?.message || "Get task failed");
     }

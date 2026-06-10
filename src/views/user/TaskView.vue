@@ -32,8 +32,27 @@
       <span class="tab-title bg-red text-danger"><CircleX size="16" /> Rejected</span>
     </div>
 
+    <!-- <div
+      class="bg-white rounded-card border border-0"
+      style="padding: 20px; min-height: 220px"
+      v-if="getTaskByTeam.length === 0"
+    >
+      <n-empty
+        description="No Data"
+        class="mt-7"
+        style="--n-icon-size: 45px; font-size: 14px"
+      />
+    </div> -->
+
+    <n-empty
+      v-if="getTaskByTeam.length === 0"
+      description="No Data"
+      class="mt-8"
+      style="--n-icon-size: 45px; font-size: 14px"
+    />
+
     <!-- Task Card -->
-    <n-scrollbar style="max-height: 580px">
+    <n-scrollbar style="max-height: 580px" v-else>
       <div class="d-flex flex-column gap-3">
         <div
           class="bg-white rounded-card border border-0"
@@ -65,7 +84,7 @@
                 />
 
                 <span class="fw-semibold fs-13">
-                  {{ task.assigned_to?.name }}
+                  {{ task.created_by?.name }}
                 </span>
 
                 <span class="fw-bold text-mute fs-12">·</span>
@@ -82,7 +101,7 @@
                 />
 
                 <span class="fw-semibold fs-13">
-                  {{ task.created_by?.name }}
+                  {{ task.assigned_by?.name }}
                 </span>
 
                 <span class="fw-bold text-mute fs-12">·</span>
@@ -156,11 +175,18 @@
                   style="width: 22px; height: 22px"
                 />
 
-                {{ task.assigned_to.name }}
+                <n-ellipsis
+                  style="max-width: 60px"
+                  :tooltip="{
+                    style: { fontSize: '11px', padding: '4px 8px', borderRadius: '8px' },
+                  }"
+                >
+                  {{ task.assigned_to.name }}
+                </n-ellipsis>
 
                 <span
                   v-if="task.assigned_to.user_id === getMe.user_id"
-                  class="text-secondary fs-12"
+                  class="text-secondary fs-11"
                 >
                   (You)
                 </span>
