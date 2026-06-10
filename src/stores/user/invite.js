@@ -10,21 +10,24 @@ export const useInviteStore = defineStore("invite", () => {
           email,
         },
       );
-    //   console.log(res.data);
+      //   console.log(res.data);
       return res.data;
-    } catch (error) {
-    //   console.error("Invite failed:", error);
-      throw error;
+    } catch (err) {
+      throw new Error(err.response?.data?.message);
     }
   };
   const generatePasscode = async (workspace_id, team_id) => {
-    const res = await api.post(
-      `/workspace/${workspace_id}/team/${team_id}/invite`,
-    );
+    try {
+      const res = await api.post(
+        `/workspace/${workspace_id}/team/${team_id}/invite`,
+      );
 
-    // console.log("API:", res.data);
+      // console.log("API:", res.data);
 
-    return res.data;
+      return res.data;
+    } catch (error) {
+      throw new Error(err.response?.data?.message || "generate team failed");
+    }
   };
 
   return {
