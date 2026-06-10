@@ -48,6 +48,30 @@ export const useTeamStore = defineStore("team", () => {
       throw new Error(err.response?.data?.message || "Create team failed");
     }
   };
+  const updateTeam = async (workspace_id, team_id, title, description) => {
+    try {
+      const res = await api.put(`/workspace/${workspace_id}/team/${team_id}`, {
+        title,
+        description,
+      });
+
+      // console.log(res.data);
+      return res.data;
+    } catch (err) {
+      throw new Error(err.response?.data?.message || "Update team failed");
+    }
+  };
+  const deleteTeam = async (workspace_id, team_id) => {
+    try {
+      const res = await api.delete(
+        `/workspace/${workspace_id}/team/${team_id}`,
+      );
+
+      return res.data;
+    } catch (err) {
+      throw new Error(err.response?.data?.message || "Delete team failed");
+    }
+  };
 
   return {
     getTeamSection,
@@ -57,5 +81,7 @@ export const useTeamStore = defineStore("team", () => {
     getTeamById,
     getTeamByIdStore,
     createTeam,
+    updateTeam,
+    deleteTeam
   };
 });
