@@ -211,3 +211,18 @@ body {
   color: #34C759 !important;
 }
 
+.bg-gray {
+  background-color: #D4D4D7 !important;
+}
+
+.workspace-trigger {
+  cursor: pointer;
+  user-select: none;
+}
+.workspace-item:hover {
+  background: #f5f5f5 !important;
+  cursor: pointer;
+}
+.workspace-item--active {
+  background: #f5f5f5 !important;
+}

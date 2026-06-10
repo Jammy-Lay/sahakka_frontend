@@ -11,7 +11,7 @@ export const useAuthStore = defineStore("auth", () => {
 
   async function login(email, password) {
     try {
-      const res = await api.post("/api/login", { email, password });
+      const res = await api.post("/login", { email, password });
       user.value = res.data.data;
       token.value = res.data.data.token;
       localStorage.setItem("token", token.value);
@@ -22,7 +22,7 @@ export const useAuthStore = defineStore("auth", () => {
 
   const logout = async () => {
     try {
-      await api.delete("/api/logout");
+      await api.delete("/logout");
       user.value = {};
       getMe.value = {};
       token.value = null;
@@ -34,7 +34,7 @@ export const useAuthStore = defineStore("auth", () => {
 
   const getMeStore = async () => {
     try {
-      const res = await api.get("/api/getMe");
+      const res = await api.get("/getMe");
       getMe.value = res.data.data;
     } catch (err) {
       throw new Error(err.response?.data?.message || "failed");
@@ -43,7 +43,7 @@ export const useAuthStore = defineStore("auth", () => {
 
   const register = async (email, password, name) => {
     try {
-      const res = await api.post("/api/register", { email, password, name });
+      const res = await api.post("/register", { email, password, name });
       return res.data;
     } catch (err) {
       throw new Error(err.response?.data?.message || "Sign up failed");
@@ -52,7 +52,7 @@ export const useAuthStore = defineStore("auth", () => {
 
   const forgotPassword = async (email) => {
     try {
-      await api.post("/api/forgot-password", { email });
+      await api.post("/forgot-password", { email });
       sessionStorage.setItem("forgot_email", email);
     } catch (err) {
       throw new Error(err.response?.data?.message || "Invalid Email");
@@ -61,7 +61,7 @@ export const useAuthStore = defineStore("auth", () => {
 
   const resentOtp = async (email) => {
     try {
-      await api.post("/api/resend-otp", { email });
+      await api.post("/resend-otp", { email });
     } catch (err) {
       throw new Error(
         err.response?.data?.message || "Resent OTP verification failed",
@@ -71,7 +71,7 @@ export const useAuthStore = defineStore("auth", () => {
 
   const verifyOtp = async (email, otp) => {
     try {
-      await api.post("/api/verify-otp", { email, otp });
+      await api.post("/verify-otp", { email, otp });
     } catch (err) {
       throw new Error(err.response?.data?.message || "OTP verification failed");
     }
@@ -79,7 +79,7 @@ export const useAuthStore = defineStore("auth", () => {
 
   const resetPassword = async (email, new_password, confirm_password) => {
     try {
-      await api.post("/api/reset-password", {
+      await api.post("/reset-password", {
         email,
         new_password,
         confirm_password,

@@ -5,7 +5,7 @@ export const useInviteStore = defineStore("invite", () => {
   const inviteByEmail = async (workspace_id, team_id, email) => {
     try {
       const res = await api.post(
-        `/api/workspace/${workspace_id}/team/${team_id}/invite/email`,
+        `/workspace/${workspace_id}/team/${team_id}/invite/email`,
         {
           email,
         },
@@ -19,7 +19,7 @@ export const useInviteStore = defineStore("invite", () => {
   };
   const generatePasscode = async (workspace_id, team_id) => {
     const res = await api.post(
-      `/api/workspace/${workspace_id}/team/${team_id}/invite`,
+      `/workspace/${workspace_id}/team/${team_id}/invite`,
     );
 
     // console.log("API:", res.data);
