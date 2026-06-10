@@ -167,7 +167,6 @@ const handleGenerate = async () => {
 
 const handleCopy = async () => {
   await navigator.clipboard.writeText(passcode.value);
-  passcode.value = ""
 };
 </script>
 
