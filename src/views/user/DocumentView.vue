@@ -1,24 +1,21 @@
 <template>
-  <div>
-    <n-card class="rounded-4" :bordered="false" style="width: 400px; padding: 0.75rem">
-      <template #cover>
-        <div
-          class="decorate-container w-100 p-3 position-relative overflow-hidden"
-          style="border-radius: 0.75rem"
-        >
-          <h3 class="text-light fw-normal m-0">Sahakka</h3>
-          <h2 class="text-light fw-normal m-0">Document</h2>
-          <div class="doc-gradient position-absolute">
-            <div class="light"></div>
-            <div class="main"></div>
-          </div>
-        </div>
-      </template>
-    </n-card>
+  <div class="row">
+    <div class="col-4">
+      <document-card/>
+    </div>
+    <div class="col-4">
+      <document-card/>
+    </div>
+    <div class="col-4">
+      <document-card/>
+    </div>
   </div>
 </template>
 
-<script setup></script>
+<script setup>
+import DocumentCard from '@/components/DocumentCard.vue';
+
+</script>
 
 <style scoped>
 .decorate-container {
