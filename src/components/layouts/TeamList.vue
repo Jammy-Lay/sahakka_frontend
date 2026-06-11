@@ -19,7 +19,7 @@
               text
               size="small"
               @click="showCreateTeam = false"
-              class="text-dark hover-circle p-1 rounded-circle"
+              class="hover-circle p-1 rounded-circle"
             >
               <x size="18" />
             </n-button>
@@ -90,7 +90,7 @@
                 <template #trigger>
                   <div
                     style="width: 25px; height: 25px; cursor: pointer"
-                   
+                    class="btn-option d-flex justify-content-center align-items-center rounded-circle"
                   >
                     <ellipsis size="18" />
                   </div>
@@ -161,7 +161,7 @@
             text
             size="small"
             @click="showRenameModal = false"
-            class="text-dark hover-circle p-1 rounded-circle"
+            class="hover-circle p-1 rounded-circle"
           >
             <X size="18" />
           </n-button>
@@ -198,7 +198,7 @@
             text
             size="small"
             @click="showDeleteModal = false"
-            class="text-dark hover-circle p-1 rounded-circle"
+            class="hover-circle p-1 rounded-circle"
           >
             <X size="18" />
           </n-button>

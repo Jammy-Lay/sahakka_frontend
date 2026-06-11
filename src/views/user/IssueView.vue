@@ -1,28 +1,30 @@
 <template>
   <div class="">
     <!-- Header -->
-    <div class="d-flex align-items-start justify-content-between mb-3">
-      <div>
-        <h2 class="fw-semibold fs-5 mb-1">{{ getTeamById.title }}</h2>
-        <p class="text-secondary fs-13 mb-0">{{ getTeamById.description }}</p>
+    <div class="position-sticky top-0 z-1 header pt-5 pb-2 bg-body">
+      <div class="d-flex align-items-start justify-content-between mb-3">
+        <div>
+          <h2 class="fw-semibold fs-5 mb-1">{{ getTeamById.title }}</h2>
+          <p class="text-secondary fs-13 mb-0">{{ getTeamById.description }}</p>
+        </div>
+        <div class="d-flex gap-2">
+          <button
+            class="btn btn-white bg-white rounded-btn border-1 border-white fs-13 d-flex align-items-center gap-1"
+          >
+            <Filter size="16" /> Filter
+          </button>
+        </div>
       </div>
-      <div class="d-flex gap-2">
-        <button
-          class="btn btn-white bg-white rounded-btn border-1 border-white fs-13 d-flex align-items-center gap-1"
-        >
-          <Filter size="16" /> Filter
-        </button>
-      </div>
-    </div>
 
-    <!-- Status Tabs -->
-    <div class="d-flex flex-wrap gap-2 mb-3">
-      <span class="tab-title bg-red text-dark">
-        <Circle size="10" fill="#FF383C" class="text-danger" /> Bug
-      </span>
-      <span class="tab-title bg-purple text-dark">
-        <Circle size="10" fill="#6155F5" class="text-purple" /> Improvement
-      </span>
+      <!-- Status Tabs -->
+      <div class="d-flex flex-wrap gap-2 mb-3">
+        <span class="tab-title bg-red text-dark">
+          <Circle size="10" fill="#FF383C" class="text-danger" /> Bug
+        </span>
+        <span class="tab-title bg-purple text-dark">
+          <Circle size="10" fill="#6155F5" class="text-purple" /> Improvement
+        </span>
+      </div>
     </div>
 
     <!-- <div
