@@ -6,7 +6,6 @@
 
 <script setup>
   import TipTapEditor from '@/components/TipTapEditor.vue';
-  import { Bold } from 'lucide-vue-next';
 
 </script>
 
