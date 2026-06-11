@@ -65,7 +65,7 @@
             text
             size="small"
             @click="showModal = false"
-            class="text-dark hover-circle p-1 rounded-circle"
+            class="hover-circle p-1 rounded-circle"
           >
             <X :size="18" />
           </n-button>

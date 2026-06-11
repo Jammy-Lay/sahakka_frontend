@@ -139,8 +139,20 @@ body {
   border: 1px solid #171717 !important;
 }
 
+.hover-circle {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #888 !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s, color 0.15s;
+}
+
 .hover-circle:hover {
-  background-color: #f5f5f5 !important;
+  background: #f4f4f5 !important;
+  color: #171717 !important;
 }
 
 .rounded-btn {
@@ -225,4 +237,22 @@ body {
 }
 .workspace-item--active {
   background: #f5f5f5 !important;
+}
+
+.icon-action-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #888;
+  padding: 8px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s, color 0.15s;
+}
+
+.icon-action-btn:hover {
+  background: #f4f4f5;
+  color: #171717;
 }
