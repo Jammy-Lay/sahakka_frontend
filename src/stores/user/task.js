@@ -28,11 +28,19 @@ export const useTaskStore = defineStore("task", () => {
     }
   };
 
+  const createTask = async (workspace_id, team_id, form) => {
+    try {
+      await api.post(`/workspace/${workspace_id}/team/${team_id}/task`, form);
+    } catch (err) {
+      throw new Error(err.response?.data?.message || "Create task fail");
+    }
+  };
 
   return {
     getTaskByTeam,
     getIssueTask,
     getTask,
     getTaskByTeamStore,
+    createTask
   };
 });
