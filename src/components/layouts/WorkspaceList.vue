@@ -245,7 +245,7 @@
         <div class="d-flex align-items-center justify-content-between px-4 py-3 pb-2">
           <span class="fw-medium fs-15">Rename Workspace</span>
           <n-button text size="small" @click="showRenameModal = false"
-            class="text-dark hover-circle p-1 rounded-circle">
+            class="hover-circle p-1 rounded-circle">
             <X size="18" />
           </n-button>
         </div>
@@ -264,7 +264,7 @@
         <div class="d-flex align-items-center justify-content-between px-4 py-3 pb-2">
           <span class="fw-medium fs-15">Delete Workspace</span>
           <n-button text size="small" @click="showDeleteModal = false"
-            class="text-dark hover-circle p-1 rounded-circle">
+            class="hover-circle p-1 rounded-circle">
             <X size="18" />
           </n-button>
         </div>
@@ -292,7 +292,7 @@
         <div class="d-flex align-items-center justify-content-between px-4 py-3 pb-2">
           <span class="fw-medium fs-15">Log Out</span>
           <n-button text size="small" @click="showLogoutModal = false"
-            class="text-dark hover-circle p-1 rounded-circle">
+            class="hover-circle p-1 rounded-circle">
             <X size="18" />
           </n-button>
         </div>
