@@ -285,8 +285,8 @@
                 @click="showActivity = !showActivity"
                 :title="showActivity ? 'Collapse' : 'Show activity'"
               >
-                <Maximize2 v-if="!showActivity" size="15" />
-                <Minimize2 v-else size="15" />
+                <Expand v-if="!showActivity" size="16" />
+                <Shrink v-else size="16" />
               </button>
               <button class="icon-action-btn" @click="showTaskModal = false">
                 <X size="18" />
@@ -725,18 +725,63 @@
 
       <!-- Status Tabs -->
       <div class="d-flex flex-wrap gap-2 mb-3">
-        <span class="tab-title tab-dark"><layout-dashboard size="16" /> All tasks</span>
-        <span class="tab-title bg-blue text-blue"
+        <span
+          class="tab-title"
+          :class="activeTab === '' ? 'tab-dark' : 'tab-default'"
+          @click="handleTabClick('')"
+          ><layout-dashboard size="16" /> All tasks</span
+        >
+
+        <span
+          class="tab-title"
+          :class="
+            activeTab === 'todo' ? 'bg-blue-active text-white' : 'bg-blue text-blue'
+          "
+          @click="handleTabClick('todo')"
           ><circle-check-big size="16" /> To do</span
         >
-        <span class="tab-title bg-orange text-orange"
+
+        <span
+          class="tab-title"
+          :class="
+            activeTab === 'in_progress'
+              ? 'bg-orange-active text-white'
+              : 'bg-orange text-orange'
+          "
+          @click="handleTabClick('in_progress')"
           ><circle-dashed size="16" /> In process</span
         >
-        <span class="tab-title bg-purple text-purple"><Send size="16" /> Submitted</span>
-        <span class="tab-title bg-green text-green"
+
+        <span
+          class="tab-title"
+          :class="
+            activeTab === 'submitted'
+              ? 'bg-purple-active text-white'
+              : 'bg-purple text-purple'
+          "
+          @click="handleTabClick('submitted')"
+          ><Send size="16" /> Submitted</span
+        >
+
+        <span
+          class="tab-title"
+          :class="
+            activeTab === 'approved'
+              ? 'bg-green-active text-white'
+              : 'bg-green text-green'
+          "
+          @click="handleTabClick('approved')"
           ><CircleCheck size="16" /> Approved</span
         >
-        <span class="tab-title bg-red text-danger"><CircleX size="16" /> Rejected</span>
+
+        <span
+          class="tab-title"
+          :class="
+            activeTab === 'rejected' ? 'bg-red-active text-white' : 'bg-red text-danger'
+          "
+          @click="handleTabClick('rejected')"
+          ><CircleX size="16" /> Rejected</span
+        >
       </div>
     </div>
 
@@ -1070,10 +1115,13 @@ import BaseInput from "@/components/BaseInput.vue";
 import { useTaskStore } from "@/stores/user/task";
 import { useTeamStore } from "@/stores/user/team";
 import { storeToRefs } from "pinia";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
+import { notify } from "@/utils/toast";
 
 const route = useRoute();
+const router = useRouter();
+const toast = notify(router);
 const workspace_id = route.params.workspace_id;
 const team_id = route.params.team_id;
 
@@ -1122,6 +1170,13 @@ const openTaskModal = (task) => {
   showTaskModal.value = true;
 };
 
+const activeTab = ref("");
+
+const handleTabClick = (status) => {
+  activeTab.value = status;
+  taskStore.getTaskByTeamStore(workspace_id, team_id, status);
+};
+
 const defaultForm = () => ({
   title: "",
   description: "",
@@ -1155,10 +1210,9 @@ const handleCreateTask = async () => {
     start_date: formatToYMD(form.value.date_range?.[0]),
     end_date: formatToYMD(form.value.date_range?.[1]),
   };
-  console.log(payload); return;
   try {
     isLoading.value = true;
-    // await taskStore.createTaskStore(workspace_id, team_id, payload)
+    await taskStore.createTask(workspace_id, team_id, payload);
     showCreateTask.value = false;
     form.value = defaultForm();
     await taskStore.getTaskByTeamStore(workspace_id, team_id);
@@ -1527,14 +1581,12 @@ const typeConfig = {
 
 /* ── Activity slide transition ── */
 .slide-activity-enter-active {
-  transition: max-width 0.4s cubic-bezier(0.34, 1.56, 0.64, 1),
-    opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: max-width 0.25s ease, opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   overflow: hidden;
 }
 
 .slide-activity-leave-active {
-  transition: max-width 0.3s cubic-bezier(0.4, 0, 1, 1),
-    opacity 0.2s cubic-bezier(0.4, 0, 1, 1);
+  transition: max-width 0.3s ease, opacity 0.2s cubic-bezier(0.4, 0, 1, 1);
   overflow: hidden;
 }
 
@@ -1615,5 +1667,33 @@ const typeConfig = {
 .custom-picker :deep(.n-date-panel-month-calendar__padding) {
   height: 0 !important;
   min-height: 0 !important;
+}
+
+.tab-default {
+  background-color: #ffffff !important;
+  color: #171717 !important;
+}
+
+.bg-blue-active {
+  background-color: #0088ff !important;
+  color: #b2dbff !important;
+}
+
+.bg-orange-active {
+  background-color: #ff8d28 !important;
+  color: #ffddbe !important;
+}
+
+.bg-purple-active {
+  background-color: #6155f5 !important;
+  color: #cfccfc !important;
+}
+.bg-green-active {
+  background-color: #34c759 !important;
+  color: #c2eecd !important;
+}
+.bg-red-active {
+  background-color: #ff383c !important;
+  color: #ffc3c4 !important;
 }
 </style>
