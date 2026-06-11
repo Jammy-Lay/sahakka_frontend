@@ -1,50 +1,48 @@
 <template>
-  <div class="editor-format mb-3">
-    <n-button-group horizontal>
-      <n-button round @click="editor.chain().focus().toggleItalic().run()">
-        <template #icon>
-          <n-icon>
-            <Italic />
-          </n-icon>
-        </template>
-      </n-button>
-      <n-button ghost @click="editor.chain().focus().toggleBold().run()">
-        <template #icon>
-          <n-icon>
-            <Bold />
-          </n-icon>
-        </template>
-      </n-button>
-      <n-button ghost @click="editor.chain().focus().toggleBlockquote().run()">
-        <template #icon>
-          <n-icon>
-            <Quote />
-          </n-icon>
-        </template>
-      </n-button>
-      <n-button round @click="editor.chain().focus().toggleCodeBlock().run()">
-        <template #icon>
-          <n-icon>
-            <Code />
-          </n-icon>
-        </template>
-      </n-button>
-    </n-button-group>
-  </div>
+
+  <TipTapToolbar :editor="editor" v-if="editor"/>
   <editor-content :editor="editor" class="h-100" />
+
 </template>
 
 <script setup>
-  import { useEditor, EditorContent } from '@tiptap/vue-3'
-  import StarterKit from '@tiptap/starter-kit'
-  import { Code, Italic, Quote } from 'lucide-vue-next';
+  import { onBeforeUnmount } from 'vue';
 
+  import { useEditor, EditorContent } from '@tiptap/vue-3'
+  import { Placeholder, CharacterCount } from '@tiptap/extensions';
+  import StarterKit from '@tiptap/starter-kit'
+  import TipTapToolbar from './TipTapToolbar.vue';
+  import Blockquote from '@tiptap/extension-blockquote'
+  import { HardBreak } from '@tiptap/extension-hard-break'
+
+
+  const emit = defineEmits(['update:modelValue'])
   const editor = useEditor({
-    extensions: [StarterKit],
+    extensions: [
+      StarterKit,
+      Placeholder.configure({
+        placeholder: 'Write something, or press / for commands…',
+      }),
+      Blockquote,
+      HardBreak,
+    ],
+
+    editorProps: {
+      attributes: {
+      }
+    },
+
     injectCSS: false,
     autofocus: true,
-    
+
+    onUpdate: () => {
+      emit('update:modelValue', editor.value.getHTML())
+    },
+
   })
+
+  onBeforeUnmount(() => editor.value?.destroy())
+
 </script>
 
 <style scoped>
@@ -56,9 +54,30 @@
     padding: 20px;
     border-radius: 20px;
     overflow: hidden scroll;
+
+    blockquote {
+      border-left: 3px solid var(--bs-gray);
+      padding-left: 1rem;
+    }
+
+    p {
+      margin: 0;
+    }
+  }
+
+  :deep(.ProseMirror) {
+    white-space: pre-wrap;
   }
 
   :deep(.tiptap::-webkit-scrollbar) {
     appearance: none;
+  }
+
+  :deep(.tiptap p.is-editor-empty:first-child::before) {
+    content: attr(data-placeholder);
+    float: left;
+    color: #adb5bd;
+    pointer-events: none;
+    height: 0;
   }
 </style>
