@@ -1,6 +1,6 @@
 <template>
 
-  <div class="editor-format mb-3">
+  <div class="editor-format mb-3 mt-5">
 
     <n-space>
       <n-button-group>
