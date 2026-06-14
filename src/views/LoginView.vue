@@ -137,18 +137,19 @@ async function handleLogin() {
 
   try {
     await auth.login(email.value, password.value);
-
     const decoded = jwtDecode(auth.token);
+    // console.log("decoded token:", decoded);
 
     if (decoded.role === "admin") {
       toast.success("Signin Successfully", "/admin/dashboard");
       return;
     }
 
-    const userId = decoded.user_id;
-    const lastVisited = userId
-      ? JSON.parse(localStorage.getItem(`lastVisited_${userId}`))
-      : null;
+    const userId = decoded.id;
+    const lastVisited = JSON.parse(localStorage.getItem(`lastVisited_${userId}`));
+
+    // console.log("userId:", userId);
+    // console.log("lastVisited:", lastVisited);
 
     if (lastVisited?.workspace_id && lastVisited?.team_id) {
       toast.success(
@@ -185,4 +186,5 @@ async function handleLogin() {
   }
 }
 </script>
+
 <style scoped></style>
