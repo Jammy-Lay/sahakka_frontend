@@ -1,58 +1,78 @@
 <template>
 
-  <TipTapToolbar :editor="editor" v-if="editor"/>
-  <editor-content :editor="editor" class="h-100" />
+  <div class="main overflow-hidden h-100 m-auto" style="width: 80%;">
+    <div class="h-100 d-flex flex-column mt-5 border">
+      <TipTapToolbar :editor="editor" v-if="editor" />
+      <editor-content :editor="editor" class="h-100 overflow-y-auto" />
+    </div>
+  </div>
 
 </template>
 
 <script setup>
-  import { onBeforeUnmount } from 'vue';
+  import { onBeforeUnmount, onMounted } from 'vue';
 
-  import { useEditor, EditorContent } from '@tiptap/vue-3'
-  import { Placeholder, CharacterCount } from '@tiptap/extensions';
-  import StarterKit from '@tiptap/starter-kit'
+  import { useEditor, EditorContent, Extension } from '@tiptap/vue-3'
+  import { Placeholder } from '@tiptap/extensions';
+  import StarterKit from '@tiptap/starter-kit';
   import TipTapToolbar from './TipTapToolbar.vue';
-  import Blockquote from '@tiptap/extension-blockquote'
-  import { HardBreak } from '@tiptap/extension-hard-break'
+  import { useDocumentStore } from '@/stores/user/document.js';
+  import { useRoute } from 'vue-router';
 
-  
+  const useDocument = useDocumentStore();
+  const route = useRoute()
+
+  const workspace_id = route.params.workspace_id;
+  const team_id = route.params.team_id;
+  const document_id = route.params.document_id
+
   const emit = defineEmits(['update:modelValue'])
   const editor = useEditor({
     extensions: [
-      StarterKit,
+      StarterKit.configure({
+        blockquote: {},
+        hardBreak: {},
+      }),
       Placeholder.configure({
         placeholder: 'Write something, or press / for commands…',
       }),
-      Blockquote,
-      HardBreak,
     ],
 
     editorProps: {
       attributes: {
-      }
+      },
     },
 
-    injectCSS: false,
-    autofocus: true,
 
-    onUpdate: () => {
+    injectCSS: false,
+
+    onUpdate: async () => {
       emit('update:modelValue', editor.value.getHTML())
+      await useDocument.updateContentDocument(workspace_id, team_id, document_id, editor.value.getHTML());
     },
 
   })
 
-  onBeforeUnmount(() => editor.value?.destroy())
+  onMounted(async () => {
+    const res = await useDocument.getDocumentById(workspace_id, team_id, document_id);
+    editor.value.commands.setContent(res.content);
+    editor.value.chain().focus().run()
+  })
+
+  onBeforeUnmount(() => {
+    editor.value?.destroy()
+  })
+
 
 </script>
 
 <style scoped>
 
   :deep(.tiptap) {
-    height: 97% !important;
+    height: 100%;
     background-color: var(--bs-white);
     outline: none;
     padding: 20px;
-    border-radius: 20px;
     overflow: hidden scroll;
 
     blockquote {
@@ -80,4 +100,5 @@
     pointer-events: none;
     height: 0;
   }
+
 </style>

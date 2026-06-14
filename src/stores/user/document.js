@@ -4,7 +4,6 @@ import { ref } from 'vue';
 
 export const useDocumentStore = defineStore("document", () => {
   let getDocumentByTeam = ref([]);
-  let getDocumentById = ref({});
 
   const getAllDocument = async (workspace_id, team_id) => {
     try {
@@ -16,9 +15,18 @@ export const useDocumentStore = defineStore("document", () => {
     }
   }
 
+  const getDocumentById = async (workspace_id, team_id, docId) => {
+    try {
+      const res = await api.get(`/workspace/${workspace_id}/team/${team_id}/document/${docId}`)
+      return res.data.data;
+    } catch (error) {
+      throw new Error(error.response?.data?.message || "Get document failed");
+    }
+  }
+
   const createDocument = async (workspace_id, team_id, title) => {
     try {
-      const res = await api.post(`/workspace/${workspace_id}/team/${team_id}/document`, title);
+      const res = await api.post(`/workspace/${workspace_id}/team/${team_id}/document`, { title });
       return res.data
     } catch (error) {
       throw new Error(error.response?.data?.message) || "Can not create document"
@@ -29,16 +37,36 @@ export const useDocumentStore = defineStore("document", () => {
     try {
       const res = await api.delete(`/workspace/${workspace_id}/team/${team_id}/document/${docId}`);
       return res.data.message;
-      console.log(document);
     } catch (error) {
-      
+      throw new Error(error.response?.data?.message) || "Can not delete document"
+    }
+  }
+
+  const updateTitleDocument = async (workspace_id, team_id, document_id, title) => {
+    try {
+      const res = await api.put(`/workspace/${ workspace_id }/team/${ team_id }/document/${ document_id }/title`, { title })
+      return res.data.message
+    } catch (error) {
+      throw new Error(error.response?.data?.message) || "Can not update document"
+    }
+  }
+
+  const updateContentDocument = async (workspace_id, team_id, document_id, content) => {
+    try {
+      const res = await api.put(`/workspace/${ workspace_id }/team/${ team_id }/document/${ document_id }/content`, { content })
+      return res.data.data
+    } catch (error) {
+      throw new Error(error.response?.data?.message) || "Can not update content"
     }
   }
 
   return {
     getDocumentByTeam,
     getAllDocument,
+    getDocumentById,
     createDocument,
-    deleteDocument
+    deleteDocument,
+    updateTitleDocument,
+    updateContentDocument
   }
 })

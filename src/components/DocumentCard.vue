@@ -1,5 +1,5 @@
 <template>
-  <router-link :to="{ name: 'editor' }" class="text-decoration-none">
+  <router-link :to="{ name: 'editor', params: { document_id: documentId } }" class="text-decoration-none">
     <n-card class="rounded-4" :bordered="false" style="padding: 0.75rem;">
       <template #cover>
         <div class="decorate-container w-100 p-3 overflow-hidden" style="border-radius: 0.75rem;"
@@ -14,14 +14,15 @@
       </template>
       <div style="height: 1rem;"></div>
       <div class="doc-title d-flex align-items-center justify-content-between">
-        <div class="doc-title-1 d-flex gap-2">
+        <div class="doc-title-1 d-flex gap-2 w-100 align-items-center">
           <file color="var(--bs-info)" size="26" />
-          <h5 ref="editTitle" :contenteditable="edit" @blur="edit = false" @dblclick.prevent="editAction" @keydown="lineBreak" @click.prevent
-            class="title m-0 fw-semibold">
+          <h5 ref="editTitle" :contenteditable="edit" @dblclick.prevent="editAction" @keydown="lineBreak" @click.prevent
+            class="title w-100 m-0 fw-semibold">
             {{ documentTitle.length > 10 ? documentTitle.substring(0, 10) + '...' : documentTitle }}</h5>
         </div>
-        <n-button v-if="edit" class="px-3 py-2 rounded-btn" secondary :bordered="false">Save</n-button>
-        <n-icon-wrapper v-else :size="32" :border-radius="999" class="bg-dark">
+        <base-btn v-if="edit" class="btn rounded-btn" btn-name="Rename"
+          @click.prevent="$emit('updateTitle', documentId, editTitle.innerText, updateTitleHandling(action))" />
+        <n-icon-wrapper v-else :size="32" :border-radius="999" class="bg-dark px-1">
           <arrow-up-right size="28" />
         </n-icon-wrapper>
       </div>
@@ -36,12 +37,12 @@
           <dot size="24" />
           <h6 class="fw-normal m-0">{{ date(createdAt) }}</h6>
         </div>
-        <n-popover placement="bottom-end" trigger="hover" :show-arrow="false" @update:show="" class="p-2"
+        <n-popover placement="bottom-end" trigger="click" :show-arrow="false" @update:show="" class="p-2"
           style="border-radius: 12px;">
           <template #trigger>
-            <n-button quaternary circle @click.prevent class="px-2"><more-vertical-icon
-                size="20" /></n-button>
+            <n-button quaternary circle @click.prevent class="px-2"><more-vertical-icon size="20" /></n-button>
           </template>
+
           <div class="d-flex flex-column">
             <n-button class="rounded-3 fw-bold d-flex justify-content-start px-2  " @click.prevent="editAction"
               quaternary>
@@ -50,10 +51,10 @@
               </template>
               <span>Rename</span>
             </n-button>
-            <n-button class="rounded-3 fw-bold d-flex justify-content-start px-2  " type="error"
-              @click.prevent="$emit('deleteAction',documentId)" quaternary>
+
+            <n-button class="rounded-3 fw-bold d-flex justify-content-start px-2  " type="error" quaternary @click.prevent="$emit('deleteAction', documentId)">
               <template #icon>
-                <trash2-icon size="16" />
+                <trash2-icon size="16"/>
               </template>
               <span>Delete</span>
             </n-button>
@@ -67,14 +68,11 @@
 
 <script setup>
   import { ArrowUpRight, BrushIcon, Dot, File, MoreVerticalIcon, Trash2Icon, } from 'lucide-vue-next';
-  import router from '@/router';
   import { nextTick, ref } from 'vue';
+  import BaseBtn from './BaseBtn.vue';
 
   const date = (date) => new Date(date).toLocaleDateString('en-GB', { dateStyle: 'medium' })
-
-  const edit = ref(false);
-  const editTitle = ref(null);
-
+  
   defineProps({
     documentTitle: String,
     documentId: Number,
@@ -97,8 +95,14 @@
     return `hsl(from hsl(${hue}, 83%, 80%) h s calc(l ${operation} ${light}))`;
   }
 
+
+  const edit = ref(false);
+  const editTitle = ref(null);
+
   async function editAction() {
-    edit.value = !edit.value;
+    if (!edit.value) {
+      edit.value = !edit.value;
+    }
 
     await nextTick();
 
@@ -117,8 +121,15 @@
   function lineBreak(e) {
     if (e.key === 'Enter') {
       editTitle.value.blur()
+      edit.value = false;
       window.getSelection().removeAllRanges();
     }
+  }
+
+  function updateTitleHandling() {
+    editTitle.value.blur()
+    edit.value = false;
+    window.getSelection().removeAllRanges();
   }
 
 </script>
@@ -157,6 +168,7 @@
   }
 
   h5.title:focus {
+    width: fit-content !important;
     max-width: 150px;
     display: inline-block;
     overflow: hidden;
@@ -164,7 +176,8 @@
     outline: 1px solid var(--bs-dark);
     background-color: hsl(from var(--bs-gray) h s l / 0.2);
     border-radius: 8px;
-    padding: 3px 5px;
+    padding: 2px 4px;
+    scale: .9;
   }
 
 
