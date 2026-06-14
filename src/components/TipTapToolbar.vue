@@ -1,34 +1,37 @@
 <template>
 
-  <div class="editor-format mb-3 mt-5">
+  <div class="editor-format border-bottom" style="background-color: #eeeeee;">
 
-    <n-space>
-      <n-button-group>
-        <n-select class="n-select" v-model:value="value" :options="options" @update:value="setHeading(value)" />
-        <ToolbarButton :type="editor.isActive(tool.class) ? 'primary' : 'default'" class="n-button" :icon="tool.icon"
-          v-for="(tool, index) in icons" :key="index" :action="tool.fn" />
-      </n-button-group>
-    </n-space>
-
+    <div class="d-flex align-items-center">
+      <n-select class="n-select" v-model:value="value" :bordered="false" :options="options"
+        @update:value="setHeading(value)" />
+      <div v-for="(tool, index) in icons" :key="index">
+        <ToolbarButton :class="{ 'active': editor.isActive(tool.class.toLowerCase()) }" :action="tool.fn"
+          class="btn toolbar-btn rounded-0" :icon="tool.icon" :type="tool.class" />
+      </div>
+    </div>
   </div>
 
 </template>
 
 <script setup>
-  import { Bold, Italic, Quote, Strikethrough, Underline } from 'lucide-vue-next';
+  import { Bold, Indent, Italic, Quote, Strikethrough, Underline } from 'lucide-vue-next';
   import ToolbarButton from './ToolbarButton.vue';
   import { ref } from 'vue';
 
   const props = defineProps({
-    editor: Function
+    editor: {
+      type: Object
+    }
   })
 
   const icons = [
-    { icon: Italic, fn: () => props.editor.chain().focus().toggleItalic().run(), class: 'italic' },
-    { icon: Bold, fn: () => props.editor.chain().focus().toggleBold().run(), class: 'bold' },
-    { icon: Quote, fn: () => props.editor.chain().focus().setBlockquote().run(), class: 'strike' },
-    { icon: Strikethrough, fn: () => props.editor.chain().focus().toggleStrike().run(), class: 'strike' },
-    { icon: Underline, fn: () => props.editor.chain().focus().toggleUnderline().run(), class: 'underline' }
+    { icon: Italic, fn: () => props.editor.chain().focus().toggleItalic().run(), class: 'Italic' },
+    { icon: Bold, fn: () => props.editor.chain().focus().toggleBold().run(), class: 'Bold' },
+    { icon: Quote, fn: () => props.editor.chain().focus().setBlockquote().run(), class: 'Quote' },
+    { icon: Strikethrough, fn: () => props.editor.chain().focus().toggleStrike().run(), class: 'Strike' },
+    { icon: Underline, fn: () => props.editor.chain().focus().toggleUnderline().run(), class: 'Underline' },
+    { icon: Indent, fn: () => props.editor.chain().focus().insertContent('     ').run(), class: 'Increase indent' },
   ]
 
   const value = ref(0);
@@ -41,6 +44,7 @@
 
 
   function setHeading(n) {
+    console.log(n);
     const chain = props.editor.chain().focus();
     n === 0 ? chain.setParagraph().run() : chain.toggleHeading({ level: n }).run();
   }
@@ -49,42 +53,25 @@
 </script>
 
 <style scoped>
+  .toolbar-btn {
+    --active: #e0f0ff;
+    --no-active: #eeeeee;
+    background-color: var(--no-active);
+    border: none;
 
-  :deep(.n-button) {
-    --n-bezier: cubic-bezier(.4, 0, .2, 1) !important;
-    --n-bezier-ease-out: cubic-bezier(0, 0, .2, 1) !important;
-    --n-ripple-duration: .2s !important;
-    --n-opacity-disabled: 0.5 !important;
-    --n-wave-opacity: 0.6 !important;
-    --n-font-weight: 400 !important;
-    --n-color: #0000 !important;
-    --n-color-hover: #3f3f3f !important;
-    --n-color-pressed: #0000 !important;
-    --n-color-focus: #0000 !important;
-    --n-color-disabled: #0000 !important;
-    --n-ripple-color: var(--bs-gray) !important;
-    --n-text-color: rgb(51, 54, 57) !important;
-    --n-text-color-hover: var(--bs-white) !important;
-    --n-text-color-pressed: var(--bs-black) !important;
-    --n-text-color-focus: var(--bs-black) !important;
-    --n-text-color-disabled: rgb(51, 54, 57) !important;
-    --n-border: 1px solid rgb(224, 224, 230) !important;
-    --n-border-hover: 1px solid var(--bs-gray) !important;
-    --n-border-pressed: 1px solid var(--bs-gray) !important;
-    --n-border-focus: 1px solid var(--bs-gray) !important;
-    --n-border-disabled: 1px solid rgb(224, 224, 230) !important;
-    --n-width: initial !important;
-    --n-height: 34px !important;
-    --n-font-size: 14px !important;
-    --n-padding: 0 14px !important;
-    --n-icon-size: 18px !important;
-    --n-icon-margin: 6px !important;
-    --n-border-radius: 3px !important;
+    &:hover {
+      background-color: var(--active);
+    }
   }
 
-  :deep(.n-button--primary-type) {
-    --n-color: #000000 !important;
-    --n-text-color: white !important;
+  .active {
+    --active: #cde7ff;
+    background-color: var(--active);
+    outline: none;
+    border: none;
   }
 
+  :deep(.n-base-select) {
+    background-color: transparent !important;
+  }
 </style>

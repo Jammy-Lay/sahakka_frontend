@@ -1,7 +1,8 @@
 <template >
-  <n-button :round="isRounded" @click="action" :type="type">
-    <component :is="icon" size="20"></component>
-  </n-button>
+  <button @click="action" class="d-flex align-items-center gap-1">
+    <component :is="icon" size="16"/>
+    <span>{{ type }}</span>
+  </button>
 </template>
 
 <script setup>
@@ -12,10 +13,13 @@
       required: true
     },
     action : Function,
-    type: String
+    type: String,
   });
 </script>
 
 <style scoped>
-  
+  span {
+    font-size: 0.875rem;
+    text-wrap: nowrap;
+  }
 </style>

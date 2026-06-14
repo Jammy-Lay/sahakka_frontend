@@ -1,5 +1,5 @@
 <template>
-  <router-link :to="{ name: 'editor', params: {document_id: documentId}}" class="text-decoration-none">
+  <router-link :to="{ name: 'editor', params: { document_id: documentId } }" class="text-decoration-none">
     <n-card class="rounded-4" :bordered="false" style="padding: 0.75rem;">
       <template #cover>
         <div class="decorate-container w-100 p-3 overflow-hidden" style="border-radius: 0.75rem;"
@@ -37,11 +37,12 @@
           <dot size="24" />
           <h6 class="fw-normal m-0">{{ date(createdAt) }}</h6>
         </div>
-        <n-popover placement="bottom-end" trigger="hover" :show-arrow="false" @update:show="" class="p-2"
+        <n-popover placement="bottom-end" trigger="click" :show-arrow="false" @update:show="" class="p-2"
           style="border-radius: 12px;">
           <template #trigger>
             <n-button quaternary circle @click.prevent class="px-2"><more-vertical-icon size="20" /></n-button>
           </template>
+
           <div class="d-flex flex-column">
             <n-button class="rounded-3 fw-bold d-flex justify-content-start px-2  " @click.prevent="editAction"
               quaternary>
@@ -50,10 +51,10 @@
               </template>
               <span>Rename</span>
             </n-button>
-            <n-button class="rounded-3 fw-bold d-flex justify-content-start px-2  " type="error"
-              @click.prevent="$emit('deleteAction', documentId)" quaternary>
+
+            <n-button class="rounded-3 fw-bold d-flex justify-content-start px-2  " type="error" quaternary @click.prevent="$emit('deleteAction', documentId)">
               <template #icon>
-                <trash2-icon size="16" />
+                <trash2-icon size="16"/>
               </template>
               <span>Delete</span>
             </n-button>
@@ -67,12 +68,11 @@
 
 <script setup>
   import { ArrowUpRight, BrushIcon, Dot, File, MoreVerticalIcon, Trash2Icon, } from 'lucide-vue-next';
-  import router from '@/router';
   import { nextTick, ref } from 'vue';
   import BaseBtn from './BaseBtn.vue';
 
   const date = (date) => new Date(date).toLocaleDateString('en-GB', { dateStyle: 'medium' })
-
+  
   defineProps({
     documentTitle: String,
     documentId: Number,

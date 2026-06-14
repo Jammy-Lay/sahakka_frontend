@@ -1,35 +1,45 @@
 <template>
 
+  <n-modal-provider>
+
+    <n-modal v-model:show="showModal">
+      <document-modal @close="showModal = false" @create-document="createDocument" />
+    </n-modal>
+
+    <n-modal v-model:show="deleteModal" class="rounded-4 p-4">
+      <n-card style="width: 500px" title="Delete document">
+        <template #header-extra>
+          <n-button quaternary circle @click="deleteModal = false">
+            <X/>
+          </n-button>
+        </template>
+        <div class="my-4">
+          <p class="border rounded-4 p-3 text-danger fw-bold" style="background-color: #EFF0ED;">Are you sure you want to delete?</p>
+        </div>
+        <template #footer class="">
+          <n-button quaternary class="rounded-btn">Cancel</n-button>
+          <n-button type="error" class="rounded-btn" @click="deleteDocHandling">Delete</n-button>
+        </template>
+      </n-card>
+    </n-modal>
+  </n-modal-provider>
+
   <main class="py-5">
 
     <div class="container-fluid p-0">
       <div class="row">
         <div class="col-5 ms-auto text-end">
-          <n-modal-provider>
-            <base-btn @click="showModal = true" class="btn rounded-btn rounded-btn" icon="PlusIcon" btn-name="New document">
-            </base-btn>
-
-            <n-modal v-model:show="showModal">
-              <document-modal 
-                @close="showModal = false"
-                @create-document="createDocument"
-              />
-            </n-modal>
-          </n-modal-provider>
+          <base-btn @click="showModal = true" class="btn rounded-btn rounded-btn" icon="PlusIcon"
+            btn-name="New document">
+          </base-btn>
         </div>
       </div>
       <div class="pt-4"></div>
       <div class="row g-3">
         <div v-for="(doc, index) in getDocumentByTeam" :key="index" class="col-4">
-          <document-card 
-            :avatar="doc.created_by.avatar" 
-            :user-name="doc.created_by.name" 
-            :document-title="doc.title"
-            :created-at="doc.created_at" 
-            :document-id="doc.document_id" 
-            @delete-action="deleteDocHandling"
-            @update-title="updateTitle"
-          />
+          <document-card :avatar="doc.created_by.avatar" :user-name="doc.created_by.name" :document-title="doc.title"
+            :created-at="doc.created_at" :document-id="doc.document_id" @delete-action="(docId) => { deleteModal = true; document_id = docId}"
+            @update-title="updateTitle" />
         </div>
       </div>
     </div>
@@ -53,8 +63,10 @@
   const workspace_id = route.params.workspace_id;
   const team_id = route.params.team_id;
 
+  const document_id = ref(null);
+
   const showModal = ref(false);
-  
+
   const useDocument = useDocumentStore();
   const { getDocumentByTeam } = storeToRefs(useDocument)
 
@@ -65,7 +77,7 @@
 
   async function createDocument(title) {
 
-    const newDoc = await useDocument.createDocument(workspace_id, team_id, {title});
+    const newDoc = await useDocument.createDocument(workspace_id, team_id, title);
     showModal.value = false
     if (newDoc) {
       getDocumentByTeam.value.unshift(newDoc.data)
@@ -75,24 +87,26 @@
     notify().error(newDoc.message);
   }
 
-  async function deleteDocHandling(docId) {
-    const deleteDoc = await useDocument.deleteDocument(workspace_id, team_id, docId);
+  async function deleteDocHandling() {
+    const deleteDoc = await useDocument.deleteDocument(workspace_id, team_id, document_id.value);
     if (deleteDoc) {
-      const indexofDoc = getDocumentByTeam.value.findIndex(doc => doc.document_id === docId)
+      const indexofDoc = getDocumentByTeam.value.findIndex(doc => doc.document_id === document_id.value)
       getDocumentByTeam.value.splice(indexofDoc, 1);
+      deleteModal.value = false;
       return notify().success(deleteDoc);
-      
     }
     notify().error(deleteDoc);
   }
 
   async function updateTitle(docId, title) {
-    const updateTitle = await useDocument.updateTitleDocument(workspace_id, team_id, docId, {title});
+    const updateTitle = await useDocument.updateTitleDocument(workspace_id, team_id, docId, title);
     if (updateTitle) {
       return notify().success(updateTitle);
     }
     notify().error(updateTitle);
   }
+
+  const deleteModal = ref(false);
 
 </script>
 
@@ -141,6 +155,20 @@
 
   :deep(.n-card__content) {
     padding: 0 !important;
+  }
+
+  :deep(i.n-base-icon) {
+    fill: black !important;
+  }
+
+  :deep(.n-card-header) {
+    padding: 0 0 10px !important;
+    border-bottom: 1px solid var(--bs-border-color);
+  }
+
+  :deep(.n-card__footer) {
+    padding: 10px 0 0 !important;
+    text-align: end;
   }
 
 </style>
