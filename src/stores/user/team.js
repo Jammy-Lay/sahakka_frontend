@@ -6,6 +6,7 @@ export const useTeamStore = defineStore("team", () => {
   let getTeamSection = ref([]);
   let getTeamByWorkspace = ref([]);
   let getTeamById = ref({});
+  let getMember = ref({});
 
   const getTeamSectionStore = async (team_id) => {
     try {
@@ -31,6 +32,9 @@ export const useTeamStore = defineStore("team", () => {
     try {
       const res = await api.get(`/workspace/${workspace_id}/team/${team_id}`);
       getTeamById.value = res.data.data;
+      getMember.value = res.data.data.members.filter(
+        (user) => user.role !== "owner",
+      );
     } catch (err) {
       throw new Error(err.response?.data?.message || "Get team failed");
     }
@@ -79,9 +83,10 @@ export const useTeamStore = defineStore("team", () => {
     getTeamByWorkspace,
     getTeamByWorkspaceStore,
     getTeamById,
+    getMember,
     getTeamByIdStore,
     createTeam,
     updateTeam,
-    deleteTeam
+    deleteTeam,
   };
 });
