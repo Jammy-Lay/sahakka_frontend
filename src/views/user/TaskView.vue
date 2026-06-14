@@ -1,7 +1,7 @@
 <template>
   <div class="">
     <!-- Header -->
-    <div class="position-sticky top-0 z-1 header pt-5 pb-2 bg-body">
+    <div class="position-sticky top-0 z-1 header pt-4 pb-2 bg-body">
       <div class="d-flex align-items-start justify-content-between mb-3">
         <div>
           <h2 class="fw-semibold fs-5 mb-1">{{ getTeamById.title }}</h2>
@@ -187,42 +187,81 @@
                 trigger="click"
                 placement="bottom-start"
                 v-model:show="showAssigneePop"
+                :disabled="!canChangeAssignee"
                 :show-arrow="false"
                 style="border-radius: 12px; padding: 6px; width: 180px"
               >
                 <template #trigger>
-                  <span class="d-flex align-items-center gap-2 fs-13 cursor-pointer">
+                  <span
+                    class="d-flex align-items-center gap-2 fs-13"
+                    :class="canChangeAssignee ? 'cursor-pointer' : 'cursor-default'"
+                  >
                     <img
-                      :src="form.assignee?.avatar || getMe.avatar"
+                      v-if="form.assigned_to"
+                      :src="
+                        getTeamById.members?.find((m) => m.user_id === form.assigned_to)
+                          ?.avatar
+                      "
                       class="rounded-circle object-fit-cover"
                       style="width: 22px; height: 22px"
                     />
-                    <n-ellipsis
-                      style="max-width: 60px"
-                      :tooltip="{
-                        style: {
-                          fontSize: '11px',
-                          padding: '4px 8px',
-                          borderRadius: '8px',
-                        },
-                      }"
+                    <div
+                      v-else
+                      class="rounded-circle bg-secondary d-flex align-items-center justify-content-center"
+                      style="width: 22px; height: 22px; flex-shrink: 0"
                     >
-                      {{ form.assignee?.name || getMe.name }}
+                      <img
+                        src="../../assets/image/default-avatar.png"
+                        alt=""
+                        class="w-100 h-100 object-fit-cover rounded-circle"
+                      />
+                    </div>
+                    <n-ellipsis style="max-width: 80px">
+                      {{
+                        form.assigned_to
+                          ? getTeamById.members?.find(
+                              (m) => m.user_id === form.assigned_to
+                            )?.name
+                          : "No Assignee"
+                      }}
                     </n-ellipsis>
                     <span
-                      v-if="!form.assignee || form.assignee.user_id === getMe.user_id"
+                      v-if="form.assigned_to === getMe.user_id"
                       class="text-mute fs-11"
                       >(You)</span
                     >
                   </span>
                 </template>
+
                 <div>
+                  <!-- No Assignee -->
                   <div
-                    v-for="member in teamMembers"
+                    class="d-flex align-items-center gap-2 px-2 py-1 rounded workspace-item fs-13 cursor-pointer"
+                    @click="
+                      form.assigned_to = null;
+                      showAssigneePop = false;
+                    "
+                  >
+                    <div
+                      class="rounded-circle bg-secondary d-flex align-items-center justify-content-center"
+                      style="width: 22px; height: 22px; flex-shrink: 0"
+                    >
+                      <img
+                        src="../../assets/image/default-avatar.png"
+                        alt=""
+                        class="w-100 h-100 object-fit-cover rounded-circle"
+                      />
+                    </div>
+                    <span class="text-mute">No Assignee</span>
+                  </div>
+
+                  <!-- Members -->
+                  <div
+                    v-for="member in getTeamById.members"
                     :key="member.user_id"
                     class="d-flex align-items-center gap-2 px-2 py-1 rounded workspace-item fs-13 cursor-pointer"
                     @click="
-                      form.assignee = member;
+                      form.assigned_to = member.user_id;
                       showAssigneePop = false;
                     "
                   >
@@ -273,7 +312,7 @@
       <n-modal v-model:show="showTaskModal" :mask-closable="true">
         <div
           v-if="selectedTask"
-          class="bg-white task-detail-modal text-nowrap"
+          class="bg-white task-detail-modal"
           :class="{ 'modal-expanded': showActivity }"
         >
           <!-- Modal Top Bar -->
@@ -302,20 +341,45 @@
                 <!-- Assignee row -->
                 <div class="d-flex align-items-center justify-content-between mb-3">
                   <div class="d-flex align-items-center gap-2">
-                    <img
-                      v-if="selectedTask.created_by?.avatar"
-                      :src="selectedTask.created_by.avatar"
-                      class="rounded-circle object-fit-cover"
-                      style="width: 28px; height: 28px"
-                    />
-                    <div v-else class="default-avatar-sm">
-                      {{ selectedTask.created_by?.name?.charAt(0) || "?" }}
-                    </div>
-                    <span class="fw-semibold fs-13">{{
-                      selectedTask.created_by?.name || "Unknown"
-                    }}</span>
-                    <span class="text-mute fs-13">· assign to you</span>
+                    <template v-if="!selectedTask.assigned_to?.user_id">
+                      <img
+                        src="../../assets/image/default-avatar.png"
+                        class="rounded-circle object-fit-cover"
+                        style="width: 28px; height: 28px"
+                      />
+                      <span class="fw-medium text-mute fs-13">No assignee</span>
+                    </template>
+                    <template
+                      v-else-if="
+                        selectedTask.created_by?.user_id ===
+                        selectedTask.assigned_to?.user_id
+                      "
+                    >
+                      <img
+                        :src="selectedTask.created_by?.avatar"
+                        class="rounded-circle object-fit-cover"
+                        style="width: 28px; height: 28px"
+                      />
+                      <span class="fw-semibold fs-13">{{
+                        selectedTask.created_by?.name
+                      }}</span>
+                      <span class="fw-bold text-mute fs-12">·</span>
+                      <span class="text-mute fs-13">Self-assigned the task</span>
+                    </template>
+                    <template v-else>
+                      <img
+                        :src="selectedTask.assigned_to?.avatar"
+                        class="rounded-circle object-fit-cover"
+                        style="width: 28px; height: 28px"
+                      />
+                      <span class="fw-semibold fs-13">{{
+                        selectedTask.assigned_by?.name
+                      }}</span>
+                      <span class="fw-bold text-mute fs-12">·</span>
+                      <span class="text-mute fs-13">Assigned to you</span>
+                    </template>
                   </div>
+
                   <!-- Type badge -->
                   <n-popover
                     trigger="click"
@@ -349,6 +413,7 @@
                         @click="
                           selectedTask.type = key;
                           showDetailTypePop = false;
+                          handleUpdateTask(selectedTask);
                         "
                       >
                         <Circle size="10" :fill="cfg.fill" stroke-width="0" />
@@ -359,7 +424,7 @@
                 </div>
 
                 <!-- Meta rows -->
-                <div class="detail-meta-rows mb-4">
+                <div class="detail-meta-rows mb-3">
                   <div class="detail-meta-row">
                     <span class="detail-meta-label"
                       ><CircleDashed size="14" /> Status</span
@@ -395,6 +460,7 @@
                           @click="
                             selectedTask.status = key;
                             showDetailStatusPop = false;
+                            handleUpdateTask(selectedTask);
                           "
                         >
                           <component :is="cfg.icon" size="14" />
@@ -438,6 +504,7 @@
                           @click="
                             selectedTask.priority = key;
                             showDetailPriorityPop = false;
+                            handleUpdateTask(selectedTask);
                           "
                         >
                           <Circle size="10" :fill="cfg.fill" stroke-width="0" />
@@ -449,40 +516,85 @@
 
                   <div class="detail-meta-row mt-1">
                     <span class="detail-meta-label"><Users size="14" /> Assignee</span>
-                    <span class="d-flex align-items-center gap-2 fs-13">
-                      <template v-if="!selectedTask.assigned_to?.user_id">
-                        <img
-                          src="../../assets/image/default-avatar.png"
-                          class="rounded-circle object-fit-cover"
-                          style="width: 22px; height: 22px"
-                        />
-                        <span class="text-mute">No assignee</span>
-                      </template>
-                      <template v-else>
-                        <img
-                          :src="selectedTask.assigned_to.avatar"
-                          class="rounded-circle object-fit-cover"
-                          style="width: 22px; height: 22px"
-                        />
-                        <n-ellipsis
-                          style="max-width: 80px"
-                          :tooltip="{
-                            style: {
-                              fontSize: '11px',
-                              padding: '4px 8px',
-                              borderRadius: '8px',
-                            },
-                          }"
-                        >
-                          {{ selectedTask.assigned_to.name }}
-                        </n-ellipsis>
+                    <n-popover
+                      trigger="click"
+                      placement="bottom-start"
+                      v-model:show="showDetailAssigneePop"
+                      :disabled="!canChangeAssignee"
+                      :show-arrow="false"
+                      style="border-radius: 12px; padding: 6px; width: 180px"
+                    >
+                      <template #trigger>
                         <span
-                          v-if="selectedTask.assigned_to.user_id === getMe.user_id"
-                          class="text-secondary fs-11"
-                          >(You)</span
+                          class="d-flex align-items-center gap-2 fs-13"
+                          :class="canChangeAssignee ? 'cursor-pointer' : 'cursor-default'"
+                          @click.stop
                         >
+                          <template v-if="!selectedTask.assigned_to?.user_id">
+                            <img
+                              src="../../assets/image/default-avatar.png"
+                              class="rounded-circle object-fit-cover"
+                              style="width: 22px; height: 22px"
+                            />
+                            <span class="text-mute">No assignee</span>
+                          </template>
+                          <template v-else>
+                            <img
+                              :src="selectedTask.assigned_to.avatar"
+                              class="rounded-circle object-fit-cover"
+                              style="width: 22px; height: 22px"
+                            />
+                            <n-ellipsis style="max-width: 80px">{{
+                              selectedTask.assigned_to.name
+                            }}</n-ellipsis>
+                            <span
+                              v-if="selectedTask.assigned_to.user_id === getMe.user_id"
+                              class="text-secondary fs-11"
+                              >(You)</span
+                            >
+                          </template>
+                        </span>
                       </template>
-                    </span>
+                      <div>
+                        <div
+                          class="d-flex align-items-center gap-2 px-2 py-1 rounded workspace-item fs-13 cursor-pointer"
+                          @click="
+                            selectedTask.assigned_to = null;
+                            showDetailAssigneePop = false;
+                            handleUpdateTask(selectedTask);
+                          "
+                        >
+                          <img
+                            src="../../assets/image/default-avatar.png"
+                            class="rounded-circle"
+                            style="width: 22px; height: 22px"
+                          />
+                          <span class="text-mute">No Assignee</span>
+                        </div>
+                        <div
+                          v-for="member in getMember"
+                          :key="member.user_id"
+                          class="d-flex align-items-center gap-2 px-2 py-1 rounded workspace-item fs-13 cursor-pointer"
+                          @click="
+                            selectedTask.assigned_to = member;
+                            showDetailAssigneePop = false;
+                            handleUpdateTask(selectedTask);
+                          "
+                        >
+                          <img
+                            :src="member.avatar"
+                            class="rounded-circle object-fit-cover"
+                            style="width: 22px; height: 22px"
+                          />
+                          {{ member.name }}
+                          <span
+                            v-if="member.user_id === getMe.user_id"
+                            class="text-mute fs-11"
+                            >(You)</span
+                          >
+                        </div>
+                      </div>
+                    </n-popover>
                   </div>
 
                   <div class="detail-meta-row mt-2">
@@ -522,6 +634,7 @@
                             (val) => {
                               selectedTask.start_date = formatToYMD(val);
                               showDetailStartDatePop = false;
+                              handleUpdateTask(selectedTask);
                             }
                           "
                         />
@@ -564,6 +677,7 @@
                             (val) => {
                               selectedTask.end_date = formatToYMD(val);
                               showDetailEndDatePop = false;
+                              handleUpdateTask(selectedTask);
                             }
                           "
                         />
@@ -572,13 +686,23 @@
                   </div>
                 </div>
 
-                <!-- Title & Description -->
-                <p class="fw-bold mb-2" style="font-size: 18px">
-                  {{ selectedTask.title }}
-                </p>
-                <p class="fs-13 text-mute mb-4">
-                  {{ selectedTask.description || "No description provided" }}
-                </p>
+                <div class="d-flex flex-column">
+                  <textarea
+                    v-model="selectedTask.title"
+                    class="detail-title-input fw-bold mb-2"
+                    rows="1"
+                    @blur="handleUpdateTask(selectedTask)"
+                    @input="autoResize"
+                  />
+                  <textarea
+                    v-model="selectedTask.description"
+                    placeholder="No description provided"
+                    class="detail-desc-input fs-13 text-mute mb-4"
+                    rows="1"
+                    @blur="handleUpdateTask(selectedTask)"
+                    @input="autoResize"
+                  />
+                </div>
 
                 <!-- File/Link Attachment -->
                 <p class="fw-semibold fs-15 mb-2">
@@ -648,60 +772,8 @@
                     </template>
                   </template>
 
-                  <!-- Fallback demo activities if no real data -->
                   <template v-else>
-                    <div class="activity-date-label">
-                      <Calendar size="13" />
-                      {{ formatDate(selectedTask.start_date) }}
-                    </div>
-                    <div class="activity-card">
-                      <span class="act-tag act-tag-create"
-                        ><Plus size="11" /> Create</span
-                      >
-                      <div class="d-flex align-items-center justify-content-between mb-2">
-                        <div class="d-flex align-items-center gap-2">
-                          <img
-                            v-if="selectedTask.created_by?.avatar"
-                            :src="selectedTask.created_by.avatar"
-                            class="rounded-circle object-fit-cover"
-                            style="width: 24px; height: 24px"
-                          />
-                          <div v-else class="default-avatar-sm">
-                            {{ selectedTask.created_by?.name?.charAt(0) || "?" }}
-                          </div>
-                          <span class="fw-semibold fs-13">{{
-                            selectedTask.created_by?.name
-                          }}</span>
-                        </div>
-                        <span class="fs-13 text-dark bg-accent px-2 rounded-pill py-1"
-                          >9:41 AM</span
-                        >
-                      </div>
-                      <div class="act-note">created this task</div>
-                    </div>
-                    <div class="activity-card" v-if="selectedTask.assigned_to?.user_id">
-                      <span class="act-tag act-tag-assign"
-                        ><UserCheck size="11" /> Assign</span
-                      >
-                      <div class="d-flex align-items-center justify-content-between mb-2">
-                        <div class="d-flex align-items-center gap-2">
-                          <img
-                            v-if="selectedTask.assigned_to?.avatar"
-                            :src="selectedTask.assigned_to.avatar"
-                            class="rounded-circle object-fit-cover"
-                            style="width: 24px; height: 24px"
-                          />
-                          <div v-else class="default-avatar-sm">
-                            {{ selectedTask.assigned_to?.name?.charAt(0) || "?" }}
-                          </div>
-                          <span class="fw-semibold fs-13">{{
-                            selectedTask.assigned_to?.name
-                          }}</span>
-                        </div>
-                        <span class="fs-11 text-mute bg-accent px-2">9:41 AM</span>
-                      </div>
-                      <div class="act-note">self-assigned {{ selectedTask.title }}</div>
-                    </div>
+                    <div class="text-mute fs-13 text-center py-4">No activity yet</div>
                   </template>
                 </div>
               </div>
@@ -712,11 +784,11 @@
           <div class="detail-bottombar">
             <span class="fw-semibold fs-5">Submission</span>
             <button
-              class="btn bg-btn rounded-btn rounded-btn py-1 px-3"
+              class="btn bg-btn rounded-4 py-2 px-3 d-flex align-items-center gap-2"
               :disabled="isLoading"
             >
               <span v-if="isLoading" class="spinner-border spinner-border-sm me-2" />
-              <Send v-else :size="16" class="me-2" />
+              <Send v-else :size="16" />
               {{ isLoading ? "Submitting..." : "Submit" }}
             </button>
           </div>
@@ -731,7 +803,6 @@
           @click="handleTabClick('')"
           ><layout-dashboard size="16" /> All tasks</span
         >
-
         <span
           class="tab-title"
           :class="
@@ -740,7 +811,6 @@
           @click="handleTabClick('todo')"
           ><circle-check-big size="16" /> To do</span
         >
-
         <span
           class="tab-title"
           :class="
@@ -751,7 +821,6 @@
           @click="handleTabClick('in_progress')"
           ><circle-dashed size="16" /> In process</span
         >
-
         <span
           class="tab-title"
           :class="
@@ -762,7 +831,6 @@
           @click="handleTabClick('submitted')"
           ><Send size="16" /> Submitted</span
         >
-
         <span
           class="tab-title"
           :class="
@@ -773,7 +841,6 @@
           @click="handleTabClick('approved')"
           ><CircleCheck size="16" /> Approved</span
         >
-
         <span
           class="tab-title"
           :class="
@@ -866,6 +933,7 @@
                   @click="
                     task.type = key;
                     closePop(task.id, 'type');
+                    handleUpdateTask(task);
                   "
                 >
                   <Circle size="10" :fill="cfg.fill" stroke-width="0" />
@@ -876,21 +944,21 @@
           </div>
 
           <div class="meta-grid mb-3">
-            <span class="d-flex align-items-center gap-1 fs-14 text-mute">
-              <circle-dashed size="15" /> Status
-            </span>
-            <span class="d-flex align-items-center gap-1 fs-14 text-mute">
-              <ghost size="15" /> Priority
-            </span>
-            <span class="d-flex align-items-center gap-1 fs-14 text-mute">
-              <Users size="15" /> Assignee
-            </span>
-            <span class="d-flex align-items-center gap-1 fs-14 text-mute">
-              <Calendar size="15" /> Start Date
-            </span>
-            <span class="d-flex align-items-center gap-1 fs-14 text-mute">
-              <Calendar size="15" /> End Date
-            </span>
+            <span class="d-flex align-items-center gap-1 fs-14 text-mute"
+              ><circle-dashed size="15" /> Status</span
+            >
+            <span class="d-flex align-items-center gap-1 fs-14 text-mute"
+              ><ghost size="15" /> Priority</span
+            >
+            <span class="d-flex align-items-center gap-1 fs-14 text-mute"
+              ><Users size="15" /> Assignee</span
+            >
+            <span class="d-flex align-items-center gap-1 fs-14 text-mute"
+              ><Calendar size="15" /> Start Date</span
+            >
+            <span class="d-flex align-items-center gap-1 fs-14 text-mute"
+              ><Calendar size="15" /> End Date</span
+            >
 
             <!-- Status -->
             <n-popover
@@ -922,6 +990,7 @@
                   @click="
                     task.status = key;
                     closePop(task.id, 'status');
+                    handleUpdateTask(task);
                   "
                 >
                   <component :is="cfg.icon" size="14" />
@@ -964,6 +1033,7 @@
                   @click="
                     task.priority = key;
                     closePop(task.id, 'priority');
+                    handleUpdateTask(task);
                   "
                 >
                   <Circle size="10" :fill="cfg.fill" stroke-width="0" />
@@ -973,37 +1043,91 @@
             </n-popover>
 
             <!-- Assignee -->
-            <span class="d-flex align-items-center gap-2 fs-13">
-              <template v-if="!task.assigned_to?.user_id">
-                <img
-                  src="../../assets/image/default-avatar.png"
-                  class="rounded-circle object-fit-cover"
-                  style="width: 22px; height: 22px"
-                />
-                <span class="text-mute">No assignee</span>
-              </template>
-              <template v-else>
-                <img
-                  :src="task.assigned_to.avatar"
-                  class="rounded-circle object-fit-cover"
-                  style="width: 22px; height: 22px"
-                />
-                <n-ellipsis
-                  style="max-width: 60px"
-                  :tooltip="{
-                    style: { fontSize: '11px', padding: '4px 8px', borderRadius: '8px' },
-                  }"
-                >
-                  {{ task.assigned_to.name }}
-                </n-ellipsis>
+            <n-popover
+              :show="isPopOpen(task.id, 'assignee')"
+              trigger="click"
+              placement="bottom-start"
+              :show-arrow="false"
+              :disabled="!canChangeAssignee"
+              style="border-radius: 12px; padding: 6px; width: 180px"
+              @update:show="(val) => (openPop[`${task.id}_assignee`] = val)"
+            >
+              <template #trigger>
                 <span
-                  v-if="task.assigned_to.user_id === getMe.user_id"
-                  class="text-secondary fs-11"
+                  class="d-flex align-items-center gap-2 fs-13"
+                  :class="canChangeAssignee ? 'cursor-pointer' : 'cursor-default'"
+                  @click.stop
                 >
-                  (You)
+                  <template v-if="!task.assigned_to?.user_id">
+                    <img
+                      src="../../assets/image/default-avatar.png"
+                      class="rounded-circle object-fit-cover"
+                      style="width: 22px; height: 22px"
+                    />
+                    <span class="text-mute">No assignee</span>
+                  </template>
+                  <template v-else>
+                    <img
+                      :src="task.assigned_to.avatar"
+                      class="rounded-circle object-fit-cover"
+                      style="width: 22px; height: 22px"
+                    />
+                    <n-ellipsis style="max-width: 60px">{{
+                      task.assigned_to.name
+                    }}</n-ellipsis>
+                    <span
+                      v-if="task.assigned_to.user_id === getMe.user_id"
+                      class="text-secondary fs-11"
+                      >(You)</span
+                    >
+                  </template>
                 </span>
               </template>
-            </span>
+              <div>
+                <div
+                  class="d-flex align-items-center gap-2 px-2 py-1 rounded workspace-item fs-13 cursor-pointer"
+                  @click="
+                    task.assigned_to = null;
+                    closePop(task.id, 'assignee');
+                    handleUpdateTask(task);
+                  "
+                >
+                  <img
+                    src="../../assets/image/default-avatar.png"
+                    class="rounded-circle"
+                    style="width: 22px; height: 22px"
+                  />
+                  <span class="text-mute">No Assignee</span>
+                </div>
+                <div
+                  v-for="member in getMember"
+                  :key="member.user_id"
+                  class="d-flex align-items-center gap-2 px-2 py-1 rounded workspace-item fs-13 cursor-pointer"
+                  @click="
+                    task.assigned_to = member;
+                    closePop(task.id, 'assignee');
+                    handleUpdateTask(task);
+                  "
+                >
+                  <img
+                    :src="member.avatar"
+                    class="rounded-circle object-fit-cover"
+                    style="width: 22px; height: 22px"
+                  />
+                  {{ member.name }}
+                  <span v-if="member.user_id === getMe.user_id" class="text-mute fs-11"
+                    >(You)</span
+                  >
+                  <template v-else>
+                    <span
+                      v-if="member.role === 'moderator'"
+                      class="text-mute fs-11 text-green"
+                      >(Moderator)</span
+                    >
+                  </template>
+                </div>
+              </div>
+            </n-popover>
 
             <!-- Start Date -->
             <n-popover
@@ -1036,6 +1160,7 @@
                     (val) => {
                       task.start_date = formatToYMD(val);
                       closePop(task.id, 'start_date');
+                      handleUpdateTask(task);
                     }
                   "
                 />
@@ -1074,6 +1199,7 @@
                     (val) => {
                       task.end_date = formatToYMD(val);
                       closePop(task.id, 'end_date');
+                      handleUpdateTask(task);
                     }
                   "
                 />
@@ -1082,8 +1208,10 @@
           </div>
 
           <p class="fw-semibold mb-2" style="font-size: 18px">{{ task.title }}</p>
-          <p class="mb-0 text-mute fs-15">
-            {{ task.description || "No description provided" }}
+          <p class="mb-0 text-mute fs-15 card-width">
+            <n-ellipsis :tooltip="false">
+              {{ task.description || "No description provided" }}
+            </n-ellipsis>
           </p>
         </div>
       </div>
@@ -1092,7 +1220,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from "vue";
+import { ref, computed, onMounted, watch, nextTick } from "vue";
 import {
   CircleCheckBig,
   CircleDashed,
@@ -1100,8 +1228,6 @@ import {
   CircleCheck,
   CircleX,
   X,
-  Maximize2,
-  Minimize2,
   FileText,
   Plus,
   UserCheck,
@@ -1126,26 +1252,22 @@ const workspace_id = route.params.workspace_id;
 const team_id = route.params.team_id;
 
 const taskStore = useTaskStore();
-const { getTask } = storeToRefs(taskStore);
+const { getTask, getTaskActivity } = storeToRefs(taskStore);
 
 const teamStore = useTeamStore();
-const { getTeamById } = storeToRefs(teamStore);
+const { getTeamById, getTeamByWorkspace, getMember } = storeToRefs(teamStore);
 
 const authStore = useAuthStore();
 const { getMe } = storeToRefs(authStore);
 
-// create modal
 const showCreateTask = ref(false);
 const isLoading = ref(false);
-const teamMembers = ref([]);
 
-// create form popover states
 const showStatusPop = ref(false);
 const showPriorityPop = ref(false);
 const showTypePop = ref(false);
 const showAssigneePop = ref(false);
 
-// task detail modal
 const showTaskModal = ref(false);
 const selectedTask = ref(null);
 const showActivity = ref(false);
@@ -1154,20 +1276,27 @@ const showDetailPriorityPop = ref(false);
 const showDetailTypePop = ref(false);
 const showDetailStartDatePop = ref(false);
 const showDetailEndDatePop = ref(false);
+const showDetailAssigneePop = ref(false);
 const taskMessage = ref("");
 
-// card inline popover states
 const openPop = ref({});
-
 const isPopOpen = (taskId, field) => !!openPop.value[`${taskId}_${field}`];
 const closePop = (taskId, field) => {
   openPop.value[`${taskId}_${field}`] = false;
 };
 
-const openTaskModal = (task) => {
+const openTaskModal = async (task) => {
   selectedTask.value = { ...task };
   showActivity.value = false;
   showTaskModal.value = true;
+  await taskStore.getTaskActivityStore(workspace_id, team_id, task.id);
+  selectedTask.value.activities = getTaskActivity.value;
+
+  await nextTick();
+  document.querySelectorAll(".detail-title-input, .detail-desc-input").forEach((el) => {
+    el.style.height = "auto";
+    el.style.height = el.scrollHeight + "px";
+  });
 };
 
 const activeTab = ref("");
@@ -1177,14 +1306,37 @@ const handleTabClick = (status) => {
   taskStore.getTaskByTeamStore(workspace_id, team_id, status);
 };
 
+const myWorkspaceRole = computed(() => {
+  const me = getTeamById.value?.members?.find((m) => m.user_id === getMe.value?.user_id);
+  return me?.role ?? "member";
+});
+
+const canChangeAssignee = computed(() => {
+  return myWorkspaceRole.value === "owner" || myWorkspaceRole.value === "moderator";
+});
+
 const defaultForm = () => ({
   title: "",
   description: "",
   type: "task",
   status: "todo",
   priority: "low",
-  assignee: null,
+  assigned_to: null,
   date_range: null,
+});
+
+watch(showCreateTask, (val) => {
+  if (val) {
+    form.value = {
+      title: "",
+      description: "",
+      type: "task",
+      status: "todo",
+      priority: "low",
+      assigned_to: canChangeAssignee.value ? null : getMe.value?.user_id ?? null,
+      date_range: null,
+    };
+  }
 });
 
 const form = ref(defaultForm());
@@ -1206,7 +1358,12 @@ const dateToTs = (dateString) => {
 const handleCreateTask = async () => {
   if (!form.value.title.trim()) return;
   const payload = {
-    ...form.value,
+    title: form.value.title,
+    description: form.value.description,
+    type: form.value.type,
+    status: form.value.status,
+    priority: form.value.priority,
+    assigned_to: form.value.assigned_to ?? null,
     start_date: formatToYMD(form.value.date_range?.[0]),
     end_date: formatToYMD(form.value.date_range?.[1]),
   };
@@ -1216,14 +1373,38 @@ const handleCreateTask = async () => {
     showCreateTask.value = false;
     form.value = defaultForm();
     await taskStore.getTaskByTeamStore(workspace_id, team_id);
+    await taskStore.getSummaryTaskStore(workspace_id, team_id);
+    toast.success("Create Task Successfully");
   } catch (error) {
-    console.error(error);
+    toast.error(error.message);
   } finally {
     isLoading.value = false;
   }
 };
 
+const handleUpdateTask = async (task) => {
+  try {
+    await taskStore.updateTask(workspace_id, team_id, task.id, {
+      title: task.title,
+      description: task.description,
+      type: task.type,
+      status: task.status,
+      priority: task.priority,
+      assigned_to: task.assigned_to?.user_id ?? null,
+      start_date: task.start_date,
+      end_date: task.end_date,
+    });
+    await taskStore.getTaskByTeamStore(workspace_id, team_id);
+    await taskStore.getSummaryTaskStore(workspace_id, team_id);
+  } catch (error) {
+    toast.error(error.message);
+    await taskStore.getTaskByTeamStore(workspace_id, team_id);
+  }
+};
+
 onMounted(async () => {
+  await authStore.getMeStore();
+  await teamStore.getTeamByWorkspaceStore(workspace_id);
   await teamStore.getTeamByIdStore(workspace_id, team_id);
   await taskStore.getTaskByTeamStore(workspace_id, team_id);
 });
@@ -1238,14 +1419,29 @@ const formatDate = (dateString) => {
   return `${day} / ${month} / ${year}`;
 };
 
-// Group activities by date for the activity panel
+const autoResize = (e) => {
+  const textarea = e.target;
+
+  textarea.style.height = "auto";
+  textarea.style.height = textarea.scrollHeight + "px";
+};
+
 const groupedActivities = computed(() => {
   if (!selectedTask.value?.activities) return [];
   const groups = {};
   for (const act of selectedTask.value.activities) {
-    const dateKey = formatDate(act.date);
+    const dateKey = formatDate(act.created_at);
     if (!groups[dateKey]) groups[dateKey] = { date: dateKey, items: [] };
-    groups[dateKey].items.push(act);
+    groups[dateKey].items.push({
+      action: act.action,
+      note: act.message,
+      user: act.created_by,
+      time: new Date(act.created_at).toLocaleTimeString("en-US", {
+        hour: "2-digit",
+        minute: "2-digit",
+      }),
+      date: act.created_at,
+    });
   }
   return Object.values(groups);
 });
@@ -1260,11 +1456,7 @@ const actTagClass = (action) => {
 };
 
 const actTagIcon = (action) => {
-  const map = {
-    create: Plus,
-    assign: UserCheck,
-    update: Send,
-  };
+  const map = { create: Plus, assign: UserCheck, update: Send };
   return map[action?.toLowerCase()] || Send;
 };
 
@@ -1305,322 +1497,7 @@ const typeConfig = {
   improvement: { bg: "bg-purple", text: "text-purple", fill: "#6155F5" },
 };
 </script>
-
 <style scoped>
-.date-trigger {
-  display: inline-block;
-  padding: 4px 0px;
-  border-radius: 8px;
-  transition: background 0.2s ease, padding-left 0.2s ease, padding-right 0.2s ease;
-}
-
-.date-trigger.bg-active {
-  background: #f5f5f5;
-  padding: 4px 10px;
-}
-
-/* ── Tab styles ── */
-.tab-title {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  border-radius: 99px;
-  padding: 6px 11.5px;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  text-transform: capitalize;
-}
-.tab-info {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  border-radius: 99px;
-  padding: 5px 11px;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  text-transform: capitalize;
-  white-space: nowrap;
-}
-.tab-dark {
-  background: #171717;
-  color: #fff;
-  font-weight: 500 !important;
-}
-
-/* ── Meta grids (cards) ── */
-.meta-grid-modal {
-  display: grid;
-  grid-template-columns: repeat(5, auto);
-  grid-template-rows: auto auto;
-  gap: 6px 30px;
-  align-items: center;
-  width: fit-content;
-}
-
-.meta-grid {
-  display: grid;
-  grid-template-columns: repeat(5, auto);
-  grid-template-rows: auto auto;
-  gap: 6px 24px;
-  align-items: center;
-  width: fit-content;
-}
-
-.task-detail-modal {
-  border-radius: 16px;
-  overflow: hidden;
-  width: 780px;
-  max-height: 88vh;
-  display: flex;
-  flex-direction: column;
-  transition: width 0.3s ease;
-}
-
-.task-detail-modal.modal-expanded {
-  width: 1000px;
-}
-
-.detail-topbar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 12px 20px;
-  border-bottom: 1px solid #e4e4e7;
-  flex-shrink: 0;
-}
-
-.detail-body {
-  display: flex;
-  flex: 1;
-  overflow: hidden;
-}
-
-.detail-main {
-  flex: 1;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-}
-.detail-main.with-activity {
-  border-right: 1px solid #e4e4e7;
-}
-
-.detail-scroll {
-  flex: 1;
-  overflow-y: auto;
-  padding: 20px 24px;
-}
-
-.detail-scroll::-webkit-scrollbar {
-  appearance: none;
-  display: none;
-}
-
-.detail-activity {
-  width: 300px;
-  max-width: 300px;
-  flex-shrink: 0;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-}
-
-.activity-scroll {
-  flex: 1;
-  overflow-y: auto;
-  padding: 16px;
-}
-
-.detail-bottombar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 15px 20px;
-  border-top: 1px solid #e4e4e7;
-  flex-shrink: 0;
-}
-
-/* ── Detail meta rows ── */
-.detail-meta-rows {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.detail-meta-row {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
-.detail-meta-label {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 13px;
-  color: #888;
-  width: 110px;
-  flex-shrink: 0;
-}
-
-/* ── Attachment box ── */
-.attach-upload-box {
-  border: 1px solid #e4e4e7;
-  border-radius: 10px;
-  padding: 12px 16px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  cursor: pointer;
-  transition: border-color 0.15s;
-}
-
-.attach-upload-box:hover {
-  border-color: #bbb;
-}
-
-.attach-pdf-icon {
-  width: 32px;
-  height: 32px;
-  background: #fff0f0;
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-/* ── Message textarea ── */
-.msg-textarea {
-  width: 100%;
-  min-height: 100px;
-  resize: vertical;
-  border: 1px solid #e4e4e7;
-  border-radius: 8px;
-  padding: 12px 14px;
-  font-size: 13px;
-  font-family: inherit;
-  color: #171717;
-  outline: none;
-  transition: border-color 0.15s;
-}
-.msg-textarea:focus {
-  border-color: #888;
-}
-
-/* ── Activity panel ── */
-.activity-date-label {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 12px;
-  color: #171717;
-  background: #fff;
-  border-radius: 99px;
-  padding: 4px 10px;
-  width: fit-content;
-  margin-bottom: 10px;
-  border: 1px solid #e4e4e7;
-}
-.activity-card {
-  background: #fff;
-  border: 1px solid #e4e4e7;
-  border-radius: 12px;
-  padding: 10px 12px;
-  margin-bottom: 10px;
-}
-.act-tag {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  border-radius: 99px;
-  padding: 3px 9px;
-  font-size: 13px;
-  font-weight: 500;
-  margin-bottom: 8px;
-  text-transform: capitalize;
-}
-.act-tag-create {
-  background: #c2eecd;
-  color: #34c759;
-}
-.act-tag-assign {
-  background: #b2dbff;
-  color: #0088ff;
-}
-.act-tag-update {
-  background: #ffddbe;
-  color: #ff8d28;
-}
-
-.act-note {
-  background: #f5f5f5;
-  border-radius: 12px;
-  padding: 7px 10px;
-  font-size: 14px;
-  color: #171717;
-  border-radius: 12px !important;
-}
-
-/* ── Default avatar small ── */
-.default-avatar-sm {
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  background: #e4e4e7;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 11px;
-  font-weight: 600;
-  color: #555;
-  flex-shrink: 0;
-}
-
-/* ── Activity slide transition ── */
-.slide-activity-enter-active {
-  transition: max-width 0.25s ease, opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  overflow: hidden;
-}
-
-.slide-activity-leave-active {
-  transition: max-width 0.3s ease, opacity 0.2s cubic-bezier(0.4, 0, 1, 1);
-  overflow: hidden;
-}
-
-.slide-activity-enter-from,
-.slide-activity-leave-to {
-  max-width: 0 !important;
-  opacity: 0;
-}
-
-.slide-activity-enter-to,
-.slide-activity-leave-from {
-  max-width: 300px;
-  opacity: 1;
-}
-
-/* ── Scrollbar ── */
-:deep(.n-scrollbar-rail.n-scrollbar-rail--vertical) {
-  right: -100px !important;
-}
-
-/* ── Base input ── */
-.base-input {
-  border: 1.5px solid #e4e4e7;
-  transition: border-color 0.2s ease;
-  box-shadow: none !important;
-}
-
-.base-input:focus {
-  border-color: grey !important;
-  box-shadow: none !important;
-  outline: none !important;
-}
-
-/* ── Custom date picker ── */
 .custom-picker :deep(.n-input) {
   --n-border-hover: 1px solid gray !important;
   --n-border-focus: 1px solid gray !important;
@@ -1667,33 +1544,5 @@ const typeConfig = {
 .custom-picker :deep(.n-date-panel-month-calendar__padding) {
   height: 0 !important;
   min-height: 0 !important;
-}
-
-.tab-default {
-  background-color: #ffffff !important;
-  color: #171717 !important;
-}
-
-.bg-blue-active {
-  background-color: #0088ff !important;
-  color: #b2dbff !important;
-}
-
-.bg-orange-active {
-  background-color: #ff8d28 !important;
-  color: #ffddbe !important;
-}
-
-.bg-purple-active {
-  background-color: #6155f5 !important;
-  color: #cfccfc !important;
-}
-.bg-green-active {
-  background-color: #34c759 !important;
-  color: #c2eecd !important;
-}
-.bg-red-active {
-  background-color: #ff383c !important;
-  color: #ffc3c4 !important;
 }
 </style>

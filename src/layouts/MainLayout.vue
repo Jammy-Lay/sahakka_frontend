@@ -39,7 +39,7 @@
         </div>
       </aside>
 
-      <main class="main-content pb-5 px-5">
+      <main class="main-content pb-3 px-4">
         <router-view />
         </main>
       <aside class="sidebar-right"><Calendar /></aside>
@@ -154,5 +154,9 @@ watch(
   width: 400px;
   flex-shrink: 0;
   overflow-y: auto;
+}
+.sidebar-right::-webkit-scrollbar {
+  appearance: none;
+  display: none;
 }
 </style>
