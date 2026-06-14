@@ -19,18 +19,20 @@ export const UseWorkspaceStore = defineStore("workspace", () => {
     );
   });
 
-  const setLastVisitedTeam = (workspace_id, team_id) => {
+  const setLastVisitedTeam = (workspace_id, team_id, user_id) => {
     lastVisitedTeam.value[workspace_id] = team_id;
     localStorage.setItem(
       "lastVisitedTeam",
       JSON.stringify(lastVisitedTeam.value),
     );
 
-    // track the most recently visited pair
-    localStorage.setItem(
-      "lastVisited",
-      JSON.stringify({ workspace_id, team_id }),
-    );
+    // ✅ only save with userId, no fallback needed
+    if (user_id) {
+      localStorage.setItem(`lastVisited_${user_id}`, JSON.stringify({ workspace_id, team_id }));
+    }
+
+    // ✅ clean up old key forever
+    localStorage.removeItem("lastVisited");
   };
 
   const getMyWorkspaceStore = async () => {
