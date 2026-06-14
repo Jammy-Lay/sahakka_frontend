@@ -15,7 +15,7 @@
   import Blockquote from '@tiptap/extension-blockquote'
   import { HardBreak } from '@tiptap/extension-hard-break'
 
-
+  
   const emit = defineEmits(['update:modelValue'])
   const editor = useEditor({
     extensions: [
