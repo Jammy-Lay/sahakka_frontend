@@ -50,7 +50,7 @@ const router = createRouter({
           component: () => import("../views/user/DocumentView.vue"),
         },
         {
-          path: ":workspace_id/team/:team_id/documents/editor",
+          path: ":workspace_id/team/:team_id/documents/:document_id/editor",
           name: "editor",
           component: () => import("../views/user/DocumentEditorView.vue"),
         },
@@ -119,7 +119,7 @@ const router = createRouter({
         },
       ],
     },
-    {   
+    {
       path: "/loading",
       name: "loading",
       component: () => import('../components/layouts/Loading.vue')

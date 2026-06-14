@@ -11,7 +11,7 @@
 
             <n-modal v-model:show="showModal">
               <document-modal 
-                @close="() => showModal = false"
+                @close="showModal = false"
                 @create-document="createDocument"
               />
             </n-modal>
@@ -20,7 +20,7 @@
       </div>
       <div class="pt-4"></div>
       <div class="row g-3">
-        <div v-for="(doc, index) in getDocumentByTeam" :key="index" class="col-6">
+        <div v-for="(doc, index) in getDocumentByTeam" :key="index" class="col-4">
           <document-card 
             :avatar="doc.created_by.avatar" 
             :user-name="doc.created_by.name" 
@@ -28,6 +28,7 @@
             :created-at="doc.created_at" 
             :document-id="doc.document_id" 
             @delete-action="deleteDocHandling"
+            @update-title="updateTitle"
           />
         </div>
       </div>
@@ -41,7 +42,7 @@
   import DocumentCard from '@/components/DocumentCard.vue';
   import DocumentModal from '@/components/DocumentModal.vue';
   import { useDocumentStore } from '@/stores/user/document';
-import { notify } from '@/utils/toast';
+  import { notify } from '@/utils/toast';
   import { storeToRefs } from 'pinia';
   import { onMounted, ref } from 'vue';
   import { useRoute, useRouter } from 'vue-router';
@@ -60,13 +61,11 @@ import { notify } from '@/utils/toast';
 
   onMounted(async () => {
     await useDocument.getAllDocument(workspace_id, team_id)
-    console.log(getDocumentByTeam.value);
   })
 
   async function createDocument(title) {
 
     const newDoc = await useDocument.createDocument(workspace_id, team_id, {title});
-    // console.log('new ', newDoc);
     showModal.value = false
     if (newDoc) {
       getDocumentByTeam.value.unshift(newDoc.data)
@@ -81,10 +80,18 @@ import { notify } from '@/utils/toast';
     if (deleteDoc) {
       const indexofDoc = getDocumentByTeam.value.findIndex(doc => doc.document_id === docId)
       getDocumentByTeam.value.splice(indexofDoc, 1);
-      notify().success(deleteDoc);
-      return;
+      return notify().success(deleteDoc);
+      
     }
     notify().error(deleteDoc);
+  }
+
+  async function updateTitle(docId, title) {
+    const updateTitle = await useDocument.updateTitleDocument(workspace_id, team_id, docId, {title});
+    if (updateTitle) {
+      return notify().success(updateTitle);
+    }
+    notify().error(updateTitle);
   }
 
 </script>
