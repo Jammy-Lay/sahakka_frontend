@@ -26,12 +26,12 @@ export const UseWorkspaceStore = defineStore("workspace", () => {
       JSON.stringify(lastVisitedTeam.value),
     );
 
-    // ✅ only save with userId, no fallback needed
+    // only save with userId, no fallback needed
     if (user_id) {
       localStorage.setItem(`lastVisited_${user_id}`, JSON.stringify({ workspace_id, team_id }));
     }
 
-    // ✅ clean up old key forever
+    // clean up old key forever
     localStorage.removeItem("lastVisited");
   };
 

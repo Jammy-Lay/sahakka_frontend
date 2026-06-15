@@ -273,6 +273,7 @@ watch(
     if (!teamId) return;
     await teamStore.getTeamByIdStore(currentRouteWorkspaceId.value, teamId);
     await taskStore.getTaskByTeamStore(currentRouteWorkspaceId.value, teamId);
+    await taskStore.getSummaryTaskStore(currentRouteWorkspaceId.value, teamId);
   },
   { immediate: true }
 );
