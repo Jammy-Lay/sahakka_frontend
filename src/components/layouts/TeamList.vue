@@ -274,6 +274,7 @@ watch(
     await teamStore.getTeamByIdStore(currentRouteWorkspaceId.value, teamId);
     await taskStore.getTaskByTeamStore(currentRouteWorkspaceId.value, teamId);
     await taskStore.getSummaryTaskStore(currentRouteWorkspaceId.value, teamId);
+    await taskStore.getMyTaskStore(currentRouteWorkspaceId.value, teamId);
   },
   { immediate: true }
 );
@@ -355,12 +356,12 @@ const openRename = (t) => {
 };
 
 const handleRename = async () => {
-  if (!teamName.value.trim()) {
+  if (!renameName.value.trim()) {
     toast.error("Name is required");
     return;
   }
 
-  if (!description.value.trim()) {
+  if (!renameDescription.value.trim()) {
     toast.error("Description is required");
     return;
   }
@@ -372,12 +373,6 @@ const handleRename = async () => {
       renameName.value,
       renameDescription.value
     );
-    // console.log({
-    //   workspaceId: currentRouteWorkspaceId.value,
-    //   teamId: selectedTeam.value.team_id,
-    //   name: renameName.value,
-    //   description: renameDescription.value
-    // });
 
     toast.success("Team renamed successfully");
     showRenameModal.value = false;
