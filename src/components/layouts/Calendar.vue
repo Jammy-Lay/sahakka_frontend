@@ -44,7 +44,7 @@
           <div>
             <n-progress
               type="circle"
-              :percentage="60"
+              :percentage="completedPercentage"
               :stroke-width="13"
               style="width: 75px"
               class="my-progress"
@@ -65,7 +65,7 @@
           <div>
             <n-progress
               type="circle"
-              :percentage="80"
+              :percentage="submittedPercentage"
               :stroke-width="13"
               style="width: 75px"
               class="my-progress"
@@ -86,7 +86,7 @@
             <div class="d-flex align-items-center gap-2 px-1">
               <n-progress
                 type="line"
-                :percentage="60"
+                :percentage="approvedPercentage"
                 color="#34C759"
                 :height="5"
                 :show-indicator="false"
@@ -107,7 +107,7 @@
             <div class="d-flex align-items-center gap-2 px-1">
               <n-progress
                 type="line"
-                :percentage="20"
+                :percentage="rejectedPercentage"
                 color="#FF383C"
                 :height="5"
                 :show-indicator="false"
@@ -159,33 +159,57 @@
       <!-- My Tasks -->
       <h5 class="text-dark fw-semibold my-3" style="font-size: 18px">My Task</h5>
       <div class="d-flex flex-column gap-3 pb-2">
+        <n-empty
+          v-if="getMyTask.length === 0"
+          description="No Data"
+          class="mt-8"
+          style="--n-icon-size: 45px; font-size: 14px"
+        />
         <div
-          v-for="task in getTask"
+          v-else
+          v-for="task in getMyTask"
           :key="task.id"
           class="task-card"
           @click="openTaskModal(task)"
         >
-          <!-- Top: avatar + name -->
           <div class="d-flex align-items-center gap-2 mb-2">
             <template v-if="!task.assigned_to?.user_id">
-              <img src="../../assets/image/default-avatar.png" class="task-avatar" />
+              <img
+                src="../../assets/image/default-avatar.png"
+                class="rounded-circle object-fit-cover"
+                style="width: 30px; height: 30px"
+              />
               <span class="fw-medium text-mute fs-13">No assignee</span>
             </template>
             <template v-else-if="task.created_by?.user_id === task.assigned_to?.user_id">
-              <img :src="task.created_by?.avatar" class="task-avatar" />
+              <img
+                :src="task.created_by?.avatar"
+                class="rounded-circle object-fit-cover"
+                style="width: 30px; height: 30px"
+              />
               <span class="fw-semibold fs-13">{{ task.created_by?.name }}</span>
-              <span class="text-mute fs-12">·</span>
-              <span class="text-mute fs-13">assign to you</span>
+              <span class="fw-bold text-mute fs-12">·</span>
+              <span class="text-mute fs-13">Self-assigned the task</span>
             </template>
             <template v-else>
-              <img :src="task.assigned_to?.avatar" class="task-avatar" />
+              <img
+                :src="task.assigned_to?.avatar"
+                class="rounded-circle object-fit-cover"
+                style="width: 30px; height: 30px"
+              />
               <span class="fw-semibold fs-13">{{ task.assigned_by?.name }}</span>
-              <span class="text-mute fs-12">·</span>
-              <span class="text-mute fs-13">assign to you</span>
+              <span class="fw-bold text-mute fs-12">·</span>
+              <span
+                v-if="task.assigned_to?.user_id === getMe.user_id"
+                class="text-mute fs-13"
+                >Assigned to you</span
+              >
+              <span v-else class="text-mute fs-13"
+                >Assigned to {{ task.assigned_to?.name }}</span
+              >
             </template>
           </div>
 
-          <!-- Priority + Deadline rows -->
           <div class="d-flex flex-column gap-1">
             <div class="task-meta-row">
               <span class="d-flex align-items-center gap-1 fs-14 text-mute"
@@ -196,7 +220,7 @@
                 trigger="click"
                 placement="bottom-start"
                 :show-arrow="false"
-                style="border-radius: 12px; padding: 6px; width: 120px; margin-right: 5px"
+                style="border-radius: 12px; padding: 6px; width: 120px"
                 @update:show="(val) => (openPop[`${task.id}_priority`] = val)"
               >
                 <template #trigger>
@@ -224,7 +248,7 @@
                     @click="
                       task.priority = key;
                       closePop(task.id, 'priority');
-                      handleUpdateTask(task);
+                      handleUpdateTask(task, true);
                     "
                   >
                     <Circle size="10" :fill="cfg.fill" stroke-width="0" />
@@ -268,7 +292,7 @@
                       (val) => {
                         task.end_date = formatToYMD(val);
                         closePop(task.id, 'end_date');
-                        handleUpdateTask(task);
+                        handleUpdateTask(task, true);
                       }
                     "
                   />
@@ -277,7 +301,6 @@
             </div>
           </div>
 
-          <!-- Title + desc -->
           <p class="task-title mb-2 mt-2">{{ task.title }}</p>
           <p class="task-desc mb-0">
             {{ task.description || "No description provided" }}
@@ -312,7 +335,6 @@
 
         <!-- Modal Body -->
         <div class="detail-body">
-          <!-- Left / Main Panel -->
           <div class="detail-main" :class="{ 'with-activity': showActivity }">
             <div class="detail-scroll">
               <!-- Assignee row -->
@@ -322,7 +344,7 @@
                     <img
                       src="../../assets/image/default-avatar.png"
                       class="rounded-circle object-fit-cover"
-                      style="width: 28px; height: 28px"
+                      style="width: 30px; height: 30px"
                     />
                     <span class="fw-medium text-mute fs-13">No assignee</span>
                   </template>
@@ -335,7 +357,7 @@
                     <img
                       :src="selectedTask.created_by?.avatar"
                       class="rounded-circle object-fit-cover"
-                      style="width: 28px; height: 28px"
+                      style="width: 30px; height: 30px"
                     />
                     <span class="fw-semibold fs-13">{{
                       selectedTask.created_by?.name
@@ -347,13 +369,20 @@
                     <img
                       :src="selectedTask.assigned_to?.avatar"
                       class="rounded-circle object-fit-cover"
-                      style="width: 28px; height: 28px"
+                      style="width: 30px; height: 30px"
                     />
                     <span class="fw-semibold fs-13">{{
                       selectedTask.assigned_by?.name
                     }}</span>
                     <span class="fw-bold text-mute fs-12">·</span>
-                    <span class="text-mute fs-13">Assigned to you</span>
+                    <span
+                      v-if="selectedTask.assigned_to?.user_id === getMe.user_id"
+                      class="text-mute fs-13"
+                      >Assigned to you</span
+                    >
+                    <span v-else class="text-mute fs-13"
+                      >Assigned to {{ selectedTask.assigned_to?.name }}</span
+                    >
                   </template>
                 </div>
 
@@ -390,7 +419,7 @@
                       @click="
                         selectedTask.type = key;
                         showDetailTypePop = false;
-                        handleUpdateTask(selectedTask);
+                        handleUpdateTask(selectedTask, true);
                       "
                     >
                       <Circle size="10" :fill="cfg.fill" stroke-width="0" />
@@ -415,27 +444,27 @@
                       <span
                         class="tab-info w-fit fw-medium cursor-pointer"
                         :class="[
-                          statusConfigFull[selectedTask.status]?.bg,
-                          statusConfigFull[selectedTask.status]?.text,
+                          statusConfig[selectedTask.status]?.bg,
+                          statusConfig[selectedTask.status]?.text,
                         ]"
                         @click.stop
                       >
                         <component
-                          :is="statusConfigFull[selectedTask.status]?.icon"
+                          :is="statusConfig[selectedTask.status]?.icon"
                           size="14"
                         />
-                        {{ statusConfigFull[selectedTask.status]?.label }}
+                        {{ statusConfig[selectedTask.status]?.label }}
                       </span>
                     </template>
                     <div>
                       <div
-                        v-for="(cfg, key) in statusConfigFull"
+                        v-for="(cfg, key) in statusConfig"
                         :key="key"
                         class="d-flex align-items-center gap-2 px-2 py-1 rounded workspace-item fs-13 fw-medium cursor-pointer"
                         @click="
                           selectedTask.status = key;
                           showDetailStatusPop = false;
-                          handleUpdateTask(selectedTask);
+                          handleUpdateTask(selectedTask, true);
                         "
                       >
                         <component :is="cfg.icon" size="14" />
@@ -479,7 +508,7 @@
                         @click="
                           selectedTask.priority = key;
                           showDetailPriorityPop = false;
-                          handleUpdateTask(selectedTask);
+                          handleUpdateTask(selectedTask, true);
                         "
                       >
                         <Circle size="10" :fill="cfg.fill" stroke-width="0" />
@@ -536,7 +565,7 @@
                         @click="
                           selectedTask.assigned_to = null;
                           showDetailAssigneePop = false;
-                          handleUpdateTask(selectedTask);
+                          handleUpdateTask(selectedTask, true);
                         "
                       >
                         <img
@@ -553,7 +582,7 @@
                         @click="
                           selectedTask.assigned_to = member;
                           showDetailAssigneePop = false;
-                          handleUpdateTask(selectedTask);
+                          handleUpdateTask(selectedTask, true);
                         "
                       >
                         <img
@@ -607,7 +636,7 @@
                           (val) => {
                             selectedTask.start_date = formatToYMD(val);
                             showDetailStartDatePop = false;
-                            handleUpdateTask(selectedTask);
+                            handleUpdateTask(selectedTask, true);
                           }
                         "
                       />
@@ -650,7 +679,7 @@
                           (val) => {
                             selectedTask.end_date = formatToYMD(val);
                             showDetailEndDatePop = false;
-                            handleUpdateTask(selectedTask);
+                            handleUpdateTask(selectedTask, true);
                           }
                         "
                       />
@@ -702,10 +731,14 @@
 
           <!-- Right / Activity Panel -->
           <transition name="slide-activity">
-            <div v-if="showActivity" class="detail-activity">
-              <div class="activity-scroll">
-                <p class="fw-semibold fs-14 mb-3">Task activity</p>
-
+            <div v-if="showActivity" class="detail-activity text-nowrap">
+              <p
+                class="fw-semibold fs-14 position-sticky z-3 top-0 mb-0 pt-4 pb-3"
+                style="padding-left: 16px"
+              >
+                Task activity
+              </p>
+              <div class="activity-scroll pt-0">
                 <template
                   v-if="selectedTask.activities && selectedTask.activities.length"
                 >
@@ -722,14 +755,10 @@
                       <div class="d-flex align-items-center justify-content-between mb-2">
                         <div class="d-flex align-items-center gap-2">
                           <img
-                            v-if="act.user?.avatar"
                             :src="act.user.avatar"
                             class="rounded-circle object-fit-cover"
                             style="width: 24px; height: 24px"
                           />
-                          <div v-else class="default-avatar-sm">
-                            {{ act.user?.name?.charAt(0) || "?" }}
-                          </div>
                           <span class="fw-semibold fs-13">{{ act.user?.name }}</span>
                         </div>
                         <span class="fs-11 text-mute">{{ act.time }}</span>
@@ -800,9 +829,8 @@ const toast = notify(router);
 const workspace_id = route.params.workspace_id;
 const team_id = route.params.team_id;
 
-// ── Stores ──
 const taskStore = useTaskStore();
-const { getTask, getTaskActivity, getSummaryTask } = storeToRefs(taskStore);
+const { getTask, getTaskActivity, getSummaryTask, getMyTask } = storeToRefs(taskStore);
 
 const teamStore = useTeamStore();
 const { getMember, getTeamById } = storeToRefs(teamStore);
@@ -818,6 +846,33 @@ onMounted(async () => {
   await teamStore.getTeamByIdStore(workspace_id, team_id);
   await taskStore.getTaskByTeamStore(workspace_id, team_id);
   await taskStore.getSummaryTaskStore(workspace_id, team_id);
+  await taskStore.getMyTaskStore(workspace_id, team_id);
+});
+
+// Access your data source
+const summary = computed(() => getSummaryTask.value || {});
+const total = computed(() => summary.value.total_tasks || 0);
+
+// Calculate percentages
+const completedPercentage = computed(() => {
+  if (total.value === 0) return 0;
+  const count = (summary.value.status?.approved || 0) + (summary.value.status?.rejected || 0);
+  return Math.round((count / total.value) * 100);
+});
+
+const submittedPercentage = computed(() => {
+  if (total.value === 0) return 0;
+  return Math.round(((summary.value.status?.submitted || 0) / total.value) * 100);
+});
+
+const approvedPercentage = computed(() => {
+  if (total.value === 0) return 0;
+  return Math.round(((summary.value.status?.approved || 0) / total.value) * 100);
+});
+
+const rejectedPercentage = computed(() => {
+  if (total.value === 0) return 0;
+  return Math.round(((summary.value.status?.rejected || 0) / total.value) * 100);
 });
 
 // ── Calendar ──
@@ -840,6 +895,7 @@ onUnmounted(() => clearInterval(timer));
 // ── Task modal state ──
 const showTaskModal = ref(false);
 const selectedTask = ref(null);
+const originalTask = ref(null);
 const showActivity = ref(false);
 const showDetailStatusPop = ref(false);
 const showDetailPriorityPop = ref(false);
@@ -866,9 +922,9 @@ const canChangeAssignee = computed(() => {
   return myWorkspaceRole.value === "owner" || myWorkspaceRole.value === "moderator";
 });
 
-// ── Open modal ──
 const openTaskModal = async (task) => {
   selectedTask.value = { ...task };
+  originalTask.value = { ...task };
   showActivity.value = false;
   showTaskModal.value = true;
   await taskStore.getTaskActivityStore(workspace_id, team_id, task.id);
@@ -881,8 +937,14 @@ const openTaskModal = async (task) => {
   });
 };
 
-const handleUpdateTask = async (task) => {
+const handleUpdateTask = async (task, forceField = null) => {
   try {
+    if (!forceField) {
+      const titleChanged = task.title !== originalTask.value?.title;
+      const descChanged = task.description !== originalTask.value?.description;
+      if (!titleChanged && !descChanged) return;
+    }
+
     await taskStore.updateTask(workspace_id, team_id, task.id, {
       title: task.title,
       description: task.description,
@@ -893,6 +955,8 @@ const handleUpdateTask = async (task) => {
       start_date: task.start_date,
       end_date: task.end_date,
     });
+
+    originalTask.value = { ...task };
     await taskStore.getTaskByTeamStore(workspace_id, team_id);
     await taskStore.getSummaryTaskStore(workspace_id, team_id);
   } catch (error) {
@@ -949,11 +1013,12 @@ const actTagClass = (action) =>
   ({ create: "act-tag-create", assign: "act-tag-assign", update: "act-tag-update" }[
     action?.toLowerCase()
   ] || "act-tag-update");
+
 const actTagIcon = (action) =>
   ({ create: Plus, assign: UserCheck, update: Send }[action?.toLowerCase()] || Send);
 
 // ── Configs ──
-const statusConfigFull = {
+const statusConfig = {
   todo: { icon: CircleCheckBig, bg: "bg-blue", text: "text-blue", label: "To Do" },
   in_progress: {
     icon: CircleDashed,
@@ -961,9 +1026,6 @@ const statusConfigFull = {
     text: "text-orange",
     label: "In Progress",
   },
-  submitted: { icon: Send, bg: "bg-purple", text: "text-purple", label: "Submitted" },
-  approved: { icon: CircleCheck, bg: "bg-green", text: "text-green", label: "Approved" },
-  rejected: { icon: CircleX, bg: "bg-red", text: "text-danger", label: "Rejected" },
 };
 
 const priorityConfig = {
@@ -982,7 +1044,6 @@ const typeConfig = {
 </script>
 
 <style scoped>
-/* ── Task Card ── */
 .task-card {
   background: #fff;
   border-radius: 16px;
@@ -991,14 +1052,12 @@ const typeConfig = {
   transition: box-shadow 0.18s ease, transform 0.15s ease;
   border: 1px solid #f0f0f0;
 }
-
 .task-avatar {
   width: 28px;
   height: 28px;
   border-radius: 50%;
   object-fit: cover;
 }
-
 .task-meta-row {
   display: flex;
   align-items: center;
@@ -1027,7 +1086,6 @@ const typeConfig = {
   overflow: hidden;
   text-overflow: ellipsis;
 }
-
 .custom-picker :deep(.n-input) {
   --n-border-hover: 1px solid gray !important;
   --n-border-focus: 1px solid gray !important;
@@ -1075,8 +1133,6 @@ const typeConfig = {
   height: 0 !important;
   min-height: 0 !important;
 }
-
-/* ── Calendar ── */
 :deep(.vc-container) {
   border: none !important;
   box-shadow: none !important;
