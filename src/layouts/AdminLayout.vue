@@ -1,76 +1,124 @@
 <template>
-    <n-config-provider :theme-overrides="themeOverrides">
-        <div class="d-flex flex-column vh-100">
-            <!-- NAVBAR -->
-            <div class="navbar-wrapper bg-body">
-                <div class="navbar-inner shadow-box">
-                    <div class="d-flex align-items-center gap-2">
-                        <!-- Hamburger: only on small screens -->
-                        <button class="hamburger-btn d-flex d-lg-none" @click="drawerActive = true"
-                            aria-label="Open menu">
-                            <Menu :size="18" />
-                        </button>
-                        <router-link to="/admin/dashboard">
-                            <img class="ls responsive-title" style="width: 140px;" src="../assets/image/logo.svg"
-                                alt="">
-                        </router-link>
+  <n-config-provider :theme-overrides="themeOverrides">
+    <div class="d-flex flex-column vh-100">
+      <!-- NAVBAR -->
+      <div class="navbar-wrapper bg-body">
+        <div class="navbar-inner shadow-box">
+          <div class="d-flex align-items-center gap-2">
+            <!-- Hamburger: only on small screens -->
+            <button class="hamburger-btn d-flex d-lg-none" @click="drawerActive = true" aria-label="Open menu">
+              <Menu :size="18" />
+            </button>
+            <router-link to="/admin/dashboard">
+              <img class="ls responsive-title" style="width: 140px;" src="../assets/image/logo.svg" alt="">
+            </router-link>
+          </div>
+
+          <!-- Profile -->
+          <n-dropdown trigger="click" :options="options" @select="handleProfileSelect" :theme-overrides="dropdownTheme"
+            style="min-width: 150px; padding: 7px 4px">
+            <div class="d-flex gap-2 align-items-center rounded-3 profile cursor-pointer">
+              <img :src="profile.getMe?.avatar" alt="" class="img-fluid rounded-circle object-fit-cover"
+                style="width: 35px; height: 35px" />
+              <div class="d-none d-sm-flex flex-column">
+                <p class="fs-7 fw-bold m-0 p-0">{{ profile.getMe?.name }}</p>
+                <small class="fs-8 text-secondary">{{ profile.getMe?.role }}</small>
+              </div>
+            </div>
+          </n-dropdown>
+
+          <!-- LOGOUT MODAL -->
+          <n-modal v-model:show="showLogoutModal" :mask-closable="true" transform-origin="center">
+            <n-card style="width: 400px" class="rounded-3 shadow-lg" :bordered="false" content-style="padding: 0;">
+              <template #header>
+                <div class="d-flex align-items-center gap-2 py-1">
+                  <div class="logout-icon-box rounded-3">
+                    <n-icon color="#3b82f6" size="20">
+                      <LogOut />
+                    </n-icon>
+                  </div>
+                  <div>
+                    <div class="fw-bold fs-6 mb-0">Sign Out</div>
+                    <div class="text-muted" style="font-size: 0.78rem">
+                      You'll need to sign in again to continue
                     </div>
-
+                  </div>
                 </div>
-            </div>
+              </template>
+              <div class="px-4 py-3">
+                <p class="text-secondary mb-0" style="font-size: 0.9rem; line-height: 1.6">
+                  Are you sure you want to sign out of your account?
+                </p>
+              </div>
+              <template #footer>
+                <n-space justify="end" class="py-1">
+                  <n-button class="rounded-3" @click="showLogoutModal = false">Cancel</n-button>
+                  <n-button class="rounded-3" type="primary" color="#3b82f6" :loading="logoutLoading"
+                    @click="confirmLogout">
+                    <template #icon><n-icon>
+                        <LogOut />
+                      </n-icon></template>
+                    Yes, Sign Out
+                  </n-button>
+                </n-space>
+              </template>
+            </n-card>
+          </n-modal>
 
-            <!-- SIDEBAR + CONTENT (desktop) -->
-            <div class="layout-wrapper bg-body">
-                <n-layout has-sider class="layout-card shadow-box bg-body">
-                    <!-- SIDEBAR -->
-                    <n-layout-sider bordered collapse-mode="width" :collapsed-width="70" :width="240"
-                        :collapsed="collapsed" @collapse="collapsed = true" @expand="collapsed = false"
-                        class="py-2 d-none d-lg-flex position-relative rounded-top-4">
-                        <n-menu v-model:value="activeKey" :collapsed="collapsed" :collapsed-width="64"
-                            :collapsed-icon-size="18" :options="menuOptions" :expanded-keys="expandedKeys"
-                            @update:expanded-keys="onUpdateExpandedKeys" @update:value="handleMenuClick" />
-
-                        <div class="custom-trigger" @click="collapsed = !collapsed">
-                            <ChevronRight :size="16" :style="{
-                                transform: collapsed ? 'rotate(0deg)' : 'rotate(180deg)',
-                                transition: 'transform 0.3s',
-                            }" />
-                        </div>
-                    </n-layout-sider>
-
-                    <n-layout class="bg-body">
-                        <n-scrollbar>
-                            <div class="content-area bg-body">
-                                <div class="container-fluid px-3">
-                                    <router-view />
-                                </div>
-                            </div>
-                        </n-scrollbar>
-                    </n-layout>
-                </n-layout>
-            </div>
-
-            <!-- MOBILE DRAWER: visible only on < lg -->
-            <n-drawer v-model:show="drawerActive" :width="260" placement="left" :trap-focus="false" class="d-lg-none">
-                <n-drawer-content :native-scrollbar="false" :body-content-style="{ padding: 0 }">
-                    <!-- Drawer Header -->
-                    <template #header>
-                        <div class="d-flex align-items-center justify-content-between w-100">
-                            <h6 class="fw-bold m-0 text-prime">Admin</h6>
-                            <button class="hamburger-btn" @click="drawerActive = false" aria-label="Close menu">
-                                <X :size="18" />
-                            </button>
-                        </div>
-                    </template>
-
-                    <!-- Menu inside drawer -->
-                    <n-menu v-model:value="activeKey" :options="menuOptions" :expanded-keys="expandedKeys"
-                        @update:expanded-keys="onUpdateExpandedKeys" @update:value="handleMenuClickMobile"
-                        style="padding: 8px 0" />
-                </n-drawer-content>
-            </n-drawer>
         </div>
-    </n-config-provider>
+      </div>
+
+      <!-- SIDEBAR + CONTENT (desktop) -->
+      <div class="layout-wrapper bg-body">
+        <n-layout has-sider class="layout-card shadow-box bg-body">
+          <!-- SIDEBAR -->
+          <n-layout-sider collapse-mode="width" :collapsed-width="70" :width="240" :collapsed="collapsed"
+            @collapse="collapsed = true" @expand="collapsed = false"
+            class="py-2 d-none d-lg-flex position-relative rounded-4">
+            <n-menu v-model:value="activeKey" :collapsed="collapsed" :collapsed-width="64" :collapsed-icon-size="18"
+              :options="menuOptions" :expanded-keys="expandedKeys" @update:expanded-keys="onUpdateExpandedKeys"
+              @update:value="handleMenuClick" />
+
+            <div class="custom-trigger" @click="collapsed = !collapsed">
+              <ChevronRight :size="16" :style="{
+                transform: collapsed ? 'rotate(0deg)' : 'rotate(180deg)',
+                transition: 'transform 0.3s',
+              }" />
+            </div>
+          </n-layout-sider>
+
+          <n-layout class="bg-body">
+            <n-scrollbar>
+              <div class="content-area bg-body">
+                <div class="container-fluid px-3">
+                  <router-view />
+                </div>
+              </div>
+            </n-scrollbar>
+          </n-layout>
+        </n-layout>
+      </div>
+
+      <!-- MOBILE DRAWER: visible only on < lg -->
+      <n-drawer v-model:show="drawerActive" :width="260" placement="left" :trap-focus="false" class="d-lg-none">
+        <n-drawer-content :native-scrollbar="false" :body-content-style="{ padding: 0 }">
+          <!-- Drawer Header -->
+          <template #header>
+            <div class="d-flex align-items-center justify-content-between w-100">
+              <h6 class="fw-bold m-0 text-prime">Admin</h6>
+              <button class="hamburger-btn" @click="drawerActive = false" aria-label="Close menu">
+                <X :size="18" />
+              </button>
+            </div>
+          </template>
+
+          <!-- Menu inside drawer -->
+          <n-menu v-model:value="activeKey" :options="menuOptions" :expanded-keys="expandedKeys"
+            @update:expanded-keys="onUpdateExpandedKeys" @update:value="handleMenuClickMobile" style="padding: 8px 0" />
+        </n-drawer-content>
+      </n-drawer>
+    </div>
+  </n-config-provider>
 </template>
 
 <script setup>
@@ -78,78 +126,67 @@ import { ref, watch, computed, nextTick, h, onMounted } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { NIcon } from "naive-ui";
 import {
-    Book,
-    User,
-    Wine,
-    LayoutDashboard,
-    Settings,
-    Folder,
-    FileText,
-    Check,
-    LogOut,
-    Pencil,
-    Bell,
-    BellRing,
-    BellOff,
-    Earth,
-    ChevronDown,
-    Menu,
-    X,
-    ChevronRight,
-    UsersRound,
-    NotebookPen,
-    ChartPie,
-    Layers,
+  User,
+  LayoutDashboard,
+  Settings,
+  LogOut,
+  Menu,
+  X,
+  ChevronRight,
+  UsersRound,
+  ChartPie,
+  Layers,
 } from "lucide-vue-next";
+import { useAuthStore } from "@/stores/auth";
+import { notify } from "@/utils/toast";
 
+const auth = useAuthStore();
+const toast = notify();
 const drawerActive = ref(false);
 const router = useRouter();
 const route = useRoute();
-
+const profile = useAuthStore();
+const showLogoutModal = ref(false);
+const logoutLoading = ref(false);
 
 function renderIcon(icon) {
-    return () => h(NIcon, null, { default: () => h(icon) });
+  return () => h(NIcon, null, { default: () => h(icon) });
 }
 
 const menuOptions = computed(() => [
-    {
-        label: "Dashboard",
-        key: "/admin/dashboard",
-        icon: renderIcon(LayoutDashboard),
-    },
-    {
-        label: "Users",
-        key: "/admin/users",
-        icon: renderIcon(User)
-    },
-    {
-        label: "Workspaces",
-        key: "/admin/workspaces",
-        icon: renderIcon(Layers),
-    },
-    {
+  {
+    label: "Dashboard",
+    key: "/admin/dashboard",
+    icon: renderIcon(LayoutDashboard),
+  },
+  {
+    label: "Users",
+    key: "/admin/users",
+    icon: renderIcon(User)
+  },
+  {
+    label: "Workspaces",
+    key: "/admin/workspaces",
+    icon: renderIcon(Layers),
+  },
+  {
+    label: "Teams",
+    key: "teams",
+    icon: renderIcon(UsersRound),
+    children: [
+      {
         label: "Teams",
-        key: "teams",
+        key: "/admin/teams" || "workspace/:workspace_id/teams/:team_id",
         icon: renderIcon(UsersRound),
-        children: [
-            {
-                label: "Teams",
-                key: "/admin/teams" || "workspace/:workspace_id/teams/:team_id",
-                icon: renderIcon(UsersRound),
-            },
-            {
-                label: "Activites Team",
-                key: "/admin/activities-team",
-                icon: renderIcon(NotebookPen),
-            },
-            {
-                label: "Tasks",
-                key: "/admin/tasks",
-                icon: renderIcon(ChartPie),
-            },
-        ],
-    },
-    { label: "Settings", key: "/admin/setting", icon: renderIcon(Settings) },
+      },
+      {
+        label: "Tasks",
+        key: "/admin/tasks",
+        icon: renderIcon(ChartPie),
+      },
+    ],
+  },
+  { label: "Settings", key: "/admin/setting", icon: renderIcon(Settings) },
 ]);
 
 const activeKey = ref(route.path);
@@ -157,52 +194,76 @@ const collapsed = ref(false);
 const expandedKeys = ref([]);
 
 function handleMenuClick(key) {
-    if (key.startsWith("/")) router.push(key);
+  if (key.startsWith("/")) router.push(key);
 }
 
 function handleMenuClickMobile(key) {
-    if (key.startsWith("/")) {
-        router.push(key);
-        drawerActive.value = false;
-    }
+  if (key.startsWith("/")) {
+    router.push(key);
+    drawerActive.value = false;
+  }
 }
 
 watch(
-    () => route.path,
-    (newPath) => {
-        activeKey.value = newPath;
-    }
+  () => route.path,
+  (newPath) => {
+    activeKey.value = newPath;
+  }
 );
 
 function onUpdateExpandedKeys(keys) {
-    expandedKeys.value = keys;
+  expandedKeys.value = keys;
 }
 
 const activeParentKey = computed(() => {
-    for (const option of menuOptions.value) {
-        if (option.children) {
-            const found = option.children.find((c) => c.key === activeKey.value);
-            if (found) return option.key;
-        }
+  for (const option of menuOptions.value) {
+    if (option.children) {
+      const found = option.children.find((c) => c.key === activeKey.value);
+      if (found) return option.key;
     }
-    return null;
+  }
+  return null;
 });
 
 const showParentBorder = computed(() => {
-    if (!activeParentKey.value) return false;
-    if (collapsed.value) return true;
-    return !expandedKeys.value.includes(activeParentKey.value);
+  if (!activeParentKey.value) return false;
+  if (collapsed.value) return true;
+  return !expandedKeys.value.includes(activeParentKey.value);
 });
 
+const options = computed(() => [
+  { label: "Profile", key: "profile", icon: renderIcon(User) },
+  { label: "Logout", key: "logout", icon: renderIcon(LogOut) },
+]);
+
+function handleProfileSelect(key) {
+  if (key === "logout") showLogoutModal.value = true; 
+  if (key === "profile") router.push("/admin/setting");
+}
+
+async function confirmLogout() {
+  logoutLoading.value = true;
+  try {
+    await auth.logout();
+    localStorage.removeItem("avatar");
+    router.push("/login");
+  } catch (error) {
+    toast.error(error.message || "Failed");
+  } finally {
+    logoutLoading.value = false;
+    showLogoutModal.value = false;
+  }
+}
+
 function updateActiveBorderStyle() {
-    let styleEl = document.getElementById("active-parent-border-style");
-    if (!styleEl) {
-        styleEl = document.createElement("style");
-        styleEl.id = "active-parent-border-style";
-        document.head.appendChild(styleEl);
-    }
-    if (activeParentKey.value && showParentBorder.value) {
-        styleEl.innerHTML = `
+  let styleEl = document.getElementById("active-parent-border-style");
+  if (!styleEl) {
+    styleEl = document.createElement("style");
+    styleEl.id = "active-parent-border-style";
+    document.head.appendChild(styleEl);
+  }
+  if (activeParentKey.value && showParentBorder.value) {
+    styleEl.innerHTML = `
       .n-menu-item-content--child-active::after,
       .n-menu-item-content--child-active-closed::after {
         content: "";
@@ -227,106 +288,86 @@ function updateActiveBorderStyle() {
         color: #171717 !important;
       }
     `;
-    } else {
-        styleEl.innerHTML = "";
-    }
+  } else {
+    styleEl.innerHTML = "";
+  }
 }
 
 const dropdownTheme = {
-    common: { borderRadius: "8px" },
+  common: { borderRadius: "8px" },
 };
 
 watch(
-    [activeKey, expandedKeys, collapsed],
-    async () => {
-        await nextTick();
-        updateActiveBorderStyle();
-    },
-    { immediate: true }
+  [activeKey, expandedKeys, collapsed],
+  async () => {
+    await nextTick();
+    updateActiveBorderStyle();
+  },
+  { immediate: true }
 );
 
 const themeOverrides = {
-    common: {
-        primaryColor: "#171717",
-        primaryColorHover: "#1A1A2E",
-        primaryColorPressed: "#c2410c",
-        primaryColorSuppl: "#F3F4F6",
-        bodyColor: "#ffff",
-        baseColor: "#ffffff",
-        cardColor: "#ffffff",
-        textColorBase: "#1f1f1f",
-        textColor1: "#2c2c2c",
-        textColor2: "#555555",
-        textColor3: "#888888",
-        borderColor: "#e5e5e5",
-        dividerColor: "#e5e5e5",
-    },
-    Layout: { siderColor: "#ffff" },
-    Menu: {
-        itemColorHover: "#F3F4F6",
-        itemTextColorHover: "#1A1A2E",
-        itemColorActive: "#F3F4F6",
-        itemTextColorActive: "#171717",
-        itemColorActiveHover: "#F3F4F6",
-        itemTextColorActiveHover: "#171717",
-        itemColorActiveCollapsed: "#F3F4F6",
-        itemTextColorChildActive: "#1A1A2E",
-        itemTextColorChildActiveHover: "#1A1A2E",
-        itemColorChildActiveHover: "#F3F4F6",
-        itemIconColorChildActive: "#1A1A2E",
-        itemIconColorChildActiveHover: "#1A1A2E",
-        arrowColorChildActive: "#1A1A2E",
-        arrowColorChildActiveHover: "#1A1A2E",
-    },
-    Input: {
-        heightMedium: "40px",
-        border: "1px solid #e5e5e5",
+  common: {
+    primaryColor: "#171717",
+    primaryColorHover: "#1A1A2E",
+    primaryColorPressed: "#c2410c",
+    primaryColorSuppl: "#F3F4F6",
+    bodyColor: "#ffff",
+    baseColor: "#ffffff",
+    cardColor: "#ffffff",
+    textColorBase: "#1f1f1f",
+    textColor1: "#2c2c2c",
+    textColor2: "#555555",
+    textColor3: "#888888",
+    borderColor: "#e5e5e5",
+    dividerColor: "#e5e5e5",
+  },
+  Layout: { siderColor: "#ffff" },
+  Menu: {
+    itemColorHover: "#F3F4F6",
+    itemTextColorHover: "#1A1A2E",
+    itemColorActive: "#F3F4F6",
+    itemTextColorActive: "#171717",
+    itemColorActiveHover: "#F3F4F6",
+    itemTextColorActiveHover: "#171717",
+    itemColorActiveCollapsed: "#F3F4F6",
+    itemTextColorChildActive: "#1A1A2E",
+    itemTextColorChildActiveHover: "#1A1A2E",
+    itemColorChildActiveHover: "#F3F4F6",
+    itemIconColorChildActive: "#1A1A2E",
+    itemIconColorChildActiveHover: "#1A1A2E",
+    arrowColorChildActive: "#1A1A2E",
+    arrowColorChildActiveHover: "#1A1A2E",
+  },
+  Input: {
+    heightMedium: "40px",
+    border: "1px solid #e5e5e5",
+    borderHover: "1px solid #171717",
+    borderFocus: "1px solid #171717",
+    boxShadowFocus: "1px solid #171717",
+  },
+  Select: {
+    borderFocus: "1px solid #171717",
+    peers: {
+      InternalSelection: {
         borderHover: "1px solid #171717",
         borderFocus: "1px solid #171717",
-        boxShadowFocus: "1px solid #171717",
+        boxShadowFocus: "0 0 0 0",
+      },
     },
-    Select: {
-        borderFocus: "1px solid #171717",
-        peers: {
-            InternalSelection: {
-                borderHover: "1px solid #171717",
-                borderFocus: "1px solid #171717",
-                boxShadowFocus: "0 0 0 0",
-            },
-        },
-    },
+  },
 };
+
+onMounted(async () => {
+  await profile.getMeStore(); 
+});
 </script>
 
 <style scoped>
-body > .n-image-preview-container .n-image-preview-toolbar {
-  padding: 30px !important;
-  padding-left: 18px !important;
-  gap: 20px !important;
-  display: flex !important;
-  align-items: center !important;
-  border-radius: 100px !important;
-  cursor: pointer;
-}
-
-body > .n-image-preview-container .n-image-preview-toolbar .n-base-icon {
-  font-size: 30px !important;
-}
-
-.n-select-menu .n-base-select-option .n-base-select-option__check {
-  margin-right: 16px !important;
-}
-
-.n-date-panel
-  .n-date-panel-month-calendar
-  .n-date-panel-month-calendar__picker-col
-  .n-date-panel-month-calendar__padding {
-  height: calc(var(--n-scroll-item-height) * 0.15);
-}
-
+/* ─── Buttons ─── */
 button.n-button.n-button--primary-type:not(.n-button--disabled):hover {
-  --n-color-hover: #ea6607 !important;
-  --n-border-hover: 1px solid #ea6607 !important;
+  --n-color-hover: #3b82f6 !important;
+  --n-border-hover: 1px solid #3b82f6 !important;
   --n-text-color-hover: #ffffff !important;
 }
 
@@ -345,7 +386,22 @@ button.n-button.n-button--default-type:hover .n-button__content {
   color: #ffffff !important;
 }
 
-/* 1. Force the container to respect the gap */
+.n-button .n-button__border,
+.n-button .n-button__state-border {
+  box-shadow: none !important;
+}
+
+.n-button:focus::before,
+.n-button:active::before {
+  box-shadow: none !important;
+  border: none !important;
+}
+
+.n-base-wave {
+  display: none !important;
+}
+
+/* ─── Pagination ─── */
 .n-pagination {
   display: flex !important;
   gap: 8px !important;
@@ -361,7 +417,6 @@ button.n-button.n-button--default-type:hover .n-button__content {
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
-
   box-sizing: border-box !important;
   width: 38px !important;
   height: 38px !important;
@@ -370,11 +425,7 @@ button.n-button.n-button--default-type:hover .n-button__content {
   margin: 0 !important;
 }
 
-/* 3. Active state - Fixed sizing */
-.n-pagination
-  .n-pagination-item:not(
-    .n-pagination-item--disabled
-  ).n-pagination-item--active {
+.n-pagination .n-pagination-item:not(.n-pagination-item--disabled).n-pagination-item--active {
   background-color: #171717 !important;
   color: white !important;
   border-radius: 50% !important;
@@ -382,21 +433,15 @@ button.n-button.n-button--default-type:hover .n-button__content {
   border: none !important;
 }
 
-/* 4. Hover states */
-.n-pagination
-  .n-pagination-item:not(.n-pagination-item--disabled):not(
-    .n-pagination-item--active
-  ):not(.n-pagination-item--button):hover {
+.n-pagination .n-pagination-item:not(.n-pagination-item--disabled):not(.n-pagination-item--active):not(.n-pagination-item--button):hover {
   border-color: #171717 !important;
   color: #171717 !important;
 }
 
-.n-pagination
-  .n-pagination-item--button:not(.n-pagination-item--disabled):hover {
+.n-pagination .n-pagination-item--button:not(.n-pagination-item--disabled):hover {
   border-color: #171717 !important;
 }
 
-/* 5. Prev/Next Buttons layout */
 .n-pagination .n-pagination-item.n-pagination-item--button {
   box-sizing: border-box !important;
   width: 38px !important;
@@ -405,7 +450,6 @@ button.n-button.n-button--default-type:hover .n-button__content {
   border-radius: 50% !important;
 }
 
-/* 6. Disabled state */
 .n-pagination .n-pagination-item.n-pagination-item--disabled {
   color: #ced4da !important;
   background-color: #fff !important;
@@ -413,95 +457,7 @@ button.n-button.n-button--default-type:hover .n-button__content {
   pointer-events: none !important;
 }
 
-.upload-trigger-box {
-  width: 120px;
-  height: 120px;
-  border: 1px dashed #d9d9d9;
-  border-radius: 8px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  gap: 10px;
-  transition: border-color 0.3s;
-}
-
-.upload-trigger-box:hover {
-  border-color: #171717;
-  color: #171717;
-}
-
-.preview-box {
-  position: relative;
-  width: 120px;
-  height: 120px;
-  border-radius: 8px;
-  overflow: hidden;
-}
-
-.img-preview {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.45);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-
-.preview-box:hover .overlay {
-  opacity: 1;
-}
-
-.icon-group {
-  display: flex;
-  gap: 5px;
-}
-
-.action-icon {
-  color: white;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 35px;
-  height: 35px;
-  border-radius: 50%;
-
-  transition: all 0.3s ease;
-}
-
-.action-icon:hover {
-  background-color: rgba(255, 255, 255, 0.25);
-}
-
-.n-button .n-button__border,
-.n-button .n-button__state-border {
-  box-shadow: none !important;
-}
-
-.n-button:focus::before, 
-.n-button:active::before {
-  box-shadow: none !important;
-  border: none !important;
-}
-
-.n-base-wave {
-  display: none !important;
-}
-
-
+/* ─── Dropdown ─── */
 .n-dropdown-menu {
   border-radius: 12px !important;
   padding: 6px !important;
@@ -511,20 +467,22 @@ button.n-button.n-button--default-type:hover .n-button__content {
   border-radius: 8px !important;
 }
 
-.n-menu .n-popover .n-menu-item-content--selected,
-.n-menu-item-content--selected {
-  background-color: #F3F4F6 !important;
-  border-radius: 8px !important;
+/* ─── Select ─── */
+.n-base-select-menu .n-base-select-option {
+  padding: 8px 20px !important;
+  border-radius: 10px;
 }
 
-.n-popover.n-menu-tooltip {
-  border-radius: 8px !important;
+.n-base-select-option__check {
+  padding-right: 25px !important;
 }
 
-.n-menu-tooltip .n-menu-item-content {
-  border-radius: 8px !important;
+.n-base-select-menu {
+  padding: 6px 0 !important;
+  border-radius: 15px;
 }
 
+/* ─── Layout ─── */
 .navbar-wrapper {
   padding: 12px 12px 0 12px;
   background-color: #f3f4f6;
@@ -538,10 +496,6 @@ button.n-button.n-button--default-type:hover .n-button__content {
   display: flex;
   justify-content: space-between;
   align-items: center;
-}
-
-.nav-info {
-  gap: 15px;
 }
 
 .layout-wrapper {
@@ -565,49 +519,7 @@ button.n-button.n-button--default-type:hover .n-button__content {
   padding: 15px;
 }
 
-/* Hamburger button */
-.hamburger-btn {
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 6px;
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #1f1f1f;
-  transition: background 0.2s;
-}
-.hamburger-btn:hover {
-  background-color: #f3f4f6;
-}
-
-/* Drawer profile section */
-.drawer-profile {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 16px 16px 12px;
-  border-bottom: 1px solid #e5e7eb;
-  margin-bottom: 4px;
-}
-
-.bell-wrapper {
-  position: relative;
-  width: 36px;
-  height: 36px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  border-radius: 50%;
-  transition: background 0.2s;
-}
-
-.bell-wrapper:hover {
-  background-color: #f3f4f6;
-}
-
+/* ─── Sidebar Trigger ─── */
 .custom-trigger {
   position: absolute;
   right: -13px;
@@ -627,38 +539,7 @@ button.n-button.n-button--default-type:hover .n-button__content {
   transition: background 0.2s;
 }
 
-.bell-badge {
-  position: absolute;
-  top: 2px;
-  right: 2px;
-  background-color: #171717;
-  color: white;
-  font-size: 9px;
-  font-weight: 700;
-  min-width: 16px;
-  height: 16px;
-  border-radius: 999px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0 3px;
-  line-height: 1;
-}
-
-.nav-divider {
-  width: 1px;
-  height: 24px;
-  background-color: #e5e7eb;
-}
-
-.profile {
-  padding: 3px 15px;
-}
-
-.profile:hover {
-  background-color: #f3f4f6;
-}
-
+/* ─── Sidebar Menu ─── */
 .n-layout-sider {
   overflow: visible !important;
 }
@@ -696,6 +577,7 @@ button.n-button.n-button--default-type:hover .n-button__content {
   margin-right: 8px !important;
 }
 
+/* Active left border */
 .n-menu-item-content--selected::after,
 .n-menu--collapsed .n-menu-item-content--child-active-closed::after {
   content: "" !important;
@@ -719,6 +601,20 @@ button.n-button.n-button--default-type:hover .n-button__content {
   border-radius: 99px !important;
 }
 
+/* Active parent border (injected dynamically) */
+.n-menu-item-content--child-active::after,
+.n-menu-item-content--child-active-closed::after {
+  content: "";
+  position: absolute;
+  left: 8px;
+  top: 8px;
+  bottom: 8px;
+  width: 3px;
+  background-color: #171717;
+  border-radius: 99px;
+}
+
+/* ─── Scrollbar ─── */
 .n-scrollbar-rail.n-scrollbar-rail--vertical {
   top: 77px !important;
   bottom: 30px !important;
@@ -731,38 +627,18 @@ button.n-button.n-button--default-type:hover .n-button__content {
   width: 6px !important;
 }
 
-/* Hide desktop sider on mobile at layout level */
+/* ─── Responsive ─── */
 @media (max-width: 991.98px) {
   :deep(.n-layout-sider) {
     display: none !important;
   }
+
   .navbar-inner {
     padding: 8px 5px;
-  }
-  .nav-info {
-    gap: 0px;
-  }
-  .profile {
-    padding-right: 5px;
   }
 }
 
 .responsive-title {
   font-size: clamp(13px, 3vw, 20px);
 }
-
-.n-base-select-menu .n-base-select-option {
-  padding: 8px 20px !important;
-  border-radius: 10px;
-}
-
-.n-base-select-option__check {
-  padding-right: 25px !important;
-}
-
-.n-base-select-menu {
-  padding: 6px 0 !important;
-  border-radius: 15px;
-}
-
 </style>

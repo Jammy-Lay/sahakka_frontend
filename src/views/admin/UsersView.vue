@@ -135,7 +135,7 @@ const handleAction = async (key, row) => {
     try {
         if (key === "active" && row.is_active === 0) {
             try {
-                await api.patch(`/api/sahakka-admin/users/${row.id}/activate`);
+                await api.patch(`/sahakka-admin/users/${row.id}/activate`);
                 await usersStore.fetchUsers();
 
                 toast.success(`${row.name} activated successfully`);
@@ -143,20 +143,20 @@ const handleAction = async (key, row) => {
                 toast.error(error.response?.data?.message || "Activation failed");
             }
         } else if (key === "active" && row.is_active === 1) {
-            toast.info("This user is already activated");
+            toast.success("This user is already activated");
         }
 
         if (key === "block" && row.is_active === 1) {
             try {
-                await api.patch(`/api/sahakka-admin/users/${row.id}/suspend`);
+                await api.patch(`/sahakka-admin/users/${row.id}/suspend`);
                 await usersStore.fetchUsers();
 
-                toast.warning(`${row.name} has been blocked`);
+                toast.success(`${row.name} has been blocked`);
             } catch (error) {
                 toast.error(error.response?.data?.message || "Block failed");
             }
         } else if (key === "block" && row.is_active === 0) {
-            toast.info("This user is already blocked");
+            toast.error("This user is already blocked");
 
         }
     } catch (error) {

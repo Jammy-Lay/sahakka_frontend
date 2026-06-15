@@ -34,7 +34,7 @@
                 </n-scrollbar>
 
                 <!-- Pagination -->
-                <div class="mt-2 d-flex justify-content-end">
+                <div class="mt-3 d-flex justify-content-end">
                     <n-pagination v-model:page="currentPage" :page-count="totalPages" @update:page="changePage">
                         <template #prev>
                             <ChevronLeft />
@@ -99,7 +99,7 @@ import { useWorkspaceStore } from "@/stores/admin/workspaces";
 import { useTeamstore } from "@/stores/admin/teams";
 import { useTaskstore } from "@/stores/admin/tasks";
 import router from "@/router";
-import { ChartPie, Users, Layers } from "lucide-vue-next";
+import { ChartPie, Users, Layers, Search, ChevronLeft, ChevronRight } from "lucide-vue-next";
 import BaseTitle from "@/components/BaseTitle.vue";
 import Loading from "@/components/layouts/Loading.vue";
 import { useToast } from "vue-toastification";
@@ -270,7 +270,6 @@ const reportColumns = [
             );
         },
     },
-
     {
         title: "Owner",
         key: "owner",
@@ -285,10 +284,16 @@ const reportColumns = [
             );
         },
     },
-
     {
         title: "DATE",
         key: "date",
+        render(row) {                                         
+            return h(
+                "span",
+                { style: "white-space: nowrap;" },            
+                row.date
+            );
+        },
     },
 ];
 
@@ -355,5 +360,25 @@ onMounted(async () => {
 
 .clear-btn:hover {
     color: #ef4444;
+}
+.text-truncate-1 {
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.text-truncate-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.text-truncate-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 </style>

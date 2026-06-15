@@ -8,7 +8,6 @@
             <n-tag round :bordered="false" type="warning">
                 {{ todayLabel }}
             </n-tag>
-
         </div>
 
         <div class="row g-4">
@@ -18,7 +17,6 @@
                         <div>
                             <p class="text-secondary fs-7 mb-2">{{ item.label }}</p>
                             <h3 class="fw-bold mb-1">{{ item.value }}</h3>
-
                             <n-ellipsis style="max-width: 240px">
                                 <div class="d-flex align-items-center gap-1 fs-7"
                                     :class="item.trendType === 'up' ? 'text-success' : 'text-prime'">
@@ -91,20 +89,61 @@
                         class="dashboard-table" />
                 </div>
             </div>
+
+            <!-- Engagement Card (single, fixed) -->
+            <div class="col-12">
+                <div class="engagement-card">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <span class="card-title">
+                            <i class="bi bi-people me-2"></i> Customer Engagement Trends
+                        </span>
+
+                        <!-- Dropdown Date Range Selector -->
+                        <n-dropdown trigger="click" :options="rangeOptions" @select="handleRangeSelect">
+                            <n-button size="small" class="rounded-3">
+                                {{ selectedRangeLabel }}
+                                <template #icon><n-icon>
+                                        <ChevronDown />
+                                    </n-icon></template>
+                            </n-button>
+                        </n-dropdown>
+                    </div>
+
+                    <div class="d-flex gap-4 mb-4">
+                        <!-- Real Active Users from store -->
+                        <div>
+                            <div class="metric-label">Active Users</div>
+                            <div class="metric-value">
+                                {{ activeUsersCount.toLocaleString() }}
+                                <span class="metric-badge">▲ live</span>
+                            </div>
+                        </div>
+                        <!-- New Users replacing Purchase Conversion Rate -->
+                        <div>
+                            <div class="metric-label">New Users</div>
+                            <div class="metric-value">
+                                {{ newUsersCount.toLocaleString() }}
+                                <span class="metric-badge">▲ registered</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Single canvas only here -->
+                    <div style="position: relative; height: 220px;">
+                        <canvas ref="chartRef"></canvas>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </template>
 
 <script setup>
-import { computed, h, onMounted, reactive, ref } from "vue";
+import { computed, h, onMounted, ref } from "vue";
 import { NAvatar, NTag } from "naive-ui";
 import {
-    BriefcaseBusiness,
-    CalendarDays,
     Clock,
-    DollarSign,
     TrendingUp,
-    TrendingDown,
     Users,
     Layers,
     User,
@@ -115,7 +154,11 @@ import BaseTitle from "@/components/BaseTitle.vue";
 import { useUserStore } from "@/stores/admin/users";
 import Loading from "@/components/layouts/Loading.vue";
 import { useToast } from "vue-toastification";
+import Chart from "chart.js/auto";
 
+const chartRef = ref(null);
+const selectedRange = ref("week");
+let chartInstance = null;
 const toast = useToast();
 const loading = ref(false);
 
@@ -128,7 +171,6 @@ const todayLabel = new Intl.DateTimeFormat("en-US", {
 
 const formatDate = (date) => {
     if (!date) return "N/A";
-
     return new Intl.DateTimeFormat("en-GB", {
         day: "2-digit",
         month: "short",
@@ -136,109 +178,98 @@ const formatDate = (date) => {
     }).format(new Date(date));
 };
 
-let tasks = ref(0);
-let teams = ref(0);
-let users = ref(0);
-let workspaces = ref(0);
+const dashboard = ref({
+    users: { total: 0, today: 0, text: "" },
+    workspaces: { total: 0, today: 0, text: "" },
+    teams: { total: 0, today: 0, text: "" },
+    tasks: { total: 0, today: 0, text: "" },
+});
 
 const fetchDashboard = async () => {
     loading.value = true;
     try {
-        const res = await api.get('/api/sahakka-admin/dashboard');
-        let data = res.data.data;
-
-        users.value = data.total_users;
-        workspaces.value = data.total_workspaces;
-        teams.value = data.total_teams;
-        tasks.value = data.total_tasks;
-
+        const res = await api.get('/sahakka-admin/dashboard');
+        dashboard.value = res.data.data;
     } catch (error) {
         toast.error("Failed to load");
-    } finally{
+    } finally {
         loading.value = false;
     }
-}
+};
 
 const stats = computed(() => [
     {
         label: "Total Users",
-        value: users.value,
-        note: "4 users active now",
+        value: dashboard.value.users.total,
+        note: dashboard.value.users.text,
+        today: Number(dashboard.value.users.today),
         trendType: "up",
         icon: User,
     },
     {
         label: "Total Workspaces",
-        value: workspaces.value,
-        note: "12 assigned today",
+        value: dashboard.value.workspaces.total,
+        note: dashboard.value.workspaces.text,
+        today: Number(dashboard.value.workspaces.today),
         trendType: "up",
         icon: Layers,
     },
     {
         label: "Total Teams",
-        value: teams.value,
-        note: "5 assigned today",
+        value: dashboard.value.teams.total,
+        note: dashboard.value.teams.text,
+        today: Number(dashboard.value.teams.today),
         trendType: "up",
         icon: Users,
     },
     {
         label: "Total Tasks",
-        value: tasks.value,
-        note: "2 assigned today",
+        value: dashboard.value.tasks.total,
+        note: dashboard.value.tasks.text,
+        today: Number(dashboard.value.tasks.today),
         trendType: "up",
         icon: ChartPie,
     },
 ]);
-
+onMounted(() => fetchDashboard());
 const usersStore = useUserStore();
+
+// ── Real computed metrics from store ────────────────────────────────────────
+const activeUsersCount = computed(() =>
+    (usersStore.users || []).filter(u => u.is_active === 1).length
+);
+
+const newUsersCount = computed(() =>
+    (usersStore.users || []).filter(u => u.is_verified === 0).length
+);
+
+// ── Project Overview ─────────────────────────────────────────────────────────
 const getUserStats = async () => {
     await usersStore.fetchUsers();
-
-    const users = usersStore.users || [];
-    const totalUsers = users.length;
-
-    let activeUsers = users.filter(u => u.is_active === 1).length;
-    let verifiedUsers = users.filter(u => u.is_verified === 1).length;
-    let newUsers = users.filter(u => u.is_verified === 0).length;
-
-    let activeProgress =
-        totalUsers === 0 ? 0 : (activeUsers / totalUsers) * 100;
-
-    let verifiedProgress =
-        totalUsers === 0 ? 0 : (verifiedUsers / totalUsers) * 100;
-
-    let newUsersProgress =
-        totalUsers === 0 ? 0 : (newUsers / totalUsers) * 100;
+    const allUsers = usersStore.users || [];
+    const totalUsers = allUsers.length;
+    const activeUsers = allUsers.filter(u => u.is_active === 1).length;
+    const verifiedUsers = allUsers.filter(u => u.is_verified === 1).length;
+    const newUsers = allUsers.filter(u => u.is_verified === 0).length;
 
     return {
         totalUsers,
         activeUsers,
         verifiedUsers,
         newUsers,
-        activeProgress: Number(activeProgress.toFixed(2)),
-        verifiedProgress: Number(verifiedProgress.toFixed(2)),
-        newUsersProgress: Number(newUsersProgress.toFixed(2))
+        activeProgress: totalUsers === 0 ? 0 : Number(((activeUsers / totalUsers) * 100).toFixed(2)),
+        verifiedProgress: totalUsers === 0 ? 0 : Number(((verifiedUsers / totalUsers) * 100).toFixed(2)),
+        newUsersProgress: totalUsers === 0 ? 0 : Number(((newUsers / totalUsers) * 100).toFixed(2)),
     };
-
 };
 
 const projectSummary = ref([]);
 const loadProjectSummary = async () => {
     const stats = await getUserStats();
-
     projectSummary.value = [
-        {
-            label: "Active Users",
-            value: stats.activeUsers,
-        },
-        {
-            label: "Verified Users",
-            value: stats.verifiedUsers,
-        },
-        {
-            label: "New Users",
-            value: stats.newUsers,
-        },
+        { label: "Active Users", value: stats.activeUsers },
+        { label: "Verified Users", value: stats.verifiedUsers },
+        { label: "New Users", value: stats.newUsers },
     ];
 };
 
@@ -246,24 +277,15 @@ const overviewProjects = ref([]);
 const generateOverview = async () => {
     const stats = await getUserStats();
     overviewProjects.value = [
-        {
-            name: "Active Users Growth",
-            progress: stats.activeProgress,
-        },
-        {
-            name: "User Verified",
-            progress: stats.verifiedProgress,
-        },
-        {
-            name: "New Users",
-            progress: stats.newUsersProgress,
-        },
+        { name: "Active Users Growth", progress: stats.activeProgress },
+        { name: "User Verified", progress: stats.verifiedProgress },
+        { name: "New Users", progress: stats.newUsersProgress },
     ];
 };
 
-
-const recentUsersList = computed(() => {
-    return [...usersStore.users]
+// ── Recent Users Table ───────────────────────────────────────────────────────
+const recentUsersList = computed(() =>
+    [...(usersStore.users || [])]
         .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
         .slice(0, 3)
         .map(u => ({
@@ -272,14 +294,11 @@ const recentUsersList = computed(() => {
             date: formatDate(u.created_at),
             status: "New",
             type: "info",
-        }));
-});
+        }))
+);
 
 const reportColumns = [
-    {
-        title: "USERBANE",
-        key: "username",
-    },
+    { title: "USERNAME", key: "username" },
     {
         title: "EMAIL",
         key: "email",
@@ -287,32 +306,128 @@ const reportColumns = [
             return h("span", { class: "fw-bold" }, row.email);
         },
     },
-    {
-        title: "DATE",
-        key: "date",
-    },
+    { title: "DATE", key: "date" },
     {
         title: "STATUS",
         key: "status",
         render(row) {
-            return h(
-                NTag,
-                {
-                    round: true,
-                    bordered: false,
-                    type: row.type,
-                },
-                { default: () => row.status },
-            );
+            return h(NTag, { round: true, bordered: false, type: row.type }, { default: () => row.status });
         },
     },
 ];
 
+// ── Chart helpers ────────────────────────────────────────────────────────────
+const getRangeData = () => {
+    const allUsers = usersStore.users || [];
+    const now = new Date();
+    let filtered = [];
+
+    if (selectedRange.value === "today") {
+        filtered = allUsers.filter(u => {
+            const d = new Date(u.created_at);
+            return d.toDateString() === now.toDateString();
+        });
+    } else if (selectedRange.value === "week") {
+        const weekAgo = new Date(now);
+        weekAgo.setDate(now.getDate() - 7);
+        filtered = allUsers.filter(u => new Date(u.created_at) >= weekAgo);
+    } else {
+        // last month
+        const monthAgo = new Date(now);
+        monthAgo.setMonth(now.getMonth() - 1);
+        filtered = allUsers.filter(u => new Date(u.created_at) >= monthAgo);
+    }
+
+    // Group by readable date label
+    const grouped = {};
+    filtered.forEach(u => {
+        const label = new Intl.DateTimeFormat("en-GB", {
+            day: "2-digit",
+            month: "short",
+        }).format(new Date(u.created_at));
+        grouped[label] = (grouped[label] || 0) + 1;
+    });
+
+    const sorted = Object.entries(grouped)
+        .map(([date, count]) => ({ date, count }))
+        .sort((a, b) => new Date(a.date) - new Date(b.date));
+
+    // Fallback so chart is never empty
+    if (sorted.length === 0) {
+        return [{ date: "No data", count: 0 }];
+    }
+
+    return sorted;
+};
+
+const updateChart = () => {
+    const rangeData = getRangeData();
+    if (chartInstance) {
+        chartInstance.data.labels = rangeData.map(d => d.date);
+        chartInstance.data.datasets[0].data = rangeData.map(d => d.count);
+        chartInstance.update();
+    }
+};
+const rangeOptions = [
+    { label: "Last Week", key: "week" },
+    { label: "Last Month", key: "month" },
+];
+
+const selectedRangeLabel = computed(() => {
+    return rangeOptions.find((o) => o.key === selectedRange.value)?.label || "Select";
+});
+
+function handleRangeSelect(key) {
+    selectedRange.value = key;
+    updateChart();
+}
+
 onMounted(async () => {
     await fetchDashboard();
-    await getUserStats();
-    await loadProjectSummary();
-    await generateOverview();
+    await usersStore.fetchUsers();
+    loadProjectSummary();
+    generateOverview();
+
+    const initial = getRangeData();
+
+    chartInstance = new Chart(chartRef.value, {
+        type: "line",
+        data: {
+            labels: initial.map(d => d.date),
+            datasets: [{
+                label: "New Users",
+                data: initial.map(d => d.count),
+                borderColor: "#378ADD",
+                backgroundColor: "rgba(55,138,221,0.08)",
+                fill: true,
+                tension: 0.4,
+                pointRadius: 4,
+                pointHoverRadius: 5,
+                pointHoverBackgroundColor: "#378ADD",
+                pointHoverBorderColor: "#fff",
+                pointHoverBorderWidth: 2,
+            }],
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                x: {
+                    grid: { color: "rgba(0,0,0,0.05)" },
+                    ticks: { font: { size: 11 } },
+                },
+                y: {
+                    min: 0,
+                    grid: { color: "rgba(0,0,0,0.05)" },
+                    ticks: {
+                        callback: v => v >= 1000 ? (v / 1000) + "K" : v,
+                        font: { size: 11 },
+                    },
+                },
+            },
+        },
+    });
 });
 </script>
 
@@ -331,27 +446,6 @@ onMounted(async () => {
     height: 48px;
     justify-content: center;
     width: 48px;
-}
-
-.project-list {
-    display: flex;
-    flex-direction: column;
-    gap: 18px;
-}
-
-.project-row {
-    border-bottom: 1px solid #eef0f3;
-    padding-bottom: 18px;
-}
-
-.project-row:last-child {
-    border-bottom: 0;
-    padding-bottom: 0;
-}
-
-.progress-value {
-    min-width: 44px;
-    text-align: right;
 }
 
 .view-link {
@@ -436,32 +530,28 @@ onMounted(async () => {
     font-size: 12px;
 }
 
-.budget-ring {
-    display: flex;
-    justify-content: center;
+.engagement-card {
+    background: #fff;
+    border: 0.5px solid #e3e3e3;
+    border-radius: 16px;
+    padding: 20px 24px;
 }
 
-.budget-grid {
-    display: grid;
-    gap: 18px;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+.metric-label {
+    font-size: 12px;
+    color: #888;
 }
 
-.activity-grid {
-    display: grid;
-    gap: 14px;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+.metric-value {
+    font-size: 22px;
+    font-weight: 600;
+    color: #111;
 }
 
-.activity-item {
-    align-items: center;
-    background: #f8fafc;
-    border: 1px solid #edf0f3;
-    border-radius: 14px;
-    display: flex;
-    gap: 12px;
-    min-height: 78px;
-    padding: 14px;
+.metric-badge {
+    font-size: 13px;
+    color: #1D9E75;
+    font-weight: 500;
 }
 
 :deep(.dashboard-table .n-data-table-wrapper) {
@@ -477,12 +567,6 @@ onMounted(async () => {
 }
 
 @media (max-width: 575px) {
-
-    .activity-grid,
-    .budget-grid {
-        grid-template-columns: 1fr;
-    }
-
     .project-overview {
         grid-template-columns: 1fr;
     }
