@@ -40,6 +40,11 @@ const router = createRouter({
           component: () => import("../views/user/TaskView.vue"),
         },
         {
+          path: ":workspace_id/team/:team_id/submissions",
+          name: "submissions",
+          component: () => import("../views/user/SubmissionView.vue"),
+        },
+        {
           path: ":workspace_id/team/:team_id/issues",
           name: "issues",
           component: () => import("../views/user/IssueView.vue"),
@@ -50,7 +55,7 @@ const router = createRouter({
           component: () => import("../views/user/DocumentView.vue"),
         },
         {
-          path: ":workspace_id/team/:team_id/documents/editor",
+          path: ":workspace_id/team/:team_id/documents/:document_id/editor",
           name: "editor",
           component: () => import("../views/user/DocumentEditorView.vue"),
         },
@@ -75,6 +80,11 @@ const router = createRouter({
       path: "/about",
       name: "about",
       component: () => import("../views/AboutView.vue"),
+    },
+    {
+      path: "/no-workspace",
+      name: "no-workspace",
+      component: () => import("../views/NoWorkspaceView.vue"),
     },
     {
       path: "/admin/",
@@ -119,10 +129,15 @@ const router = createRouter({
         },
       ],
     },
-    {   
+    {
       path: "/loading",
       name: "loading",
-      component: () => import('../components/layouts/Loading.vue')
+      component: () => import("../components/layouts/Loading.vue"),
+    },
+    {
+      path: "/:pathMatch(.*)*",
+      name: "not-found",
+      component: () => import("../views/NotFoundView.vue"),
     },
   ],
 });

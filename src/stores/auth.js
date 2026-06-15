@@ -23,12 +23,13 @@ export const useAuthStore = defineStore("auth", () => {
   const logout = async () => {
     try {
       await api.delete("/logout");
+    } catch (err) {
+      throw new Error(err.response?.data?.message || "Logout failed");
+    } finally {
       user.value = {};
       getMe.value = {};
       token.value = null;
       localStorage.removeItem("token");
-    } catch (err) {
-      throw new Error(err.response?.data?.message || "Logout failed");
     }
   };
 

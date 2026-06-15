@@ -1,7 +1,7 @@
 <template>
   <div class="">
     <!-- Header -->
-    <div class="position-sticky top-0 z-1 header pt-5 pb-2 bg-body">
+    <div class="position-sticky top-0 z-1 header pt-4 pb-2 bg-body">
       <div class="d-flex align-items-start justify-content-between mb-3">
         <div>
           <h2 class="fw-semibold fs-5 mb-1">{{ getTeamById.title }}</h2>
@@ -25,14 +25,13 @@
       <!-- Create Task Modal -->
       <n-modal v-model:show="showCreateTask" :mask-closable="true">
         <div class="bg-white rounded-card" style="width: 750px">
-          <!-- Header -->
           <div class="d-flex align-items-center justify-content-between px-4 py-3 pb-2">
             <span class="fw-medium fs-5">Create task</span>
             <n-button
               text
               size="small"
               @click="showCreateTask = false"
-              class="text-dark hover-circle p-1 rounded-circle"
+              class="hover-circle p-1 rounded-circle"
             >
               <X size="18" />
             </n-button>
@@ -41,14 +40,12 @@
           <n-divider style="margin: 5px 0; --n-color: #e4e4e7" />
 
           <div class="px-5 pt-2 pb-4">
-            <!-- Title -->
             <label class="mb-2 fs-13 text-dark mt-2">Title</label>
             <BaseInput
               v-model="form.title"
               input-placeholder="Title"
               input-class="py-2 fs-13 rounded-btn-sm bg-white mb-3"
             />
-            <!-- Description -->
             <label class="mb-2 fs-13 text-dark">Description</label>
             <textarea
               v-model="form.description"
@@ -57,12 +54,12 @@
               style="min-height: 120px; resize: vertical; border: 1px solid #e4e4e7"
             />
 
-            <!-- Type of task -->
             <div class="d-flex align-items-center gap-3 mb-3">
               <span class="fs-13 fw-medium">Type of task</span>
               <n-popover
                 trigger="click"
                 placement="bottom-start"
+                v-model:show="showTypePop"
                 :show-arrow="false"
                 style="border-radius: 12px; padding: 6px; width: 160px"
               >
@@ -80,7 +77,10 @@
                     v-for="(cfg, key) in typeConfig"
                     :key="key"
                     class="d-flex align-items-center gap-2 px-2 py-1 rounded workspace-item fs-13 fw-medium cursor-pointer text-capitalize"
-                    @click="form.type = key"
+                    @click="
+                      form.type = key;
+                      showTypePop = false;
+                    "
                   >
                     <Circle size="10" :fill="cfg.fill" stroke-width="0" />
                     {{ key }}
@@ -88,9 +88,8 @@
                 </div>
               </n-popover>
             </div>
-            <!-- Meta row -->
+
             <div class="meta-grid-modal">
-              <!-- Labels -->
               <span class="fs-13 text-mute d-flex align-items-center gap-1">
                 <circle-dashed size="14" /> Status
               </span>
@@ -111,6 +110,7 @@
               <n-popover
                 trigger="click"
                 placement="bottom-start"
+                v-model:show="showStatusPop"
                 :show-arrow="false"
                 style="border-radius: 12px; padding: 6px; width: 160px"
               >
@@ -131,7 +131,10 @@
                     v-for="(cfg, key) in statusConfig"
                     :key="key"
                     class="d-flex align-items-center gap-2 px-2 py-1 rounded workspace-item fs-13 fw-medium cursor-pointer"
-                    @click="form.status = key"
+                    @click="
+                      form.status = key;
+                      showStatusPop = false;
+                    "
                   >
                     <component :is="cfg.icon" size="14" />
                     {{ cfg.label }}
@@ -143,6 +146,7 @@
               <n-popover
                 trigger="click"
                 placement="bottom-start"
+                v-model:show="showPriorityPop"
                 :show-arrow="false"
                 style="border-radius: 12px; padding: 6px; width: 140px"
               >
@@ -167,7 +171,10 @@
                     v-for="(cfg, key) in priorityConfig"
                     :key="key"
                     class="d-flex align-items-center gap-2 px-2 py-1 rounded workspace-item fs-13 fw-medium cursor-pointer text-capitalize"
-                    @click="form.priority = key"
+                    @click="
+                      form.priority = key;
+                      showPriorityPop = false;
+                    "
                   >
                     <Circle size="10" :fill="cfg.fill" stroke-width="0" />
                     {{ key }}
@@ -179,42 +186,84 @@
               <n-popover
                 trigger="click"
                 placement="bottom-start"
+                v-model:show="showAssigneePop"
+                :disabled="!canChangeAssignee"
                 :show-arrow="false"
                 style="border-radius: 12px; padding: 6px; width: 180px"
               >
                 <template #trigger>
-                  <span class="d-flex align-items-center gap-2 fs-13 cursor-pointer">
+                  <span
+                    class="d-flex align-items-center gap-2 fs-13"
+                    :class="canChangeAssignee ? 'cursor-pointer' : 'cursor-default'"
+                  >
                     <img
-                      :src="form.assignee?.avatar || getMe.avatar"
+                      v-if="form.assigned_to"
+                      :src="
+                        getTeamById.members?.find((m) => m.user_id === form.assigned_to)
+                          ?.avatar
+                      "
                       class="rounded-circle object-fit-cover"
                       style="width: 22px; height: 22px"
                     />
-
-                    <n-ellipsis
-                      style="max-width: 60px"
-                      :tooltip="{
-                        style: {
-                          fontSize: '11px',
-                          padding: '4px 8px',
-                          borderRadius: '8px',
-                        },
-                      }"
+                    <div
+                      v-else
+                      class="rounded-circle bg-secondary d-flex align-items-center justify-content-center"
+                      style="width: 22px; height: 22px; flex-shrink: 0"
                     >
-                      {{ form.assignee?.name || getMe.name }}
+                      <img
+                        src="../../assets/image/default-avatar.png"
+                        alt=""
+                        class="w-100 h-100 object-fit-cover rounded-circle"
+                      />
+                    </div>
+                    <n-ellipsis style="max-width: 80px">
+                      {{
+                        form.assigned_to
+                          ? getTeamById.members?.find(
+                              (m) => m.user_id === form.assigned_to
+                            )?.name
+                          : "No Assignee"
+                      }}
                     </n-ellipsis>
                     <span
-                      v-if="!form.assignee || form.assignee.user_id === getMe.user_id"
+                      v-if="form.assigned_to === getMe.user_id"
                       class="text-mute fs-11"
                       >(You)</span
                     >
                   </span>
                 </template>
+
                 <div>
+                  <!-- No Assignee -->
                   <div
-                    v-for="member in teamMembers"
+                    class="d-flex align-items-center gap-2 px-2 py-1 rounded workspace-item fs-13 cursor-pointer"
+                    @click="
+                      form.assigned_to = null;
+                      showAssigneePop = false;
+                    "
+                  >
+                    <div
+                      class="rounded-circle bg-secondary d-flex align-items-center justify-content-center"
+                      style="width: 22px; height: 22px; flex-shrink: 0"
+                    >
+                      <img
+                        src="../../assets/image/default-avatar.png"
+                        alt=""
+                        class="w-100 h-100 object-fit-cover rounded-circle"
+                      />
+                    </div>
+                    <span class="text-mute">No Assignee</span>
+                  </div>
+
+                  <!-- Members -->
+                  <div
+                    v-for="member in getTeamById.members"
                     :key="member.user_id"
                     class="d-flex align-items-center gap-2 px-2 py-1 rounded workspace-item fs-13 cursor-pointer"
-                    @click="form.assignee = member"
+                    @click="
+                      form.assigned_to = member.user_id;
+                      showAssigneePop = false;
+                    "
                   >
                     <img
                       :src="member.avatar"
@@ -222,14 +271,13 @@
                       style="width: 22px; height: 22px"
                     />
                     {{ member.name }}
-                    <span v-if="member.user_id === getMe.user_id" class="text-mute fs-11">
-                      (You)
-                    </span>
+                    <span v-if="member.user_id === getMe.user_id" class="text-mute fs-11"
+                      >(You)</span
+                    >
                   </div>
                 </div>
               </n-popover>
 
-              <!-- Date range picker spanning 2 columns -->
               <n-date-picker
                 v-model:value="form.date_range"
                 type="daterange"
@@ -251,6 +299,7 @@
               type="submit"
               class="btn bg-btn w-fit rounded-btn py-2 px-3 fs-14"
               :disabled="isLoading"
+              @click="handleCreateTask"
             >
               <span v-if="isLoading" class="spinner-border spinner-border-sm me-2" />
               {{ isLoading ? "Creating" : "Create Task" }}
@@ -259,20 +308,547 @@
         </div>
       </n-modal>
 
+      <!-- Task Detail Modal -->
+      <n-modal v-model:show="showTaskModal" :mask-closable="true">
+        <div
+          v-if="selectedTask"
+          class="bg-white task-detail-modal"
+          :class="{ 'modal-expanded': showActivity }"
+        >
+          <!-- Modal Top Bar -->
+          <div class="detail-topbar">
+            <span class="fw-medium fs-5">Detail</span>
+            <div class="d-flex align-items-center gap-2">
+              <button
+                class="icon-action-btn"
+                @click="showActivity = !showActivity"
+                :title="showActivity ? 'Collapse' : 'Show activity'"
+              >
+                <Expand v-if="!showActivity" size="16" />
+                <Shrink v-else size="16" />
+              </button>
+              <button class="icon-action-btn" @click="showTaskModal = false">
+                <X size="18" />
+              </button>
+            </div>
+          </div>
+
+          <!-- Modal Body -->
+          <div class="detail-body">
+            <!-- Left / Main Panel -->
+            <div class="detail-main" :class="{ 'with-activity': showActivity }">
+              <div class="detail-scroll">
+                <!-- Assignee row -->
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                  <div class="d-flex align-items-center gap-2">
+                    <template v-if="!selectedTask.assigned_to?.user_id">
+                      <img
+                        src="../../assets/image/default-avatar.png"
+                        class="rounded-circle object-fit-cover"
+                        style="width: 28px; height: 28px"
+                      />
+                      <span class="fw-medium text-mute fs-13">No assignee</span>
+                    </template>
+                    <template
+                      v-else-if="
+                        selectedTask.created_by?.user_id ===
+                        selectedTask.assigned_to?.user_id
+                      "
+                    >
+                      <img
+                        :src="selectedTask.created_by?.avatar"
+                        class="rounded-circle object-fit-cover"
+                        style="width: 28px; height: 28px"
+                      />
+                      <span class="fw-semibold fs-13">{{
+                        selectedTask.created_by?.name
+                      }}</span>
+                      <span class="fw-bold text-mute fs-12">·</span>
+                      <span class="text-mute fs-13">Self-assigned the task</span>
+                    </template>
+                    <template v-else>
+                      <img
+                        :src="selectedTask.assigned_to?.avatar"
+                        class="rounded-circle object-fit-cover"
+                        style="width: 28px; height: 28px"
+                      />
+                      <span class="fw-semibold fs-13">{{
+                        selectedTask.assigned_by?.name
+                      }}</span>
+                      <span class="fw-bold text-mute fs-12">·</span>
+                      <span class="text-mute fs-13">Assigned to you</span>
+                    </template>
+                  </div>
+
+                  <!-- Type badge -->
+                  <n-popover
+                    trigger="click"
+                    placement="bottom-end"
+                    v-model:show="showDetailTypePop"
+                    :show-arrow="false"
+                    style="border-radius: 12px; padding: 6px; width: 160px"
+                  >
+                    <template #trigger>
+                      <span
+                        class="tab-info fw-medium cursor-pointer"
+                        :class="[
+                          typeConfig[selectedTask.type]?.bg,
+                          typeConfig[selectedTask.type]?.text,
+                        ]"
+                        @click.stop
+                      >
+                        <Circle
+                          size="10"
+                          :fill="typeConfig[selectedTask.type]?.fill"
+                          stroke-width="0"
+                        />
+                        {{ selectedTask.type }}
+                      </span>
+                    </template>
+                    <div>
+                      <div
+                        v-for="(cfg, key) in typeConfig"
+                        :key="key"
+                        class="d-flex align-items-center gap-2 px-2 py-1 rounded workspace-item fs-13 fw-medium cursor-pointer text-capitalize"
+                        @click="
+                          selectedTask.type = key;
+                          showDetailTypePop = false;
+                          handleUpdateTask(selectedTask);
+                        "
+                      >
+                        <Circle size="10" :fill="cfg.fill" stroke-width="0" />
+                        {{ key }}
+                      </div>
+                    </div>
+                  </n-popover>
+                </div>
+
+                <!-- Meta rows -->
+                <div class="detail-meta-rows mb-3">
+                  <div class="detail-meta-row">
+                    <span class="detail-meta-label"
+                      ><CircleDashed size="14" /> Status</span
+                    >
+                    <n-popover
+                      trigger="click"
+                      placement="bottom-start"
+                      v-model:show="showDetailStatusPop"
+                      :show-arrow="false"
+                      style="border-radius: 12px; padding: 6px; width: 160px"
+                    >
+                      <template #trigger>
+                        <span
+                          class="tab-info w-fit fw-medium cursor-pointer"
+                          :class="[
+                            statusConfigFull[selectedTask.status]?.bg,
+                            statusConfigFull[selectedTask.status]?.text,
+                          ]"
+                          @click.stop
+                        >
+                          <component
+                            :is="statusConfigFull[selectedTask.status]?.icon"
+                            size="14"
+                          />
+                          {{ statusConfigFull[selectedTask.status]?.label }}
+                        </span>
+                      </template>
+                      <div>
+                        <div
+                          v-for="(cfg, key) in statusConfigFull"
+                          :key="key"
+                          class="d-flex align-items-center gap-2 px-2 py-1 rounded workspace-item fs-13 fw-medium cursor-pointer"
+                          @click="
+                            selectedTask.status = key;
+                            showDetailStatusPop = false;
+                            handleUpdateTask(selectedTask);
+                          "
+                        >
+                          <component :is="cfg.icon" size="14" />
+                          {{ cfg.label }}
+                        </div>
+                      </div>
+                    </n-popover>
+                  </div>
+
+                  <div class="detail-meta-row">
+                    <span class="detail-meta-label"><Ghost size="14" /> Priority</span>
+                    <n-popover
+                      trigger="click"
+                      placement="bottom-start"
+                      v-model:show="showDetailPriorityPop"
+                      :show-arrow="false"
+                      style="border-radius: 12px; padding: 6px; width: 140px"
+                    >
+                      <template #trigger>
+                        <span
+                          class="tab-info w-fit fw-medium cursor-pointer"
+                          :class="[
+                            priorityConfig[selectedTask.priority]?.bg,
+                            priorityConfig[selectedTask.priority]?.text,
+                          ]"
+                          @click.stop
+                        >
+                          <Circle
+                            size="10"
+                            :fill="priorityConfig[selectedTask.priority]?.fill"
+                            stroke-width="0"
+                          />
+                          {{ selectedTask.priority }}
+                        </span>
+                      </template>
+                      <div>
+                        <div
+                          v-for="(cfg, key) in priorityConfig"
+                          :key="key"
+                          class="d-flex align-items-center gap-2 px-2 py-1 rounded workspace-item fs-13 fw-medium cursor-pointer text-capitalize"
+                          @click="
+                            selectedTask.priority = key;
+                            showDetailPriorityPop = false;
+                            handleUpdateTask(selectedTask);
+                          "
+                        >
+                          <Circle size="10" :fill="cfg.fill" stroke-width="0" />
+                          {{ key }}
+                        </div>
+                      </div>
+                    </n-popover>
+                  </div>
+
+                  <div class="detail-meta-row mt-1">
+                    <span class="detail-meta-label"><Users size="14" /> Assignee</span>
+                    <n-popover
+                      trigger="click"
+                      placement="bottom-start"
+                      v-model:show="showDetailAssigneePop"
+                      :disabled="!canChangeAssignee"
+                      :show-arrow="false"
+                      style="border-radius: 12px; padding: 6px; width: 180px"
+                    >
+                      <template #trigger>
+                        <span
+                          class="d-flex align-items-center gap-2 fs-13"
+                          :class="canChangeAssignee ? 'cursor-pointer' : 'cursor-default'"
+                          @click.stop
+                        >
+                          <template v-if="!selectedTask.assigned_to?.user_id">
+                            <img
+                              src="../../assets/image/default-avatar.png"
+                              class="rounded-circle object-fit-cover"
+                              style="width: 22px; height: 22px"
+                            />
+                            <span class="text-mute">No assignee</span>
+                          </template>
+                          <template v-else>
+                            <img
+                              :src="selectedTask.assigned_to.avatar"
+                              class="rounded-circle object-fit-cover"
+                              style="width: 22px; height: 22px"
+                            />
+                            <n-ellipsis style="max-width: 80px">{{
+                              selectedTask.assigned_to.name
+                            }}</n-ellipsis>
+                            <span
+                              v-if="selectedTask.assigned_to.user_id === getMe.user_id"
+                              class="text-secondary fs-11"
+                              >(You)</span
+                            >
+                          </template>
+                        </span>
+                      </template>
+                      <div>
+                        <div
+                          class="d-flex align-items-center gap-2 px-2 py-1 rounded workspace-item fs-13 cursor-pointer"
+                          @click="
+                            selectedTask.assigned_to = null;
+                            showDetailAssigneePop = false;
+                            handleUpdateTask(selectedTask);
+                          "
+                        >
+                          <img
+                            src="../../assets/image/default-avatar.png"
+                            class="rounded-circle"
+                            style="width: 22px; height: 22px"
+                          />
+                          <span class="text-mute">No Assignee</span>
+                        </div>
+                        <div
+                          v-for="member in getMember"
+                          :key="member.user_id"
+                          class="d-flex align-items-center gap-2 px-2 py-1 rounded workspace-item fs-13 cursor-pointer"
+                          @click="
+                            selectedTask.assigned_to = member;
+                            showDetailAssigneePop = false;
+                            handleUpdateTask(selectedTask);
+                          "
+                        >
+                          <img
+                            :src="member.avatar"
+                            class="rounded-circle object-fit-cover"
+                            style="width: 22px; height: 22px"
+                          />
+                          {{ member.name }}
+                          <span
+                            v-if="member.user_id === getMe.user_id"
+                            class="text-mute fs-11"
+                            >(You)</span
+                          >
+                        </div>
+                      </div>
+                    </n-popover>
+                  </div>
+
+                  <div class="detail-meta-row mt-2">
+                    <span class="detail-meta-label"
+                      ><Calendar size="14" /> Start date</span
+                    >
+                    <n-popover
+                      v-model:show="showDetailStartDatePop"
+                      trigger="click"
+                      placement="bottom-start"
+                      :show-arrow="false"
+                      style="border-radius: 12px; padding: 0; overflow: hidden"
+                    >
+                      <template #trigger>
+                        <span
+                          class="fs-13 cursor-pointer date-trigger"
+                          :class="[
+                            selectedTask.start_date ? 'text-dark' : 'text-mute',
+                            showDetailStartDatePop ? 'bg-active' : '',
+                          ]"
+                          @click.stop
+                        >
+                          {{
+                            selectedTask.start_date
+                              ? formatDate(selectedTask.start_date)
+                              : "Set date"
+                          }}
+                        </span>
+                      </template>
+                      <div class="custom-picker">
+                        <n-date-picker
+                          :value="dateToTs(selectedTask.start_date)"
+                          type="date"
+                          :to="false"
+                          panel
+                          @update:value="
+                            (val) => {
+                              selectedTask.start_date = formatToYMD(val);
+                              showDetailStartDatePop = false;
+                              handleUpdateTask(selectedTask);
+                            }
+                          "
+                        />
+                      </div>
+                    </n-popover>
+                  </div>
+
+                  <div class="detail-meta-row mt-2">
+                    <span class="detail-meta-label"><Calendar size="14" /> End Date</span>
+                    <n-popover
+                      v-model:show="showDetailEndDatePop"
+                      trigger="click"
+                      placement="bottom-start"
+                      :show-arrow="false"
+                      style="border-radius: 12px; padding: 0; overflow: hidden"
+                    >
+                      <template #trigger>
+                        <span
+                          class="fs-13 cursor-pointer date-trigger"
+                          :class="[
+                            selectedTask.end_date ? 'text-dark' : 'text-mute',
+                            showDetailEndDatePop ? 'bg-active' : '',
+                          ]"
+                          @click.stop
+                        >
+                          {{
+                            selectedTask.end_date
+                              ? formatDate(selectedTask.end_date)
+                              : "Set date"
+                          }}
+                        </span>
+                      </template>
+                      <div class="custom-picker">
+                        <n-date-picker
+                          :value="dateToTs(selectedTask.end_date)"
+                          type="date"
+                          :to="false"
+                          panel
+                          @update:value="
+                            (val) => {
+                              selectedTask.end_date = formatToYMD(val);
+                              showDetailEndDatePop = false;
+                              handleUpdateTask(selectedTask);
+                            }
+                          "
+                        />
+                      </div>
+                    </n-popover>
+                  </div>
+                </div>
+
+                <div class="d-flex flex-column">
+                  <textarea
+                    v-model="selectedTask.title"
+                    class="detail-title-input fw-bold mb-2"
+                    rows="1"
+                    @blur="handleUpdateTask(selectedTask)"
+                    @input="autoResize"
+                  />
+                  <textarea
+                    v-model="selectedTask.description"
+                    placeholder="No description provided"
+                    class="detail-desc-input fs-13 text-mute mb-4"
+                    rows="1"
+                    @blur="handleUpdateTask(selectedTask)"
+                    @input="autoResize"
+                  />
+                </div>
+
+                <!-- File/Link Attachment -->
+                <p class="fw-semibold fs-15 mb-2">
+                  File attachment <Link size="15" class="ms-1" />
+                </p>
+                <div class="attach-upload-box mb-4">
+                  <div class="attach-pdf-icon">
+                    <FileText size="18" color="#e24b4a" />
+                  </div>
+                  <span class="fs-13 text-mute">Embed a PDF</span>
+                </div>
+
+                <!-- Messages -->
+                <p class="fw-semibold fs-15 mb-2">
+                  Messages <message-circle size="16" class="text-mute ms-1" />
+                </p>
+                <textarea
+                  v-model="taskMessage"
+                  placeholder="Send messages"
+                  class="msg-textarea"
+                />
+              </div>
+            </div>
+
+            <!-- Right / Activity Panel -->
+            <transition name="slide-activity">
+              <div v-if="showActivity" class="detail-activity">
+                <div class="activity-scroll">
+                  <p class="fw-semibold fs-14 mb-3">Task activity</p>
+
+                  <template
+                    v-if="selectedTask.activities && selectedTask.activities.length"
+                  >
+                    <template v-for="(group, gi) in groupedActivities" :key="gi">
+                      <div class="activity-date-label">
+                        <Calendar size="13" />
+                        {{ group.date }}
+                      </div>
+                      <div
+                        v-for="(act, ai) in group.items"
+                        :key="ai"
+                        class="activity-card"
+                      >
+                        <span class="act-tag" :class="actTagClass(act.action)">
+                          <component :is="actTagIcon(act.action)" size="11" />
+                          {{ act.action }}
+                        </span>
+                        <div
+                          class="d-flex align-items-center justify-content-between mb-2"
+                        >
+                          <div class="d-flex align-items-center gap-2">
+                            <img
+                              v-if="act.user?.avatar"
+                              :src="act.user.avatar"
+                              class="rounded-circle object-fit-cover"
+                              style="width: 24px; height: 24px"
+                            />
+                            <div v-else class="default-avatar-sm">
+                              {{ act.user?.name?.charAt(0) || "?" }}
+                            </div>
+                            <span class="fw-semibold fs-13">{{ act.user?.name }}</span>
+                          </div>
+                          <span class="fs-11 text-mute">{{ act.time }}</span>
+                        </div>
+                        <div class="act-note">{{ act.note }}</div>
+                      </div>
+                    </template>
+                  </template>
+
+                  <template v-else>
+                    <div class="text-mute fs-13 text-center py-4">No activity yet</div>
+                  </template>
+                </div>
+              </div>
+            </transition>
+          </div>
+
+          <!-- Modal Bottom Bar -->
+          <div class="detail-bottombar">
+            <span class="fw-semibold fs-5">Submission</span>
+            <button
+              class="btn bg-btn rounded-4 py-2 px-3 d-flex align-items-center gap-2"
+              :disabled="isLoading"
+            >
+              <span v-if="isLoading" class="spinner-border spinner-border-sm me-2" />
+              <Send v-else :size="16" />
+              {{ isLoading ? "Submitting..." : "Submit" }}
+            </button>
+          </div>
+        </div>
+      </n-modal>
+
       <!-- Status Tabs -->
       <div class="d-flex flex-wrap gap-2 mb-3">
-        <span class="tab-title tab-dark"><layout-dashboard size="16" /> All tasks</span>
-        <span class="tab-title bg-blue text-blue">
-          <circle-check-big size="16" /> To do
-        </span>
-        <span class="tab-title bg-orange text-orange">
-          <circle-dashed size="16" /> In process
-        </span>
-        <span class="tab-title bg-purple text-purple"><Send size="16" /> Submitted</span>
-        <span class="tab-title bg-green text-green">
-          <CircleCheck size="16" /> Approved
-        </span>
-        <span class="tab-title bg-red text-danger"><CircleX size="16" /> Rejected</span>
+        <span
+          class="tab-title"
+          :class="activeTab === '' ? 'tab-dark' : 'tab-default'"
+          @click="handleTabClick('')"
+          ><layout-dashboard size="16" /> All tasks</span
+        >
+        <span
+          class="tab-title"
+          :class="
+            activeTab === 'todo' ? 'bg-blue-active text-white' : 'bg-blue text-blue'
+          "
+          @click="handleTabClick('todo')"
+          ><circle-check-big size="16" /> To do</span
+        >
+        <span
+          class="tab-title"
+          :class="
+            activeTab === 'in_progress'
+              ? 'bg-orange-active text-white'
+              : 'bg-orange text-orange'
+          "
+          @click="handleTabClick('in_progress')"
+          ><circle-dashed size="16" /> In process</span
+        >
+        <span
+          class="tab-title"
+          :class="
+            activeTab === 'submitted'
+              ? 'bg-purple-active text-white'
+              : 'bg-purple text-purple'
+          "
+          @click="handleTabClick('submitted')"
+          ><Send size="16" /> Submitted</span
+        >
+        <span
+          class="tab-title"
+          :class="
+            activeTab === 'approved'
+              ? 'bg-green-active text-white'
+              : 'bg-green text-green'
+          "
+          @click="handleTabClick('approved')"
+          ><CircleCheck size="16" /> Approved</span
+        >
+        <span
+          class="tab-title"
+          :class="
+            activeTab === 'rejected' ? 'bg-red-active text-white' : 'bg-red text-danger'
+          "
+          @click="handleTabClick('rejected')"
+          ><CircleX size="16" /> Rejected</span
+        >
       </div>
     </div>
 
@@ -288,9 +864,10 @@
       <div class="d-flex flex-column gap-3">
         <div
           class="bg-white rounded-card border border-0"
-          style="padding: 20px; min-height: 220px"
+          style="padding: 20px; min-height: 220px; cursor: pointer"
           v-for="task in getTask"
           :key="task.id"
+          @click="openTaskModal(task)"
         >
           <div class="d-flex align-items-center justify-content-between mb-3">
             <div class="d-flex align-items-center gap-2">
@@ -326,95 +903,315 @@
               </template>
             </div>
 
-            <span
-              class="tab-title"
-              :class="[typeConfig[task.type]?.bg, typeConfig[task.type]?.text]"
+            <n-popover
+              :show="isPopOpen(task.id, 'type')"
+              trigger="click"
+              placement="bottom-start"
+              :show-arrow="false"
+              style="border-radius: 12px; padding: 6px; width: 140px"
+              @update:show="(val) => (openPop[`${task.id}_type`] = val)"
             >
-              <Circle size="10" :fill="typeConfig[task.type]?.fill" />
-              <span class="text-dark fs-14">{{ task.type }}</span>
-            </span>
+              <template #trigger>
+                <span
+                  class="tab-info w-fit fw-medium cursor-pointer"
+                  :class="[typeConfig[task.type]?.bg, typeConfig[task.type]?.text]"
+                  @click.stop
+                >
+                  <Circle
+                    size="10"
+                    :fill="typeConfig[task.type]?.fill"
+                    stroke-width="0"
+                  />
+                  {{ task.type }}
+                </span>
+              </template>
+              <div>
+                <div
+                  v-for="(cfg, key) in typeConfig"
+                  :key="key"
+                  class="d-flex align-items-center gap-2 px-2 py-1 rounded workspace-item fs-13 fw-medium cursor-pointer text-capitalize"
+                  @click="
+                    task.type = key;
+                    closePop(task.id, 'type');
+                    handleUpdateTask(task);
+                  "
+                >
+                  <Circle size="10" :fill="cfg.fill" stroke-width="0" />
+                  {{ key }}
+                </div>
+              </div>
+            </n-popover>
           </div>
 
           <div class="meta-grid mb-3">
-            <span class="d-flex align-items-center gap-1 fs-14 text-mute">
-              <circle-dashed size="15" /> Status
-            </span>
-            <span class="d-flex align-items-center gap-1 fs-14 text-mute">
-              <ghost size="15" /> Priority
-            </span>
-            <span class="d-flex align-items-center gap-1 fs-14 text-mute">
-              <Users size="15" /> Assignee
-            </span>
-            <span
-              class="d-flex align-items-center gap-1 fs-14 text-mute"
-              style="grid-column: span 2"
+            <span class="d-flex align-items-center gap-1 fs-14 text-mute"
+              ><circle-dashed size="15" /> Status</span
             >
-              <Calendar size="15" /> Date range
-            </span>
-
-            <span
-              class="tab-info w-fit fw-medium"
-              :class="[
-                statusConfigFull[task.status]?.bg,
-                statusConfigFull[task.status]?.text,
-              ]"
+            <span class="d-flex align-items-center gap-1 fs-14 text-mute"
+              ><ghost size="15" /> Priority</span
             >
-              <component :is="statusConfigFull[task.status]?.icon" size="16" />
-              {{ statusConfigFull[task.status]?.label }}
-            </span>
-
-            <span
-              class="tab-info w-fit fw-medium"
-              :class="[
-                priorityConfig[task.priority]?.bg,
-                priorityConfig[task.priority]?.text,
-              ]"
+            <span class="d-flex align-items-center gap-1 fs-14 text-mute"
+              ><Users size="15" /> Assignee</span
             >
-              <Circle size="10" :fill="priorityConfig[task.priority]?.fill" />
-              {{ task.priority }}
-            </span>
+            <span class="d-flex align-items-center gap-1 fs-14 text-mute"
+              ><Calendar size="15" /> Start Date</span
+            >
+            <span class="d-flex align-items-center gap-1 fs-14 text-mute"
+              ><Calendar size="15" /> End Date</span
+            >
 
-            <span class="d-flex align-items-center gap-2 fs-13">
-              <template v-if="!task.assigned_to?.user_id">
-                <img
-                  src="../../assets/image/default-avatar.png"
-                  class="rounded-circle object-fit-cover"
-                  style="width: 22px; height: 22px"
-                />
-                <span class="text-mute">No assignee</span>
-              </template>
-              <template v-else>
-                <img
-                  :src="task.assigned_to.avatar"
-                  class="rounded-circle object-fit-cover"
-                  style="width: 22px; height: 22px"
-                />
-                <n-ellipsis
-                  style="max-width: 60px"
-                  :tooltip="{
-                    style: { fontSize: '11px', padding: '4px 8px', borderRadius: '8px' },
-                  }"
-                >
-                  {{ task.assigned_to.name }}
-                </n-ellipsis>
+            <!-- Status -->
+            <n-popover
+              :show="isPopOpen(task.id, 'status')"
+              trigger="click"
+              placement="bottom-start"
+              :show-arrow="false"
+              style="border-radius: 12px; padding: 6px; width: 160px"
+              @update:show="(val) => (openPop[`${task.id}_status`] = val)"
+            >
+              <template #trigger>
                 <span
-                  v-if="task.assigned_to.user_id === getMe.user_id"
-                  class="text-secondary fs-11"
+                  class="tab-info w-fit fw-medium cursor-pointer"
+                  :class="[
+                    statusConfig[task.status]?.bg,
+                    statusConfig[task.status]?.text,
+                  ]"
+                  @click.stop
                 >
-                  (You)
+                  <component :is="statusConfig[task.status]?.icon" size="16" />
+                  {{ statusConfig[task.status]?.label }}
                 </span>
               </template>
-            </span>
+              <div>
+                <div
+                  v-for="(cfg, key) in statusConfig"
+                  :key="key"
+                  class="d-flex align-items-center gap-2 px-2 py-1 rounded workspace-item fs-13 fw-medium cursor-pointer"
+                  @click="
+                    task.status = key;
+                    closePop(task.id, 'status');
+                    handleUpdateTask(task);
+                  "
+                >
+                  <component :is="cfg.icon" size="14" />
+                  {{ cfg.label }}
+                </div>
+              </div>
+            </n-popover>
 
-            <!-- Date range display on task card -->
-            <span class="fs-13 text-mute" style="grid-column: span 2">
-              {{ formatDate(task.start_date) }} — {{ formatDate(task.end_date) }}
-            </span>
+            <!-- Priority -->
+            <n-popover
+              :show="isPopOpen(task.id, 'priority')"
+              trigger="click"
+              placement="bottom-start"
+              :show-arrow="false"
+              style="border-radius: 12px; padding: 6px; width: 140px"
+              @update:show="(val) => (openPop[`${task.id}_priority`] = val)"
+            >
+              <template #trigger>
+                <span
+                  class="tab-info w-fit fw-medium cursor-pointer"
+                  :class="[
+                    priorityConfig[task.priority]?.bg,
+                    priorityConfig[task.priority]?.text,
+                  ]"
+                  @click.stop
+                >
+                  <Circle
+                    size="10"
+                    :fill="priorityConfig[task.priority]?.fill"
+                    stroke-width="0"
+                  />
+                  {{ task.priority }}
+                </span>
+              </template>
+              <div>
+                <div
+                  v-for="(cfg, key) in priorityConfig"
+                  :key="key"
+                  class="d-flex align-items-center gap-2 px-2 py-1 rounded workspace-item fs-13 fw-medium cursor-pointer text-capitalize"
+                  @click="
+                    task.priority = key;
+                    closePop(task.id, 'priority');
+                    handleUpdateTask(task);
+                  "
+                >
+                  <Circle size="10" :fill="cfg.fill" stroke-width="0" />
+                  {{ key }}
+                </div>
+              </div>
+            </n-popover>
+
+            <!-- Assignee -->
+            <n-popover
+              :show="isPopOpen(task.id, 'assignee')"
+              trigger="click"
+              placement="bottom-start"
+              :show-arrow="false"
+              :disabled="!canChangeAssignee"
+              style="border-radius: 12px; padding: 6px; width: 180px"
+              @update:show="(val) => (openPop[`${task.id}_assignee`] = val)"
+            >
+              <template #trigger>
+                <span
+                  class="d-flex align-items-center gap-2 fs-13"
+                  :class="canChangeAssignee ? 'cursor-pointer' : 'cursor-default'"
+                  @click.stop
+                >
+                  <template v-if="!task.assigned_to?.user_id">
+                    <img
+                      src="../../assets/image/default-avatar.png"
+                      class="rounded-circle object-fit-cover"
+                      style="width: 22px; height: 22px"
+                    />
+                    <span class="text-mute">No assignee</span>
+                  </template>
+                  <template v-else>
+                    <img
+                      :src="task.assigned_to.avatar"
+                      class="rounded-circle object-fit-cover"
+                      style="width: 22px; height: 22px"
+                    />
+                    <n-ellipsis style="max-width: 60px">{{
+                      task.assigned_to.name
+                    }}</n-ellipsis>
+                    <span
+                      v-if="task.assigned_to.user_id === getMe.user_id"
+                      class="text-secondary fs-11"
+                      >(You)</span
+                    >
+                  </template>
+                </span>
+              </template>
+              <div>
+                <div
+                  class="d-flex align-items-center gap-2 px-2 py-1 rounded workspace-item fs-13 cursor-pointer"
+                  @click="
+                    task.assigned_to = null;
+                    closePop(task.id, 'assignee');
+                    handleUpdateTask(task);
+                  "
+                >
+                  <img
+                    src="../../assets/image/default-avatar.png"
+                    class="rounded-circle"
+                    style="width: 22px; height: 22px"
+                  />
+                  <span class="text-mute">No Assignee</span>
+                </div>
+                <div
+                  v-for="member in getMember"
+                  :key="member.user_id"
+                  class="d-flex align-items-center gap-2 px-2 py-1 rounded workspace-item fs-13 cursor-pointer"
+                  @click="
+                    task.assigned_to = member;
+                    closePop(task.id, 'assignee');
+                    handleUpdateTask(task);
+                  "
+                >
+                  <img
+                    :src="member.avatar"
+                    class="rounded-circle object-fit-cover"
+                    style="width: 22px; height: 22px"
+                  />
+                  {{ member.name }}
+                  <span v-if="member.user_id === getMe.user_id" class="text-mute fs-11"
+                    >(You)</span
+                  >
+                  <template v-else>
+                    <span
+                      v-if="member.role === 'moderator'"
+                      class="text-mute fs-11 text-green"
+                      >(Moderator)</span
+                    >
+                  </template>
+                </div>
+              </div>
+            </n-popover>
+
+            <!-- Start Date -->
+            <n-popover
+              :show="isPopOpen(task.id, 'start_date')"
+              trigger="click"
+              placement="bottom-start"
+              :show-arrow="false"
+              style="border-radius: 12px; padding: 0; overflow: hidden"
+              @update:show="(val) => (openPop[`${task.id}_start_date`] = val)"
+            >
+              <template #trigger>
+                <span
+                  class="fs-13 cursor-pointer rounded-3 date-trigger"
+                  :class="[
+                    task.start_date ? 'text-dark' : 'text-mute',
+                    isPopOpen(task.id, 'start_date') ? 'bg-active' : '',
+                  ]"
+                  @click.stop
+                >
+                  {{ task.start_date ? formatDate(task.start_date) : "Set date" }}
+                </span>
+              </template>
+              <div class="custom-picker">
+                <n-date-picker
+                  :value="dateToTs(task.start_date)"
+                  type="date"
+                  :to="false"
+                  panel
+                  @update:value="
+                    (val) => {
+                      task.start_date = formatToYMD(val);
+                      closePop(task.id, 'start_date');
+                      handleUpdateTask(task);
+                    }
+                  "
+                />
+              </div>
+            </n-popover>
+
+            <!-- End Date -->
+            <n-popover
+              :show="isPopOpen(task.id, 'end_date')"
+              trigger="click"
+              placement="bottom-start"
+              :show-arrow="false"
+              style="border-radius: 12px; padding: 0; overflow: hidden"
+              @update:show="(val) => (openPop[`${task.id}_end_date`] = val)"
+            >
+              <template #trigger>
+                <span
+                  class="fs-13 cursor-pointer rounded-3 date-trigger"
+                  :class="[
+                    task.end_date ? 'text-dark' : 'text-mute',
+                    isPopOpen(task.id, 'end_date') ? 'bg-active' : '',
+                  ]"
+                  @click.stop
+                >
+                  {{ task.end_date ? formatDate(task.end_date) : "Set date" }}
+                </span>
+              </template>
+              <div class="custom-picker">
+                <n-date-picker
+                  :value="dateToTs(task.end_date)"
+                  type="date"
+                  :to="false"
+                  panel
+                  class="custom-picker"
+                  @update:value="
+                    (val) => {
+                      task.end_date = formatToYMD(val);
+                      closePop(task.id, 'end_date');
+                      handleUpdateTask(task);
+                    }
+                  "
+                />
+              </div>
+            </n-popover>
           </div>
 
           <p class="fw-semibold mb-2" style="font-size: 18px">{{ task.title }}</p>
-          <p class="mb-0 text-mute fs-15">
-            {{ task.description || "No description provided" }}
+          <p class="mb-0 text-mute fs-15 card-width">
+            <n-ellipsis :tooltip="false">
+              {{ task.description || "No description provided" }}
+            </n-ellipsis>
           </p>
         </div>
       </div>
@@ -423,7 +1220,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, computed, onMounted, watch, nextTick } from "vue";
 import {
   CircleCheckBig,
   CircleDashed,
@@ -431,32 +1228,92 @@ import {
   CircleCheck,
   CircleX,
   X,
+  FileText,
+  Plus,
+  UserCheck,
+  Ghost,
+  Users,
+  Calendar,
+  Filter,
 } from "lucide-vue-next";
-
 import BaseButton from "@/components/BaseButton.vue";
 import BaseInput from "@/components/BaseInput.vue";
 import { useTaskStore } from "@/stores/user/task";
 import { useTeamStore } from "@/stores/user/team";
 import { storeToRefs } from "pinia";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
+import { notify } from "@/utils/toast";
 
 const route = useRoute();
+const router = useRouter();
+const toast = notify(router);
 const workspace_id = route.params.workspace_id;
 const team_id = route.params.team_id;
 
 const taskStore = useTaskStore();
-const { getTask } = storeToRefs(taskStore);
+const { getTask, getTaskActivity } = storeToRefs(taskStore);
 
 const teamStore = useTeamStore();
-const { getTeamById } = storeToRefs(teamStore);
+const { getTeamById, getTeamByWorkspace, getMember } = storeToRefs(teamStore);
 
 const authStore = useAuthStore();
 const { getMe } = storeToRefs(authStore);
 
 const showCreateTask = ref(false);
-const teamMembers = ref([]);
 const isLoading = ref(false);
+
+const showStatusPop = ref(false);
+const showPriorityPop = ref(false);
+const showTypePop = ref(false);
+const showAssigneePop = ref(false);
+
+const showTaskModal = ref(false);
+const selectedTask = ref(null);
+const showActivity = ref(false);
+const showDetailStatusPop = ref(false);
+const showDetailPriorityPop = ref(false);
+const showDetailTypePop = ref(false);
+const showDetailStartDatePop = ref(false);
+const showDetailEndDatePop = ref(false);
+const showDetailAssigneePop = ref(false);
+const taskMessage = ref("");
+
+const openPop = ref({});
+const isPopOpen = (taskId, field) => !!openPop.value[`${taskId}_${field}`];
+const closePop = (taskId, field) => {
+  openPop.value[`${taskId}_${field}`] = false;
+};
+
+const openTaskModal = async (task) => {
+  selectedTask.value = { ...task };
+  showActivity.value = false;
+  showTaskModal.value = true;
+  await taskStore.getTaskActivityStore(workspace_id, team_id, task.id);
+  selectedTask.value.activities = getTaskActivity.value;
+
+  await nextTick();
+  document.querySelectorAll(".detail-title-input, .detail-desc-input").forEach((el) => {
+    el.style.height = "auto";
+    el.style.height = el.scrollHeight + "px";
+  });
+};
+
+const activeTab = ref("");
+
+const handleTabClick = (status) => {
+  activeTab.value = status;
+  taskStore.getTaskByTeamStore(workspace_id, team_id, status);
+};
+
+const myWorkspaceRole = computed(() => {
+  const me = getTeamById.value?.members?.find((m) => m.user_id === getMe.value?.user_id);
+  return me?.role ?? "member";
+});
+
+const canChangeAssignee = computed(() => {
+  return myWorkspaceRole.value === "owner" || myWorkspaceRole.value === "moderator";
+});
 
 const defaultForm = () => ({
   title: "",
@@ -464,25 +1321,90 @@ const defaultForm = () => ({
   type: "task",
   status: "todo",
   priority: "low",
-  assignee: null,
+  assigned_to: null,
   date_range: null,
+});
+
+watch(showCreateTask, (val) => {
+  if (val) {
+    form.value = {
+      title: "",
+      description: "",
+      type: "task",
+      status: "todo",
+      priority: "low",
+      assigned_to: canChangeAssignee.value ? null : getMe.value?.user_id ?? null,
+      date_range: null,
+    };
+  }
 });
 
 const form = ref(defaultForm());
 
+const formatToYMD = (timestamp) => {
+  if (!timestamp) return null;
+  const date = new Date(timestamp);
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+};
+
+const dateToTs = (dateString) => {
+  if (!dateString) return null;
+  return new Date(dateString).getTime();
+};
+
 const handleCreateTask = async () => {
   if (!form.value.title.trim()) return;
+  const payload = {
+    title: form.value.title,
+    description: form.value.description,
+    type: form.value.type,
+    status: form.value.status,
+    priority: form.value.priority,
+    assigned_to: form.value.assigned_to ?? null,
+    start_date: formatToYMD(form.value.date_range?.[0]),
+    end_date: formatToYMD(form.value.date_range?.[1]),
+  };
   try {
-    // await taskStore.createTaskStore(workspace_id, team_id, form.value)
+    isLoading.value = true;
+    await taskStore.createTask(workspace_id, team_id, payload);
     showCreateTask.value = false;
     form.value = defaultForm();
     await taskStore.getTaskByTeamStore(workspace_id, team_id);
+    await taskStore.getSummaryTaskStore(workspace_id, team_id);
+    toast.success("Create Task Successfully");
   } catch (error) {
-    console.error(error);
+    toast.error(error.message);
+  } finally {
+    isLoading.value = false;
+  }
+};
+
+const handleUpdateTask = async (task) => {
+  try {
+    await taskStore.updateTask(workspace_id, team_id, task.id, {
+      title: task.title,
+      description: task.description,
+      type: task.type,
+      status: task.status,
+      priority: task.priority,
+      assigned_to: task.assigned_to?.user_id ?? null,
+      start_date: task.start_date,
+      end_date: task.end_date,
+    });
+    await taskStore.getTaskByTeamStore(workspace_id, team_id);
+    await taskStore.getSummaryTaskStore(workspace_id, team_id);
+  } catch (error) {
+    toast.error(error.message);
+    await taskStore.getTaskByTeamStore(workspace_id, team_id);
   }
 };
 
 onMounted(async () => {
+  await authStore.getMeStore();
+  await teamStore.getTeamByWorkspaceStore(workspace_id);
   await teamStore.getTeamByIdStore(workspace_id, team_id);
   await taskStore.getTaskByTeamStore(workspace_id, team_id);
 });
@@ -495,6 +1417,47 @@ const formatDate = (dateString) => {
   const month = date.toLocaleString("en-US", { month: "short" });
   const year = date.getFullYear();
   return `${day} / ${month} / ${year}`;
+};
+
+const autoResize = (e) => {
+  const textarea = e.target;
+
+  textarea.style.height = "auto";
+  textarea.style.height = textarea.scrollHeight + "px";
+};
+
+const groupedActivities = computed(() => {
+  if (!selectedTask.value?.activities) return [];
+  const groups = {};
+  for (const act of selectedTask.value.activities) {
+    const dateKey = formatDate(act.created_at);
+    if (!groups[dateKey]) groups[dateKey] = { date: dateKey, items: [] };
+    groups[dateKey].items.push({
+      action: act.action,
+      note: act.message,
+      user: act.created_by,
+      time: new Date(act.created_at).toLocaleTimeString("en-US", {
+        hour: "2-digit",
+        minute: "2-digit",
+      }),
+      date: act.created_at,
+    });
+  }
+  return Object.values(groups);
+});
+
+const actTagClass = (action) => {
+  const map = {
+    create: "act-tag-create",
+    assign: "act-tag-assign",
+    update: "act-tag-update",
+  };
+  return map[action?.toLowerCase()] || "act-tag-update";
+};
+
+const actTagIcon = (action) => {
+  const map = { create: Plus, assign: UserCheck, update: Send };
+  return map[action?.toLowerCase()] || Send;
 };
 
 const statusConfig = {
@@ -534,81 +1497,16 @@ const typeConfig = {
   improvement: { bg: "bg-purple", text: "text-purple", fill: "#6155F5" },
 };
 </script>
-
 <style scoped>
-.tab-title {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  border-radius: 99px;
-  padding: 6px 11.5px;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  text-transform: capitalize;
-}
-.tab-info {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  border-radius: 99px;
-  padding: 5px 11px;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  text-transform: capitalize;
-  white-space: nowrap;
-}
-.tab-dark {
-  background: #171717;
-  color: #fff;
-  font-weight: 500 !important;
-}
-.meta-grid-modal {
-  display: grid;
-  grid-template-columns: repeat(5, auto);
-  grid-template-rows: auto auto;
-  gap: 6px 30px;
-  align-items: center;
-  width: fit-content;
-  text-align: center;
-}
-.meta-grid {
-  display: grid;
-  grid-template-columns: repeat(5, auto);
-  grid-template-rows: auto auto;
-  gap: 6px 24px;
-  align-items: center;
-  width: fit-content;
-  text-align: center;
-}
-:deep(.n-scrollbar-rail.n-scrollbar-rail--vertical) {
-  right: -100px !important;
-}
-
-.base-input {
-  border: 1.5px solid #e4e4e7;
-  transition: border-color 0.2s ease;
-  box-shadow: none !important;
-}
-
-.base-input:focus {
-  border-color: grey !important;
-  box-shadow: none !important;
-  outline: none !important;
-}
-
 .custom-picker :deep(.n-input) {
   --n-border-hover: 1px solid gray !important;
   --n-border-focus: 1px solid gray !important;
   --n-box-shadow-focus: 0 !important;
   border-radius: 8px !important;
 }
-
 .custom-picker :deep(.n-input__input-el) {
   caret-color: #000000 !important;
 }
-
 .custom-picker :deep(.n-button--default-type) {
   color: #171717 !important;
   background: #f5f5f5 !important;
@@ -619,51 +1517,30 @@ const typeConfig = {
   --n-text-color-hover: #333 !important;
   --n-color-hover: #f5f5f5 !important;
 }
-
-.custom-picker :deep(.n-button--default-type:hover) {
-  color: #171717 !important;
-  background: #f5f5f5 !important;
-  border-radius: 8px !important;
-  --n-border-hover: 1px solid gray !important;
-  --n-border-focus: 1px solid gray !important;
-  --n-border-pressed: 1px solid gray !important;
-  --n-text-color-hover: #333 !important;
-  --n-color-hover: #f5f5f5 !important;
-}
-
-
-.custom-picker :deep(.n-button--primary-type:hover) {
-  background: #171717 !important;
-  border-color: #171717 !important;
-  color: #fff !important;
-}
-
 .custom-picker :deep(.n-button--primary-type) {
   background: #171717 !important;
   border-color: #171717 !important;
   color: #fff !important;
   border-radius: 8px !important;
 }
-
-.custom-picker :deep(.n-date-panel) {
-  --n-item-color-active: #171717 !important;
-  --n-item-color-covered: rgba(23, 23, 23, 0.08) !important;
-  --n-item-text-color-active: #fff !important;
-  --n-item-color-hover: rgba(23, 23, 23, 0.06) !important;
+.custom-picker :deep(.n-button--primary-type:hover) {
+  background: #171717 !important;
+  border-color: #171717 !important;
+  color: #fff !important;
 }
-
 .custom-picker :deep(.n-date-panel) {
   --n-item-color-active: #171717 !important;
   --n-item-color-covered: rgba(23, 23, 23, 0.08) !important;
   --n-item-text-color-active: #fff !important;
   --n-item-color-hover: rgba(23, 23, 23, 0.06) !important;
-  --n-item-color-included: rgba(23, 23, 23, 0.08) !important;  /* ← this one */
+  --n-item-color-included: rgba(23, 23, 23, 0.08) !important;
+  border-radius: 16px !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08) !important;
 }
 .custom-picker :deep(.n-date-panel-month-calendar__picker-col) {
   height: 185px !important;
   overflow: hidden !important;
 }
-
 .custom-picker :deep(.n-date-panel-month-calendar__padding) {
   height: 0 !important;
   min-height: 0 !important;

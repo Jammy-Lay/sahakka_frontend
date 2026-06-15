@@ -39,16 +39,16 @@
         </div>
       </aside>
 
-      <main class="main-content pb-5 px-5">
+      <main class="main-content pb-3 px-4">
         <router-view />
-        </main>
+      </main>
       <aside class="sidebar-right"><Calendar /></aside>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, watch } from "vue";
+import { ref, computed, watch, onMounted } from "vue";
 import { useRoute } from "vue-router";
 import { storeToRefs } from "pinia";
 import { useAuthStore } from "@/stores/auth";
@@ -78,16 +78,20 @@ const activeBorderColor = computed(() => {
   return map[section?.toLowerCase()] ?? "#0088ff";
 });
 
-watch(
-  () => route.params,
-  ({ workspace_id, team_id }) => {
-    if (workspace_id) {
-      workspaceStore.setLastVisitedTeam(workspace_id, team_id);
-      currentWorkspaceId.value = workspace_id;
-    }
-  },
-  { immediate: true, deep: true }
-);
+onMounted(async () => {
+  await authStore.getMeStore();
+
+  watch(
+    () => route.params,
+    ({ workspace_id, team_id }) => {
+      if (workspace_id) {
+        workspaceStore.setLastVisitedTeam(workspace_id, team_id, getMe.value?.user_id);
+        currentWorkspaceId.value = workspace_id;
+      }
+    },
+    { immediate: true, deep: true }
+  );
+});
 </script>
 
 <style scoped>
@@ -122,7 +126,7 @@ watch(
 .sidebar-left {
   width: 300px;
   flex-shrink: 0;
-  border-right: 1px solid #E4E4E7;
+  border-right: 1px solid #e4e4e7;
   overflow-x: hidden;
   transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s ease;
 }
@@ -137,7 +141,7 @@ watch(
   overflow-x: hidden;
 }
 .sidebar-footer {
-  border-top: 1px solid #E4E4E7;
+  border-top: 1px solid #e4e4e7;
   flex-shrink: 0;
   white-space: nowrap;
   overflow-x: hidden;
@@ -154,5 +158,9 @@ watch(
   width: 400px;
   flex-shrink: 0;
   overflow-y: auto;
+}
+.sidebar-right::-webkit-scrollbar {
+  appearance: none;
+  display: none;
 }
 </style>

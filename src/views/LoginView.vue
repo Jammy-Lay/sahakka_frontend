@@ -83,19 +83,16 @@
 </template>
 
 <script setup>
-import { reactive, ref, watch, h } from "vue";
+import { reactive, ref, watch } from "vue";
+import { jwtDecode } from "jwt-decode";
 import { useAuthStore } from "@/stores/auth";
 import { useRouter } from "vue-router";
 import { isEmail, require, validates } from "@/utils/validate";
 import { notify } from "@/utils/toast";
-import { useNotification, NButton, NAvatar } from "naive-ui";
 import { UseWorkspaceStore } from "@/stores/user/workspace";
 import { useTeamStore } from "@/stores/user/team";
 import BaseInput from "@/components/BaseInput.vue";
 import Logo from "@/assets/image/image.png";
-
-const notification = useNotification();
-const nRef = ref(null);
 
 const email = ref("");
 const password = ref("");
@@ -103,7 +100,6 @@ const router = useRouter();
 const toast = notify(router);
 const isLoading = ref(false);
 const showPassword = ref(false);
-import { jwtDecode } from "jwt-decode";
 
 const auth = useAuthStore();
 const workspaceStore = UseWorkspaceStore();
@@ -119,9 +115,7 @@ function validate() {
     (v) => require(v, "Email is require"),
     (v) => isEmail(v, "Please enter a valid email address."),
   ]);
-
   err.password = require(password.value, "Password is require");
-
   return !err.email && !err.password;
 }
 
@@ -143,92 +137,50 @@ async function handleLogin() {
 
   try {
     await auth.login(email.value, password.value);
-
-    // Decode token
     const decoded = jwtDecode(auth.token);
+    // console.log("decoded token:", decoded);
 
-    // console.log("Decoded Token:", decoded);
-
-    // Admin
     if (decoded.role === "admin") {
       toast.success("Signin Successfully", "/admin/dashboard");
       return;
     }
 
-    // Normal User
-    const lastVisited = JSON.parse(localStorage.getItem("lastVisited"));
+    const userId = decoded.id;
+    const lastVisited = JSON.parse(localStorage.getItem(`lastVisited_${userId}`));
 
-    if (lastVisited) {
-      const { workspace_id, team_id } = lastVisited;
+    // console.log("userId:", userId);
+    // console.log("lastVisited:", lastVisited);
 
+    if (lastVisited?.workspace_id && lastVisited?.team_id) {
       toast.success(
         "Signin Successfully",
-        `/workspace/${workspace_id}/team/${team_id}/tasks`
+        `/workspace/${lastVisited.workspace_id}/team/${lastVisited.team_id}/tasks`
       );
-
       return;
     }
 
     await workspaceStore.getMyWorkspaceStore();
-
     const workspace = workspaceStore.myWorkspaces[0];
 
-    if (workspace) {
-      await teamStore.getTeamByWorkspaceStore(workspace.workspace_id);
-
-      const team = teamStore.getTeamByWorkspace[0];
-
-      if (team) {
-        router.push(`/workspace/${workspace.workspace_id}/team/${team.team_id}/tasks`);
-      }
+    if (!workspace) {
+      toast.success("Signin Successfully", "/no-workspace");
+      return;
     }
+
+    await teamStore.getTeamByWorkspaceStore(workspace.workspace_id);
+    const team = teamStore.getTeamByWorkspace[0];
+
+    if (!team) {
+      toast.success("Signin Successfully", "/no-workspace");
+      return;
+    }
+
+    toast.success(
+      "Signin Successfully",
+      `/workspace/${workspace.workspace_id}/team/${team.team_id}/tasks`
+    );
   } catch (error) {
-    const msg = error.message || "";
-
-    if (msg.toLowerCase().includes("email not verify")) {
-      nRef.value = notification.warning({
-        title: "Email Not Verified",
-        content: "Your email hasn't been verified yet. Please check your inbox.",
-        duration: 0,
-        avatar: () => h(NAvatar, { size: "small", round: true, src: Logo }),
-        action: () =>
-          h("div", { class: "d-flex gap-2" }, [
-            h(
-              NButton,
-              {
-                type: "default",
-                size: "small",
-                style: "border-radius: 8px;",
-                onClick: () => {
-                  nRef.value?.destroy();
-                  nRef.value = null;
-                  window.open("https://mail.google.com", "_blank");
-                },
-              },
-              { default: () => "Go to Mail" }
-            ),
-            h(
-              NButton,
-              {
-                type: "default",
-                size: "small",
-                style: "border-radius: 8px;",
-                onClick: () => {
-                  nRef.value?.destroy();
-                  nRef.value = null;
-                  router.push("/verify-email?status=resend");
-                },
-              },
-              { default: () => "Resend Link" }
-            ),
-          ]),
-        onClose: () => {
-          nRef.value = null;
-        },
-      });
-    } else {
-      toast.error(msg || "Sign in fail");
-    }
+    toast.error(error.message);
   } finally {
     isLoading.value = false;
   }
