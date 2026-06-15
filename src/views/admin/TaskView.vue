@@ -1,38 +1,85 @@
 <template>
-    <div class="p-4 w-100">
-        <h5 class="fw-500 mb-4">Task Board</h5>
-
-        <div class="board">
-            <div v-for="col in columns" :key="col.key" class="board-col">
-                <div class="col-header d-flex align-items-center justify-content-between mb-3">
-                    <span class="col-title" :class="col.titleClass">{{ col.label }}</span>
-                    <span class="col-count">{{ tasksByStatus(col.key).length }}</span>
+    <div class="row g-3">
+        <div class="col-12">
+            <div class="row justify-content-between">
+                <div class="col-4">
+                    <h5>Tasks</h5>
                 </div>
+                <div class="mb-4 col-12 col-sm-6 col-md-4 col-lg-3 px-0">
+                    <div class="search-wrapper border-0 shadow-sm">
+                        <Search size="18" class="search-icon" />
 
-                <div v-for="task in tasksByStatus(col.key)" :key="task.id" class="task-card">
-                    <div class="d-flex align-items-start justify-content-between gap-2 mb-2">
-                        <span class="task-title">{{ task.title }}</span>
-                        <span v-if="task.priority" class="badge-priority" :class="`badge-${task.priority}`">
-                            {{ capitalize(task.priority) }}
-                        </span>
-                    </div>
-
-                    <p class="task-desc">{{ task.description }}</p>
-
-                    <div class="task-footer d-flex align-items-center justify-content-between">
-                        <div class="d-flex align-items-center gap-1">
-                            <div class="avatar">{{ initials(task.assigned_user?.name) }}</div>
-                            <span class="task-meta">{{ task.assigned_user?.name || 'Unassigned' }}</span>
-                        </div>
-                        <div class="d-flex align-items-center gap-1">
-                            <i class="bi bi-calendar3 task-meta"></i>
-                            <span class="task-meta">{{ formatDate(task.end_date) }}</span>
-                        </div>
+                        <input v-model="search" type="text" class="form-control form-control-sm border-0"
+                            placeholder="Search by team name..." @input="currentPage = 1" />
                     </div>
                 </div>
+            </div>
+        </div>
+        <div class="col-12">
+            <div class="row">
+                <div v-for="col in columns" :key="col.key" class="col-12 col-sm-6 col-lg-4 col-xl">
+                    <div class="board-col h-100">
+                        <div class="col-header d-flex align-items-end justify-content-between mb-3" :class="col.titleClass">
+                            <div class="col-title-pill d-flex align-items-center gap-2">
+                                    <component :is="col.icon" :size="14" />
+                                    <span>{{ col.label }}</span>
+                                </div>
+                            <span class="col-count">{{ tasksByStatus(col.key).length }}</span>
+                        </div>
 
-                <div v-if="tasksByStatus(col.key).length === 0" class="empty-col">
-                    No tasks
+                        <n-scrollbar style="max-height: 67vh">
+                            <div v-for="task in tasksByStatus(col.key)" :key="task.id" class="task-card">
+                                <!-- Header -->
+                                <div class="d-flex align-items-start justify-content-between gap-2 mb-2">
+                                    <div>
+                                        <span class="task-title">{{ task.title }}</span>
+                                        <div class="task-id">#{{ task.id }} • {{ task.type }}</div>
+                                    </div>
+                                    <span v-if="task.priority" class="badge-priority" :class="`badge-${task.priority}`">
+                                        {{ capitalize(task.priority) }}
+                                    </span>
+                                </div>
+
+                                <!-- Description -->
+                                <p class="task-desc">{{ task.description || "No description" }}</p>
+
+                                <!-- Team -->
+                                <div class="info-box" v-if="task.team">
+                                    <i class="bi bi-people"></i>
+                                    <div>
+                                        <div class="info-title">{{ task.team.name }}</div>
+                                        <div class="info-sub">{{ task.team.description }}</div>
+                                    </div>
+                                </div>
+
+                                <!-- Dates -->
+                                <div class="date-section">
+                                    <div><i class="bi bi-calendar-event"></i> Start: <span>{{
+                                        formatDate(task.dates.start)
+                                            }}</span></div>
+                                    <div><i class="bi bi-calendar-check"></i> End: <span>{{ formatDate(task.dates.end)
+                                    }}</span>
+                                    </div>
+                                </div>
+
+                                <!-- Footer -->
+                                <div class="task-footer d-flex justify-content-between align-items-center mt-2">
+                                    <div class="d-flex align-items-center gap-1">
+                                        <div class="avatar">
+                                            <img v-if="task.assignedUser?.avatar" :src="task.assignedUser.avatar"
+                                                :alt="task.assignedUser?.name"
+                                                style="width:100%;height:100%;border-radius:50%;object-fit:cover;" />
+                                            <span v-else>{{ initials(task.assignedUser?.name) }}</span>
+                                        </div>
+                                        <span class="task-meta">{{ task.assignedUser?.name || "Unassigned" }}</span>
+                                    </div>
+                                    <span class="task-meta">{{ formatDate(task.createdAt) }}</span>
+                                </div>
+                            </div>
+                        </n-scrollbar>
+
+                        <div v-if="tasksByStatus(col.key).length === 0" class="empty-col">No tasks</div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -42,34 +89,50 @@
 <script setup>
 import { useTaskstore } from "@/stores/admin/tasks";
 import { ref, onMounted } from "vue";
+import { CircleCheckBig, CircleDashed, Send, CircleCheck, CircleX } from "lucide-vue-next";
 
 const taskStore = useTaskstore();
-
+const search = ref("");
 const columns = [
-  { key: "todo",        label: "To Do",       titleClass: "title-todo"       },
-  { key: "in_progress", label: "In Progress", titleClass: "title-inprogress" },
-  { key: "submitted",   label: "Submitted",   titleClass: "title-submitted"  },
-  { key: "approved",    label: "Approved",    titleClass: "title-approved"   },
-  { key: "rejected",    label: "Rejected",    titleClass: "title-rejected"   },
+    { key: "todo", label: "To Do", titleClass: "title-todo cus-title", icon: CircleCheckBig },
+    { key: "in_progress", label: "In Progress", titleClass: "title-inprogress cus-title", icon: CircleDashed },
+    { key: "submitted", label: "Submitted", titleClass: "title-submitted cus-title", icon: Send },
+    { key: "approved", label: "Approved", titleClass: "title-approved cus-title", icon: CircleCheck },
+    { key: "rejected", label: "Rejected", titleClass: "title-rejected cus-title", icon: CircleX },
 ];
 
-const tasksByStatus = (status) => taskStore.tasks.filter(t => t.status === status);
+const tasksByStatus = (status) =>
+    taskStore.tasks.filter((t) => {
+        const matchStatus = t.status === status;
+        const matchTeam = t.team?.name?.toLowerCase().includes(search.value.toLowerCase());
+        return matchStatus && matchTeam;
+    });
 
 onMounted(async () => {
-  await taskStore.fetchTasks();
+    await taskStore.fetchTasks();
 });
 
 const initials = (name) => {
     if (!name) return "?";
-    return name.split(" ").map(w => w[0]).join("").substring(0, 2).toUpperCase();
+    return name
+        .split(" ")
+        .map((w) => w[0])
+        .join("")
+        .substring(0, 2)
+        .toUpperCase();
 };
 
-const capitalize = (str) => str ? str.charAt(0).toUpperCase() + str.slice(1) : "";
+const capitalize = (str) => (str ? str.charAt(0).toUpperCase() + str.slice(1) : "");
 
 const formatDate = (d) => {
     if (!d) return "—";
-    return new Intl.DateTimeFormat("en-GB", { day: "2-digit", month: "short", year: "numeric" }).format(new Date(d));
+    return new Intl.DateTimeFormat("en-GB", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+    }).format(new Date(d));
 };
+
 </script>
 
 <style scoped>
@@ -83,10 +146,10 @@ const formatDate = (d) => {
 
 /* ── Column ── */
 .board-col {
-    flex: 0 0 295px;
     background-color: #f5f5f5;
     border-radius: 12px;
     padding: 14px 12px;
+    /* removed: flex: 0 0 295px */
 }
 
 .col-count {
@@ -104,24 +167,34 @@ const formatDate = (d) => {
     font-weight: 600;
 }
 
+.cus-title {
+    padding: 10px 15px;
+    border-radius: 30px;
+}
+
 .title-todo {
-    color: #111;
+    color: #4361ee;
+    background-color: #B2DBFF;
 }
 
 .title-inprogress {
-    color: #185FA5;
+    color: #FF973B;
+    background-color: #FFDDBE;
 }
 
 .title-submitted {
-    color: #854F0B;
+    color: #6155F5;
+    background-color: #CFCCFC;
 }
 
 .title-approved {
-    color: #3B6D11;
+    color: #3CB159;
+    background-color: #C2EECD;
 }
 
 .title-rejected {
-    color: #A32D2D;
+    color: #FF383C;
+    background-color: #FFC3C4;
 }
 
 /* ── Card ── */
@@ -170,23 +243,23 @@ const formatDate = (d) => {
 }
 
 .badge-urgent {
-    background: #FAECE7;
-    color: #993C1D;
+    background: #faece7;
+    color: #993c1d;
 }
 
 .badge-high {
-    background: #FAEEDA;
-    color: #854F0B;
+    background: #faeeda;
+    color: #854f0b;
 }
 
 .badge-medium {
-    background: #E6F1FB;
-    color: #185FA5;
+    background: #e6f1fb;
+    color: #185fa5;
 }
 
 .badge-low {
-    background: #EAF3DE;
-    color: #3B6D11;
+    background: #eaf3de;
+    color: #3b6d11;
 }
 
 /* ── Footer ── */
@@ -220,5 +293,90 @@ const formatDate = (d) => {
     color: #bbb;
     text-align: center;
     padding: 20px 0;
+}
+
+.team-info {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11px;
+    color: #666;
+    background: #f7f7f7;
+    padding: 4px 8px;
+    border-radius: 8px;
+    width: fit-content;
+}
+
+.team-info i {
+    font-size: 11px;
+}
+
+.task-id {
+    font-size: 10px;
+    color: #999;
+    margin-top: 2px;
+}
+
+.info-box {
+    display: flex;
+    gap: 8px;
+    background: #f7f7f7;
+    padding: 8px;
+    border-radius: 10px;
+    margin-bottom: 10px;
+}
+
+.info-box i {
+    color: #666;
+}
+
+.info-title {
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.info-sub {
+    font-size: 11px;
+    color: #888;
+}
+
+.date-section {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-size: 11px;
+    color: #777;
+    margin-bottom: 10px;
+}
+
+.date-section i {
+    margin-right: 4px;
+}
+.search-wrapper {
+    width: 100%;
+    max-width: 420px;
+    height: 46px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #ffffff;
+    border-radius: 14px;
+    padding: 0 14px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    transition: all 0.25s ease;
+}
+
+.search-wrapper:focus-within {
+    box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15), 0 8px 20px rgba(99, 102, 241, 0.15);
+}
+
+.search-icon {
+    color: #9ca3af;
+    flex-shrink: 0;
+}
+.search-wrapper .form-control:focus {
+    outline: none !important;
+    box-shadow: none !important;
+    border-color: transparent !important;
 }
 </style>

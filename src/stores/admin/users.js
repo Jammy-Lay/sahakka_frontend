@@ -7,7 +7,7 @@ export const useUserStore = defineStore ('user', () =>{
     async function fetchUsers() {
         try {
             const res = await api.get("/sahakka-admin/users");
-            users.value = res.data.data
+            users.value = res.data.data;
         } catch (error) {
             throw new Error(error.response?.data?.message || "Invalid Data");
         }
