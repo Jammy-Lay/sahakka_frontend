@@ -8,6 +8,7 @@ export const useTaskStore = defineStore("task", () => {
   let getTask = ref([]); // task, feature
   let getTaskActivity = ref([]);
   let getSummaryTask = ref({});
+  let getMyTask = ref([]);
 
   const getTaskByTeamStore = async (workspace_id, team_id, status = "") => {
     try {
@@ -73,16 +74,29 @@ export const useTaskStore = defineStore("task", () => {
     }
   };
 
+  const getMyTaskStore = async (workspace_id, team_id, status = "") => {
+    try {
+      const res = await api.get(
+        `/workspace/${workspace_id}/team/${team_id}/my-tasks?status=${status}`,
+      );
+      getMyTask.value = res.data.data;
+    } catch (err) {
+      throw new Error(err.response?.data?.message || "Get my task failed");
+    }
+  };
+
   return {
     getTaskByTeam,
     getIssueTask,
     getTask,
     getTaskActivity,
     getSummaryTask,
+    getMyTask,
     getTaskByTeamStore,
     createTask,
     getTaskActivityStore,
     updateTask,
     getSummaryTaskStore,
+    getMyTaskStore
   };
 });
