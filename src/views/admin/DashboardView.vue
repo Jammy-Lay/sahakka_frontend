@@ -4,7 +4,10 @@
     </div>
     <div v-else>
         <div class="d-flex align-items-center justify-content-between mb-3">
-            <BaseTitle title="Dashboard" />
+            <div class="d-flex align-items-center gap-2">
+                <LayoutDashboard  class="text-prime" :size="30" />
+                <BaseTitle title="Dashboard" class="mb-0" />
+            </div>
             <n-tag round :bordered="false" type="warning">
                 {{ todayLabel }}
             </n-tag>

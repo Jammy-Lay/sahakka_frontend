@@ -40,7 +40,10 @@
 
                     <!-- Title -->
                     <div class="col-12">
-                        <BaseTitle title="Activities" />
+                        <div class="d-flex align-items-center gap-2">
+                            <Clock  class="text-prime" :size="30" />
+                            <BaseTitle title="Activies" class="mb-0" />
+                        </div>
                     </div>
 
                     <!-- Recent Teams Table -->
@@ -72,7 +75,7 @@ import { useWorkspaceStore } from "@/stores/admin/workspaces";
 import { useTeamstore } from "@/stores/admin/teams";
 import { useTaskstore } from "@/stores/admin/tasks";
 
-import { Users, ChartPie } from "lucide-vue-next";
+import { Users, ChartPie, Clock } from "lucide-vue-next";
 import BaseCard from "@/components/BaseCard.vue";
 import BaseTitle from "@/components/BaseTitle.vue";
 import { NTag } from "naive-ui";

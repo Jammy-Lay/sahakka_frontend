@@ -4,8 +4,11 @@
     </div>
     <div v-else>
         <div class="row">
-            <div class="col-4">
-                <BaseTitle title="Teams" />
+            <div class="col-4 pb-4">
+                <div class="d-flex align-items-center gap-2">
+                    <Users  class="text-prime" :size="30" />
+                    <BaseTitle title="Teams" class="mb-0" />
+                </div>
             </div>
             <div class="col-8">
                 <div class="d-flex justify-content-end">

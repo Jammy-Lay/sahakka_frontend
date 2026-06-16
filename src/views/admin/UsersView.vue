@@ -4,7 +4,10 @@
     </div>
     <div v-else>
         <div class="d-flex align-items-center mb-1">
-            <BaseTitle title="View Users" />
+            <div class="d-flex align-items-center gap-2">
+                <Users  class="text-prime" :size="30" />
+                <BaseTitle title="View Users" class="mb-0" />
+            </div>
         </div>
 
         <n-tabs type="line" animated default-value="allUsers">

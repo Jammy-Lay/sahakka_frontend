@@ -8,7 +8,10 @@
             <div class="col-lg-12 col-xl-8">
                 <div class="row bg-body position-sticky pt-5" style="top: 10px; z-index: 10">
                     <div class="col-4">
-                        <BaseTitle title="Workspaces" />
+                        <div class="d-flex align-items-center gap-2">
+                            <Layers  class="text-prime" :size="30" />
+                            <BaseTitle title="Workspace" class="mb-0" />
+                        </div>
                     </div>
 
                     <div class="col-8">
@@ -49,7 +52,10 @@
 
             <!-- ── Right: Activities ── -->
             <div class="col-lg-12 col-xl-4 sticky-top" style="top: 40px">
-                <BaseTitle title="Overview" />
+                <div class="d-flex align-items-center gap-2">
+                    <Target  class="text-prime" :size="30" />
+                    <BaseTitle title="Overview" class="mb-0" />
+                </div>
 
                 <!-- Stat cards -->
                 <div class="row g-3 mt-1">
@@ -99,7 +105,7 @@ import { useWorkspaceStore } from "@/stores/admin/workspaces";
 import { useTeamstore } from "@/stores/admin/teams";
 import { useTaskstore } from "@/stores/admin/tasks";
 import router from "@/router";
-import { ChartPie, Users, Layers, Search, ChevronLeft, ChevronRight } from "lucide-vue-next";
+import { ChartPie, Users, Layers, Search, ChevronLeft, ChevronRight, Target } from "lucide-vue-next";
 import BaseTitle from "@/components/BaseTitle.vue";
 import Loading from "@/components/layouts/Loading.vue";
 import { useToast } from "vue-toastification";
