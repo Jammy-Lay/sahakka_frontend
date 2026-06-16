@@ -141,7 +141,7 @@
                 class="rounded-circle object-fit-cover" />
               <span class="fs-13">
                 <n-ellipsis style="max-width: 160px" :tooltip="{
-                  style: { fontSize: '11px', padding: '4px 8px', borderRadius: '8px' },
+                  style: { fontSize: '11px !important', padding: '5px 14px !important', borderRadius: '8px !important' },
                 }">
                   {{ ws.workspace_name }}
                 </n-ellipsis>
