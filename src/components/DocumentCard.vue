@@ -18,7 +18,7 @@
           <file color="var(--bs-info)" size="26" />
           <h5 ref="editTitle" :contenteditable="edit" @dblclick.prevent="editAction" @keydown="lineBreak" @click.prevent
             class="title w-100 m-0 fw-semibold">
-            {{ documentTitle.length > 10 ? documentTitle.substring(0, 10) + '...' : documentTitle }}</h5>
+            {{ documentTitle.length > 10 && !edit ? documentTitle.substring(0, 10) + '...' : documentTitle }}</h5>
         </div>
         <base-btn v-if="edit" class="btn rounded-btn" btn-name="Rename"
           @click.prevent="$emit('updateTitle', documentId, editTitle.innerText, updateTitleHandling(action))" />
