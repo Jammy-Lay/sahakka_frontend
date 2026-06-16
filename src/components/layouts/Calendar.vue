@@ -92,7 +92,7 @@
                 :show-indicator="false"
                 processing
               />
-              <span class="fs-13 text-green">60%</span>
+              <span class="fs-13 text-green">{{ approvedPercentage }}%</span>
             </div>
           </div>
           <div class="bg-white p-2 rounded-card gap-3 w-50">
@@ -113,7 +113,7 @@
                 :show-indicator="false"
                 processing
               />
-              <span class="fs-13 text-danger">20%</span>
+              <span class="fs-13 text-danger">{{ rejectedPercentage }}%</span>
             </div>
           </div>
         </div>
@@ -162,8 +162,8 @@
         <n-empty
           v-if="getMyTask.length === 0"
           description="No Data"
-          class="mt-8"
-          style="--n-icon-size: 45px; font-size: 14px"
+          class="mt-3"
+          style="--n-icon-size: 40px; font-size: 13px"
         />
         <div
           v-else
@@ -695,6 +695,7 @@
                   rows="1"
                   @blur="handleUpdateTask(selectedTask)"
                   @input="autoResize"
+                  placeholder="Task Title"
                 />
                 <textarea
                   v-model="selectedTask.description"
@@ -710,11 +711,53 @@
               <p class="fw-semibold fs-15 mb-2">
                 File attachment <Link size="15" class="ms-1" />
               </p>
-              <div class="attach-upload-box mb-4">
-                <div class="attach-pdf-icon">
-                  <FileText size="18" color="#e24b4a" />
-                </div>
-                <span class="fs-13 text-mute">Embed a PDF</span>
+              <input
+                ref="fileInputRef"
+                type="file"
+                accept="image/*,application/pdf"
+                class="d-none"
+                @change="handleFileChange"
+              />
+              <div class="attach-upload-box mb-4" @click="triggerFileInput">
+                <template v-if="!selectedFile">
+                  <div class="attach-pdf-icon">
+                    <FileText size="18" color="#e24b4a" />
+                  </div>
+                  <span class="fs-13 text-mute">Embed a PDF or Image</span>
+                </template>
+
+                <template v-else>
+                  <!-- Image: show n-image thumbnail, click = built-in lightbox -->
+                  <div
+                    v-if="selectedFile.type.startsWith('image/')"
+                    class="attach-thumb"
+                    @click.stop
+                  >
+                    <n-image
+                      :src="filePreviewUrl"
+                      width="32"
+                      height="32"
+                      object-fit="cover"
+                      style="border-radius: 6px; display: block"
+                      show-toolbar-tooltip
+                    />
+                  </div>
+
+                  <div
+                    v-else
+                    class="attach-pdf-icon cursor-pointer bg-blue"
+                    @click.stop="openFilePreview"
+                  >
+                    <FileText size="18" color="#0088ff" />
+                  </div>
+
+                  <span class="fs-13 text-dark fw-medium flex-grow-1 text-truncate">
+                    {{ selectedFile.name }}
+                  </span>
+                  <button type="button" class="icon-action-btn" @click.stop="removeFile">
+                    <X size="14" />
+                  </button>
+                </template>
               </div>
 
               <!-- Messages -->
@@ -782,6 +825,7 @@
           <button
             class="btn bg-btn rounded-4 py-2 px-3 d-flex align-items-center gap-2"
             :disabled="isLoading"
+            @click="handleSubmit"
           >
             <span v-if="isLoading" class="spinner-border spinner-border-sm me-2" />
             <Send v-else :size="16" />
@@ -794,7 +838,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted, nextTick } from "vue";
+import { ref, computed, onMounted, onUnmounted, nextTick, watch } from "vue";
 import { Calendar as VCalendar } from "v-calendar";
 import "v-calendar/style.css";
 import {
@@ -856,7 +900,8 @@ const total = computed(() => summary.value.total_tasks || 0);
 // Calculate percentages
 const completedPercentage = computed(() => {
   if (total.value === 0) return 0;
-  const count = (summary.value.status?.approved || 0) + (summary.value.status?.rejected || 0);
+  const count =
+    (summary.value.status?.approved || 0) + (summary.value.status?.rejected || 0);
   return Math.round((count / total.value) * 100);
 });
 
@@ -875,6 +920,69 @@ const rejectedPercentage = computed(() => {
   return Math.round(((summary.value.status?.rejected || 0) / total.value) * 100);
 });
 
+// ── File attachment ──
+const fileInputRef = ref(null);
+const selectedFile = ref(null);
+const filePreviewUrl = ref(null);
+
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+
+const triggerFileInput = () => {
+  fileInputRef.value?.click();
+};
+
+const handleFileChange = (e) => {
+  const file = e.target.files?.[0];
+  if (!file) return;
+
+  const isValid = file.type === "application/pdf" || file.type.startsWith("image/");
+  if (!isValid) {
+    toast.error("Only image or PDF files are allowed");
+    e.target.value = "";
+    return;
+  }
+
+  if (file.size > MAX_FILE_SIZE) {
+    toast.error("File size must be 5MB or less");
+    e.target.value = "";
+    return;
+  }
+
+  selectedFile.value = file;
+  e.target.value = "";
+};
+
+const removeFile = () => {
+  if (filePreviewUrl.value) {
+    URL.revokeObjectURL(filePreviewUrl.value);
+    filePreviewUrl.value = null;
+  }
+  selectedFile.value = null;
+};
+
+// Generate object URL for images only (used by n-image thumbnail)
+watch(selectedFile, (newFile) => {
+  if (filePreviewUrl.value) {
+    URL.revokeObjectURL(filePreviewUrl.value);
+    filePreviewUrl.value = null;
+  }
+  if (newFile && newFile.type.startsWith("image/")) {
+    filePreviewUrl.value = URL.createObjectURL(newFile);
+  }
+});
+
+// PDF only — open in new tab
+const openFilePreview = () => {
+  if (!selectedFile.value || selectedFile.value.type !== "application/pdf") return;
+  const url = URL.createObjectURL(selectedFile.value);
+  window.open(url, "_blank");
+};
+
+const handleSubmit = () => {
+  console.log("taskMessage:", taskMessage.value);
+  console.log("selectedFile:", selectedFile.value);
+};
+
 // ── Calendar ──
 const selectedDate = ref(new Date());
 const currentTime = ref("");
@@ -890,7 +998,11 @@ const updateTime = () => {
     hour12: true,
   });
 };
-onUnmounted(() => clearInterval(timer));
+
+onUnmounted(() => {
+  clearInterval(timer);
+  if (filePreviewUrl.value) URL.revokeObjectURL(filePreviewUrl.value);
+});
 
 // ── Task modal state ──
 const showTaskModal = ref(false);

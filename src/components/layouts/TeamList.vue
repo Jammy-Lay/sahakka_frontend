@@ -81,18 +81,20 @@
                 <p class="mb-0 fs-11 text-mute">{{ t.description }}</p>
               </div>
               <n-popover
+                v-model:show="showPopover[t.team_id]"
                 trigger="click"
                 placement="right"
                 :show-arrow="false"
                 v-if="isOwner"
-                style="border-radius: 12px; width: 135px; padding: 0; margin-left: 18px"
+                style="border-radius: 12px; width: 135px; padding: 0; margin-left: 20px"
               >
                 <template #trigger>
                   <div
                     style="width: 25px; height: 25px; cursor: pointer"
                     class="btn-option d-flex justify-content-center align-items-center rounded-circle"
+                    :class="{ 'btn-option-active': showPopover[t.team_id] }"
                   >
-                    <ellipsis size="18" />
+                    <ellipsis size="16" />
                   </div>
                 </template>
 
@@ -105,7 +107,7 @@
                   </div>
                   <div
                     class="d-flex align-items-center rounded gap-2 px-2 py-1 fw-bold workspace-item"
-                    @click="showSubmissionModal = true"
+                    @click="goSubmissionView(t.team_id)"
                   >
                     <ClipboardList size="15" /> Submissions
                   </div>
@@ -132,7 +134,13 @@
             <n-avatar-group :options="mapMembers(t.members)" :size="25" :max="4">
               <template #avatar="{ option: { name, src } }">
                 <n-tooltip
-                  :style="{ fontSize: '11px', padding: '4px 8px', borderRadius: '8px' }"
+                  :style="{
+                    fontSize: '11px !important',
+                    padding: '4px 8px !important',
+                    borderRadius: '8px !important',
+                    marginBottom: '5px !important',
+                    marginLeft: '0px !important',
+                  }"
                 >
                   <template #trigger><n-avatar :src="src" /></template>
                   {{ name }}
@@ -248,6 +256,8 @@ const currentRouteWorkspaceId = computed(() => route.params.workspace_id);
 const currentRouteTeamId = computed(() => route.params.team_id);
 const currentSection = computed(() => route.path.split("/").pop()?.toLowerCase());
 
+const showPopover = ref({});
+
 const activeBorderColor = computed(() => {
   const map = {
     tasks: "#0088ff",
@@ -282,6 +292,11 @@ watch(
 onMounted(async () => {
   await teamStore.getTeamByWorkspaceStore(currentRouteWorkspaceId.value);
 });
+
+const goSubmissionView = (teamId) => {
+  showPopover.value[teamId] = false;
+  router.push(`/workspace/${currentRouteWorkspaceId.value}/team/${teamId}/submissions`);
+};
 
 function mapMembers(members = []) {
   return members.map((m) => ({ name: m.name, src: m.avatar }));
@@ -414,6 +429,10 @@ const handleDelete = async () => {
 }
 
 .btn-option:hover {
+  background-color: #e4e4e7 !important;
+}
+
+.btn-option-active {
   background-color: #e4e4e7 !important;
 }
 </style>

@@ -31,6 +31,13 @@ export const useTaskStore = defineStore("task", () => {
     }
   };
 
+  // const getApprovedPercentage = (team_id) => {
+  //   const tasks = getTaskByTeam.value[team_id];
+  //   if (!tasks || tasks.length === 0) return 0;
+  //   const approved = tasks.filter((t) => t.status === "approved").length;
+  //   return Math.round((approved / tasks.length) * 100);
+  // };
+
   const createTask = async (workspace_id, team_id, form) => {
     try {
       await api.post(`/workspace/${workspace_id}/team/${team_id}/task`, form);
@@ -92,11 +99,12 @@ export const useTaskStore = defineStore("task", () => {
     getTaskActivity,
     getSummaryTask,
     getMyTask,
+    // getApprovedPercentage,
     getTaskByTeamStore,
     createTask,
     getTaskActivityStore,
     updateTask,
     getSummaryTaskStore,
-    getMyTaskStore
+    getMyTaskStore,
   };
 });
