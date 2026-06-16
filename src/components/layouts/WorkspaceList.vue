@@ -1,9 +1,9 @@
 <template>
   <div>
-    <n-popover trigger="manual" placement="bottom-start" :show-arrow="false" v-model:show="showPopover"
+    <n-popover trigger="click" placement="bottom-start" :show-arrow="false" v-model:show="showPopover"
       style="padding: 0; border-radius: 16px; width: 267px; margin-top: 12px">
       <template #trigger>
-        <div class="workspace-trigger d-flex align-items-center gap-2" @click="showPopover = !showPopover">
+        <div class="workspace-trigger d-flex align-items-center gap-2"  @click="showPopover = !showPopover">
           <img :src="currentWorkspace?.creator?.avatar" alt="" style="width: 25px; height: 25px"
             class="rounded-circle object-fit-cover" />
           <span class="fs-13 fw-bold">
@@ -32,7 +32,7 @@
         <div class="d-flex align-items-center justify-content-between px-2 py-1 mb-2">
           <span class="fs-13 fw-semibold">My Workspace</span>
           <n-popover trigger="click" placement="right" :show-arrow="false"
-            style="border-radius: 12px; width: 210px; padding: 0; margin-left: 18px">
+            style="border-radius: 12px; width: 210px; padding: 0; margin-left: 18px;">
             <template #trigger>
               <button class="btn rounded-btn-sm fs-12 btn-outline px-2 border text-nowrap">
                 <plus size="13" /> New

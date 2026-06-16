@@ -19,12 +19,14 @@
 
                     <!-- Teams Section -->
                     <div class="col-12">
-                        <h3>Teams</h3>
+                        <h3 class="pt-3">Teams</h3>
                         <div class="row g-3 mt-1">
-                            <div v-for="team in teamCards" :key="team.project.team_id" class="col-12 col-md-6 col-lg-4">
-                                <BaseCard :project="team.project" :stats="team.stats"
-                                    :members="team.project.membersList" class="cursor-pointer h-100"
-                                    @click="goDetail(workspace_id, team.project.team_id)" />
+                            <div v-for="team in teamCards" :key="team.project.team_id" class="col-12 col-lg-6">
+                                <BaseCardTeam :project="team.project" :stats="team.stats"
+                                    :title="team.project.name"
+                                    :members="team.project.membersList"
+                                    :owner="team.project.owner"
+                                    @click="goDetail(team.project.workspace_id, team.project.team_id)" />
                             </div>
                         </div>
                     </div>
@@ -77,6 +79,7 @@ import { NTag } from "naive-ui";
 import router from "@/router";
 import Loading from "@/components/layouts/Loading.vue";
 import { useToast } from "vue-toastification";
+import BaseCardTeam from "@/components/BaseCardTeam.vue";
 
 
 const route = useRoute();
@@ -166,15 +169,16 @@ const teamCards = computed(() =>
         const teamTasks = tasks.value.filter(t => t.team_id === team.team_id);
         const totalTeamTasks = teamTasks.length;
         const doneTasks = teamTasks.filter(t => t.status === "done").length;
-
-        const owner = team.members?.find(m => m.role === "owner");
-
         return {
             project: {
                 team_id: team.team_id,
                 name: team.title,
-                owner: owner?.name || "Unknown",
+                workspace_id: team.workspace?.workspace_id,     
+                workspace_name: team.workspace?.workspace_name,  
+                name: team.title,                                 
+                description: team.description,
                 membersList: team.members || [],
+                owner: team.members?.find((m) => m.role === "owner") ?? team.members?.[0],
                 progress: totalTeamTasks === 0
                     ? 0
                     : Math.round((doneTasks / totalTeamTasks) * 100),
