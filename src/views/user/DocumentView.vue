@@ -7,7 +7,7 @@
     </n-modal>
 
     <n-modal v-model:show="deleteModal" class="rounded-4 p-4">
-      <n-card style="width: 500px" title="Delete document">
+      <n-card style="width: 300px" title="Delete document">
         <template #header-extra>
           <n-button quaternary circle @click="deleteModal = false">
             <X/>
@@ -24,11 +24,12 @@
     </n-modal>
   </n-modal-provider>
 
-  <main class="py-5">
+  <main class="py-4">
 
     <div class="container-fluid p-0">
       <div class="row">
-        <div class="col-5 ms-auto text-end">
+        <div class="col-5 ms-auto text-end d-flex gap-3">
+          <input type="text" class="form-control rounded-btn shadow-none">
           <base-btn @click="showModal = true" class="btn rounded-btn rounded-btn" icon="PlusIcon"
             btn-name="New document">
           </base-btn>
@@ -78,13 +79,14 @@
   async function createDocument(title) {
 
     const newDoc = await useDocument.createDocument(workspace_id, team_id, title);
-    showModal.value = false
+    showModal.value = false;
     if (newDoc) {
-      getDocumentByTeam.value.unshift(newDoc.data)
+      getDocumentByTeam.value.unshift(newDoc.data);
       notify().success(newDoc.message);
       return;
     }
     notify().error(newDoc.message);
+
   }
 
   async function deleteDocHandling() {

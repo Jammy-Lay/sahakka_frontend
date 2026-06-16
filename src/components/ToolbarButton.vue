@@ -1,7 +1,7 @@
 <template >
-  <button @click="action" class="d-flex align-items-center gap-1">
-    <component :is="icon" size="16"/>
-    <span>{{ type }}</span>
+  <button @click="action" class="d-flex align-items-stretch gap-1">
+    <component :is="icon" size="20" stroke-width="2"/>
+    <!-- <span>{{ type }}</span> -->
   </button>
 </template>
 
