@@ -25,13 +25,17 @@
         <ToolbarButton :class="{ 'active': editor.isActive(tool.class) }" :action="tool.fn"
           class="btn toolbar-btn rounded-0" :icon="tool.icon" :type="tool.class" :title="tool.class.charAt(0).toLocaleUpperCase() + tool.class.slice(1)"/>
       </div>
+      <div v-for="(tool, index) in undoRedo" :key="index">
+        <ToolbarButton :class="{ 'active': editor.isActive(tool.class.toLowerCase()) }" :action="tool.fn"
+          class="btn toolbar-btn rounded-0" :icon="tool.icon" :type="tool.class" :title="tool.class"/>
+      </div>
     </div>
   </div>
 
 </template>
 
 <script setup>
-  import { ArrowLeft, Bold, Code2, Heading1, Heading2, Heading3, Indent, Italic, List, ListOrdered, Pilcrow, Quote, Strikethrough, Underline } from 'lucide-vue-next';
+  import { ArrowLeft, Bold, Code2, Heading1, Heading2, Heading3, Indent, Italic, List, ListOrdered, Pilcrow, Quote, Redo2, Strikethrough, Underline, Undo2 } from 'lucide-vue-next';
   import ToolbarButton from './ToolbarButton.vue';
   import { ref } from 'vue';
 
@@ -64,6 +68,11 @@
   const lists = [
     { icon: List, fn: () => props.editor.chain().focus().toggleBulletList().run(), class: 'bulletList' },
     { icon: ListOrdered, fn: () => props.editor.chain().focus().toggleOrderedList().run(), class: 'orderedList' },
+  ]
+
+  const undoRedo = [
+    { icon: Undo2, fn: () => props.editor.chain().focus().undo().run(), class: 'Undo' },
+    { icon: Redo2, fn: () => props.editor.chain().focus().redo().run(), class: 'Redo' },
   ]
 
 
