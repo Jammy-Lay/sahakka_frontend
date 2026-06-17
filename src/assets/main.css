@@ -365,6 +365,7 @@ body .n-popover.n-tooltip {
   font-weight: 600;
   cursor: pointer;
   text-transform: capitalize;
+  border: 1px solid transparent;
 }
 .tab-info {
   display: inline-flex;
@@ -629,8 +630,9 @@ body .n-popover.n-tooltip {
   color: #171717 !important;
 }
 .bg-blue-active {
-  background-color: #0088ff !important;
-  color: #b2dbff !important;
+  background-color: #b2dbff !important;
+  color: #0088ff !important;
+  border: 1px solid #0088ff;
 }
 .bg-orange-active {
   background-color: #ff8d28 !important;
