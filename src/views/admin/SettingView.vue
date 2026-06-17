@@ -1,5 +1,8 @@
 <template>
-    <div class="container-fluid px-4">
+    <div v-if="auth.loading">
+        <SkeletonSetting></SkeletonSetting>
+    </div>
+    <div v-else class="container-fluid px-4">
         <!-- HEADER SECTION -->
         <div class="d-flex align-items-center justify-content-between mb-4 px-2">
             <div class="d-flex align-items-center gap-2">
@@ -155,7 +158,7 @@
                 <template #footer>
                     <n-space justify="end" class="py-1">
                         <n-button class="rounded-3" secondary @click="showCropper = false">Cancel</n-button>
-                        <n-button class="rounded-3" type="primary" color="#3b82f6" :loading="Loading"
+                        <n-button class="rounded-3" type="primary" color="#171717" :loading="Loading"
                             @click="cropImage">
                             <template #icon><n-icon>
                                     <Check />
@@ -308,9 +311,10 @@ import {
 import { Cropper, CircleStencil } from "vue-advanced-cropper";
 import "vue-advanced-cropper/dist/style.css";
 import { notify } from "@/utils/toast";
-import { useGetProfile } from "@/stores/myProfile";
+import { useGetProfile } from "@/stores/profile/profile";
 import { useAuthStore } from "@/stores/auth";
 import { useRouter } from "vue-router";
+import SkeletonSetting from "@/components/Skeleton/SkeletonSetting.vue";
 
 const profile = useGetProfile();
 const auth = useAuthStore();

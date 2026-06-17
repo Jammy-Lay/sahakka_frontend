@@ -1,10 +1,13 @@
 <template>
-    <div v-if="loading">
-        <Loading></Loading>
+    <div v-if="loading || usersStore.loading">
+        <Dashboard></Dashboard>
     </div>
     <div v-else>
         <div class="d-flex align-items-center justify-content-between mb-3">
-            <BaseTitle title="Dashboard" />
+            <div class="d-flex align-items-center gap-2">
+                <LayoutDashboard  class="text-prime" :size="30" />
+                <BaseTitle title="Dashboard" class="mb-0" />
+            </div>
             <n-tag round :bordered="false" type="warning">
                 {{ todayLabel }}
             </n-tag>
@@ -155,6 +158,7 @@ import { useUserStore } from "@/stores/admin/users";
 import Loading from "@/components/layouts/Loading.vue";
 import { useToast } from "vue-toastification";
 import Chart from "chart.js/auto";
+import Dashboard from "@/components/Skeleton/Dashboard.vue";
 
 const chartRef = ref(null);
 const selectedRange = ref("week");

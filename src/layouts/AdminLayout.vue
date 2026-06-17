@@ -14,12 +14,20 @@
             </router-link>
           </div>
 
-          <!-- Profile -->
-          <n-dropdown trigger="click" :options="options" @select="handleProfileSelect" :theme-overrides="dropdownTheme"
-            style="min-width: 150px; padding: 7px 4px">
+          <!-- Profile Skeleton -->
+          <div v-if="auth.loading" class="d-flex gap-2 align-items-center rounded-3 profile">
+            <div class="skeleton" style="width:35px; height:35px; border-radius:50%; flex-shrink:0;"></div>
+            <div class="d-none d-sm-flex flex-column gap-1">
+              <div class="skeleton" style="width:120px; height:22px;"></div>
+            </div>
+          </div>
+
+          <!-- Profile Real -->
+          <n-dropdown v-else trigger="click" :options="options" @select="handleProfileSelect"
+            :theme-overrides="dropdownTheme" style="min-width: 150px; padding: 7px 4px">
             <div class="d-flex gap-2 align-items-center rounded-3 profile cursor-pointer">
               <img :src="profile.getMe?.avatar" alt="" class="img-fluid rounded-circle object-fit-cover"
-                style="width: 35px; height: 35px" />
+                style="width:35px; height:35px" />
               <div class="d-none d-sm-flex flex-column">
                 <p class="fs-7 fw-bold m-0 p-0">{{ profile.getMe?.name }}</p>
                 <small class="fs-8 text-secondary">{{ profile.getMe?.role }}</small>
@@ -53,7 +61,7 @@
               <template #footer>
                 <n-space justify="end" class="py-1">
                   <n-button class="rounded-3" @click="showLogoutModal = false">Cancel</n-button>
-                  <n-button class="rounded-3" type="primary" color="#3b82f6" :loading="logoutLoading"
+                  <n-button class="rounded-3 bg-danger border-0" type="primary" :loading="logoutLoading"
                     @click="confirmLogout">
                     <template #icon><n-icon>
                         <LogOut />
@@ -237,7 +245,7 @@ const options = computed(() => [
 ]);
 
 function handleProfileSelect(key) {
-  if (key === "logout") showLogoutModal.value = true; 
+  if (key === "logout") showLogoutModal.value = true;
   if (key === "profile") router.push("/admin/setting");
 }
 
@@ -359,7 +367,7 @@ const themeOverrides = {
 };
 
 onMounted(async () => {
-  await profile.getMeStore(); 
+  await profile.getMeStore();
 });
 </script>
 
@@ -640,5 +648,32 @@ button.n-button.n-button--default-type:hover .n-button__content {
 
 .responsive-title {
   font-size: clamp(13px, 3vw, 20px);
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  background: #e2e2e2;
+  border-radius: 8px;
+  flex-shrink: 0;
+}
+
+.skeleton::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, #e2e2e2 25%, #f0f0f0 50%, #e2e2e2 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.2s infinite linear;
 }
 </style>
