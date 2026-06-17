@@ -1,6 +1,6 @@
 <template>
     <div v-if="loading">
-        <Loading />
+        <SkeletonTeam></SkeletonTeam>
     </div>
     <div v-else>
         <div class="row">
@@ -55,6 +55,7 @@ import BaseTitle from "@/components/BaseTitle.vue";
 import Loading from "@/components/layouts/Loading.vue";
 import { useToast } from "vue-toastification";
 import BaseCardTeam from "@/components/BaseCardTeam.vue";
+import SkeletonTeam from "@/components/Skeleton/SkeletonTeam.vue";
 
 const useTeam = useTeamstore();
 const useTask = useTaskstore();

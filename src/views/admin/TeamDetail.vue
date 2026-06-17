@@ -1,6 +1,6 @@
 <template>
     <div v-if="loading">
-        <Loading />
+        <SkeletonTeamDetail />
     </div>
     <div v-else class="page-bg p-4">
         <router-link to="/admin/teams" class="btn btn-outline-dark mb-3 d-flex align-items-center gap-2 w-fit">
@@ -156,6 +156,7 @@ import { useTeamstore } from "@/stores/admin/teams";
 import Loading from "@/components/layouts/Loading.vue";
 import { useToast } from "vue-toastification";
 import { useTaskstore } from "@/stores/admin/tasks";
+import SkeletonTeamDetail from "@/components/Skeleton/SkeletonTeamDetail.vue";
 
 const toast = useToast();
 const loading = ref(false);

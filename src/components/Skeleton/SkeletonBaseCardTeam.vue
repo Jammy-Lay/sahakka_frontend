@@ -1,5 +1,5 @@
 <template>
-    <div class="card border-0 shadow-sm rounded-4 h-100">
+    <div class="card border-0 shadow-sm rounded-4 h-100 py-3">
         <div class="card-body">
             <!-- workspace row -->
             <div class="d-flex gap-2 pb-2 mb-3 border-bottom border-2">

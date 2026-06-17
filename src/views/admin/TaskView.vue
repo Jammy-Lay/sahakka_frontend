@@ -1,5 +1,8 @@
 <template>
-    <div class="row g-3">
+    <div v-if="taskStore.loading">
+        <SkeletonTask></SkeletonTask>
+    </div>
+    <div v-else class="row g-3">
         <div class="col-12">
             <div class="row justify-content-between">
                 <div class="col-4">
@@ -94,6 +97,7 @@ import { useTaskstore } from "@/stores/admin/tasks";
 import { ref, onMounted } from "vue";
 import { CircleCheckBig, CircleDashed, Send, CircleCheck, CircleX } from "lucide-vue-next";
 import BaseTitle from "@/components/BaseTitle.vue";
+import SkeletonTask from "@/components/Skeleton/SkeletonTask.vue";
 
 const taskStore = useTaskstore();
 const search = ref("");
