@@ -1,48 +1,62 @@
+ 
 <template>
   <div class="mt-4">
-    <div class="d-flex justify-content-between align-items-center">
+    <div class="justify-content-between align-items-center">
       <h5 class="mb-0">FrontEnd</h5>
-      <span class="text-mute fs-14">All Activity</span>
-    </div>
-    
-    <div class="my-4">
-      <span class="date-of py-1 bg-white rounded-2 mt-3 fs-14 px-3 rounded-card">
-        {{ formattedDate }}
-      </span>
+      <span class="text-muted fs-14">All Activity</span>
     </div>
 
     <div class="mt-3 px-5">
       <div class="row g-3">
-        <div class="col-12" v-for="activity in activities" :key="activity.id">
+        <div class="col-12" v-for="el in showActivity" :key="el.id">
           <div class="card rounded-card border">
             <div class="card-body">
-              <span :class="['btn-create', 'py-1', activity.buttonClass]">
-                {{ activity.buttonIcon }} {{ activity.buttonText }}
+              <!-- Fixed: Proper conditional class binding -->
+              <span :class="[
+
+                'fs-14',
+                'p-1',
+                'rounded-card',
+                el.action == 'create' ? ['bg-green', 'text-green'] : (el.action == 'assign') ? ['bg-blue', 'text-blue'] : ['bg-orange', 'text-orange']
+              ]">
+
+                <span v-if="el.action === 'create'">
+                  <Plus size="12" />
+                </span>
+                <span v-else-if="el.action === 'assign'">
+                  <UserRound size="12" />
+                </span>
+                <span v-else>
+                  <SquarePen size="12" />
+                </span>
+                {{ el.action }}
               </span>
-              
-              <div class="d-flex align-items-center justify-content-between bg-white rounded-card px-0 py-2 mt-3 w-100"
-                style="border-color: #e4e4e7;">
-                <div class="d-flex align-items-center gap-2 boder-0 px-0 mx-0">
+
+              <div class="d-flex align-items-center justify-content-between bg-white rounded-card px-0 py-2 mt-3 w-100">
+                <div class="d-flex align-items-center gap-2">
                   <span class="pro-img">
-                    <img :src="activity.userAvatar" class="p-0 m-x" :alt="activity.userName" 
-                         @error="handleImageError" />
+                    <img :src="el.created_by?.avatar || '/default-avatar.png'" alt="User avatar">
                   </span>
-                  <span class="title-text fs-14 fw-semibold text-dark">{{ activity.userName }}</span>
+                  <span class="title-text fs-14 fw-semibold text-dark">
+                    {{ el.created_by?.name || 'Unknown User' }}
+                  </span>
                 </div>
-                <span class="fs-12 text-mute bg-mute px-2 py-1 rounded-btn-sm">{{ activity.timeAgo }}</span>
+                <span class="fs-12 text-muted bg-light px-2 py-1 rounded-btn-sm">
+                  {{ formatTime(el.created_at) }}
+                </span>
               </div>
-              
+
               <div class="p-2 bg-accent rounded-card border mt-2">
-                <p class="p-0 m-0">{{ activity.description }}</p>
+                <p class="p-0 m-0">{{ el.message || 'No message provided' }}</p>
               </div>
             </div>
           </div>
         </div>
-        
+
         <!-- Empty state -->
-        <div v-if="!activities.length" class="col-12">
-          <div class="text-center py-5 bg-accent rounded-card">
-            <p class="text-mute mb-0">No activities yet</p>
+        <div v-if="!showActivity || showActivity.length === 0" class="col-12">
+          <div class="text-center py-5">
+            <p class="text-muted">No activity found</p>
           </div>
         </div>
       </div>
@@ -52,87 +66,59 @@
 
 <script setup>
 import { useActivityStore } from '@/stores/activity/activity';
-import { ref, computed, onMounted } from 'vue';
+import { ref, onMounted, watch, computed } from 'vue';
 import { useRoute } from 'vue-router';
 
-const route = useRoute();
 const activityStore = useActivityStore();
-const activities = ref([]);
+const route = useRoute();
+const workspaceId = computed(() => route.params.workspace_id);
+const teamId = computed(() => route.params.team_id);
+const showActivity = computed(() => activityStore.teamActivity?.data || []);
 
-// Get IDs from route params
-const workspaceId = computed(() => {
-  return route.params.workspace_id || 
-         route.params.workspaceId || 
-         route.params.workspace || 
-         '4';
-});
-
-const teamId = computed(() => {
-  return route.params.team_id || 
-         route.params.teamId || 
-         route.params.team || 
-         '7';
-});
-
-const taskId = computed(() => {
-  return route.params.task_id || 
-         route.params.taskId || 
-         route.params.task || 
-         null;
-});
-
-// Format current date
-const formattedDate = computed(() => {
-  const date = new Date();
-  const day = date.getDate();
-  const month = date.toLocaleString('default', { month: 'short' });
-  const year = date.getFullYear();
-  return `${day} / ${month} / ${year}`;
-});
-
-// Fetch activities based on context
-const fetchActivities = async () => {
+const formatTime = (dateString) => {
+  if (!dateString) return '';
   try {
-    let data;
-    
-    if (taskId.value) {
-      data = await activityStore.getTaskActivity(workspaceId.value,teamId.value,taskId.value);
-    } else {
-      data = await activityStore.getTeamActivity(workspaceId.value,teamId.value);
-    }
-    
-    if (data && Array.isArray(data)) {
-      activities.value = data.map(activity =>activityStore.formatActivity(activity));
-    } else {
-      activities.value = [];
-    }
-    
-  } catch (err) {
-    console.error('Failed to fetch activities:', err);
-    activities.value = [];
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return '';
+
+    let hours = date.getHours();
+    const minutes = date.getMinutes().toString().padStart(2, '0');
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    hours = hours % 12 || 12;
+    return `${hours}:${minutes} ${ampm}`;
+  } catch (error) {
+    return '';
   }
 };
 
-// Handle image loading errors
-const handleImageError = (event) => {
-  event.target.src = '/src/assets/image/default-avatar.jpg';
+const loadActivity = async () => {
+  if (workspaceId.value && teamId.value) {
+    try {
+      await activityStore.getTeamActivity(workspaceId.value, teamId.value);
+    } catch (error) {
+      console.error('Failed to load activity:', error);
+    }
+  } else {
+    console.warn('Workspace ID or Team ID is missing');
+  }
 };
 
-onMounted(() => {
-  fetchActivities();
-});
+onMounted(loadActivity);
+
+watch([workspaceId, teamId], () => {
+  loadActivity();
+}, { deep: true });
+
 </script>
 
 <style scoped>
-
-
 .card .btn-create {
   padding: 4px 12px;
   border-radius: 16px !important;
   display: inline-block;
   font-size: 12px;
   font-weight: 500;
-  background-color: rgba(0,0,0,0.05);
+  background-color: rgba(0, 0, 0, 0.05);
 }
 
 .pro-img {
@@ -152,18 +138,11 @@ onMounted(() => {
   object-fit: cover;
 }
 
-
-.rounded-btn-sm {
+.rounded-card {
   border-radius: 8px;
 }
 
-.bg-mute {
-  background-color: #f8f9fa;
+.rounded-btn-sm {
+  border-radius: 12px;
 }
-
-.bg-accent {
-  background-color: #f8f9fa;
-}
-
-
 </style>
