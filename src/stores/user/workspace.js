@@ -3,6 +3,7 @@ import { defineStore } from "pinia";
 import { ref, computed } from "vue";
 
 export const UseWorkspaceStore = defineStore("workspace", () => {
+  let loading = ref(true);
   let myWorkspaces = ref([]);
   let joinedWorkspaces = ref([]);
   let getAllWorkspace = ref([]);
@@ -37,6 +38,7 @@ export const UseWorkspaceStore = defineStore("workspace", () => {
 
   const getMyWorkspaceStore = async () => {
     try {
+      loading.value = true;
       const res = await api.get("/getMyWorkspace");
       const data = res.data.data;
       myWorkspaces.value = data.filter((w) => w.my_role === "owner");
@@ -46,10 +48,13 @@ export const UseWorkspaceStore = defineStore("workspace", () => {
       getAllWorkspace.value = data;
     } catch (error) {
       console.log(error);
+    } finally {
+      loading.value = false;
     }
   };
 
   return {
+    loading,
     myWorkspaces,
     joinedWorkspaces,
     getAllWorkspace,
