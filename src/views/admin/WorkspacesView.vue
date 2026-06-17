@@ -1,6 +1,6 @@
 <template>
     <div v-if="loading">
-        <Loading></Loading>
+        <SkeletonWorkspace></SkeletonWorkspace>
     </div>
     <div v-else class="container-fluid px-4">
         <div class="row g-4 align-items-start">
@@ -109,6 +109,7 @@ import { ChartPie, Users, Layers, Search, ChevronLeft, ChevronRight, Target } fr
 import BaseTitle from "@/components/BaseTitle.vue";
 import Loading from "@/components/layouts/Loading.vue";
 import { useToast } from "vue-toastification";
+import SkeletonWorkspace from "@/components/Skeleton/SkeletonWorkspace.vue";
 
 const useWorkspace = useWorkspaceStore();
 const useTeam = useTeamstore();

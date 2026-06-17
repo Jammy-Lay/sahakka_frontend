@@ -1,6 +1,6 @@
 <template>
     <div v-if="loading">
-        <Loading></Loading>
+        <SkeletonWorkspaceDetail></SkeletonWorkspaceDetail>
     </div>
     <div v-else class="container-fluid">
         <router-link to="/admin/workspaces" class="btn btn-outline-dark mb-3 align-items-center">
@@ -83,6 +83,7 @@ import router from "@/router";
 import Loading from "@/components/layouts/Loading.vue";
 import { useToast } from "vue-toastification";
 import BaseCardTeam from "@/components/BaseCardTeam.vue";
+import SkeletonWorkspaceDetail from "@/components/Skeleton/SkeletonWorkspaceDetail.vue";
 
 
 const route = useRoute();

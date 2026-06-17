@@ -53,7 +53,7 @@
               <template #footer>
                 <n-space justify="end" class="py-1">
                   <n-button class="rounded-3" @click="showLogoutModal = false">Cancel</n-button>
-                  <n-button class="rounded-3" type="primary" color="#3b82f6" :loading="logoutLoading"
+                  <n-button class="rounded-3 bg-danger border-0" type="primary" :loading="logoutLoading"
                     @click="confirmLogout">
                     <template #icon><n-icon>
                         <LogOut />

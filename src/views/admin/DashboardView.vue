@@ -1,6 +1,6 @@
 <template>
-    <div v-if="loading">
-        <Loading></Loading>
+    <div v-if="loading || usersStore.loading">
+        <Dashboard></Dashboard>
     </div>
     <div v-else>
         <div class="d-flex align-items-center justify-content-between mb-3">
@@ -158,6 +158,7 @@ import { useUserStore } from "@/stores/admin/users";
 import Loading from "@/components/layouts/Loading.vue";
 import { useToast } from "vue-toastification";
 import Chart from "chart.js/auto";
+import Dashboard from "@/components/Skeleton/Dashboard.vue";
 
 const chartRef = ref(null);
 const selectedRange = ref("week");

@@ -1,6 +1,6 @@
 <template>
     <div v-if="loading">
-        <Loading></Loading>
+        <SkeletonUser></SkeletonUser>
     </div>
     <div v-else>
         <div class="d-flex align-items-center mb-1">
@@ -64,11 +64,11 @@ import { computed } from "vue";
 import { useUserStore } from "@/stores/admin/users";
 import api from "@/api/https";
 import { useToast } from "vue-toastification";
-import Loading from "@/components/layouts/Loading.vue";
+import SkeletonUser from "@/components/Skeleton/SkeletonUser.vue";
 
-const loading = ref(false)
 const toast = useToast();
 const usersStore = useUserStore();
+const loading = ref(true);
 
 const formatDate = (date) => {
     if (!date) return "N/A";
@@ -82,7 +82,6 @@ const formatDate = (date) => {
 
 const getAllUsers = async () => {
     loading.value = true;
-
     try {
         await usersStore.fetchUsers();
     } catch (error) {
