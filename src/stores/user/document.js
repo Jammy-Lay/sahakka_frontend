@@ -36,7 +36,7 @@ export const useDocumentStore = defineStore("document", () => {
   const deleteDocument = async (workspace_id, team_id, docId) => {
     try {
       const res = await api.delete(`/workspace/${workspace_id}/team/${team_id}/document/${docId}`);
-      return res.data.message;
+      return res.data;
     } catch (error) {
       throw new Error(error.response?.data?.message) || "Can not delete document"
     }

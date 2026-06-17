@@ -169,8 +169,8 @@
     img {
       width: 500px;
       object-fit: cover;
-      border: 2px solid hsl(from var(--bs-gray) h s l / 0.5);
-      border-radius: 10px;
+      border: 2px solid hsl(from var(--bs-gray) h s l / 0.2);
+      border-radius: 8px;
       margin-block: 20px;
     }
 

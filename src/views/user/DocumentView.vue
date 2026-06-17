@@ -91,13 +91,13 @@
 
   async function deleteDocHandling() {
     const deleteDoc = await useDocument.deleteDocument(workspace_id, team_id, document_id.value);
-    if (deleteDoc) {
+    deleteModal.value = false;
+    if (deleteDoc.result) {
       const indexofDoc = getDocumentByTeam.value.findIndex(doc => doc.document_id === document_id.value)
       getDocumentByTeam.value.splice(indexofDoc, 1);
-      deleteModal.value = false;
-      return notify().success(deleteDoc);
+      return notify().success(deleteDoc.message);
     }
-    notify().error(deleteDoc);
+    notify().error(deleteDoc.message);
   }
 
   async function updateTitle(docId, title) {

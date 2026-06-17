@@ -10,10 +10,8 @@
   },
   "dependencies": {
     "@tiptap/extension-image": "^3.27.0",
-    "@tiptap/extensions": "^3.26.0",
-    "@tiptap/pm": "^3.26.0",
-    "@tiptap/starter-kit": "^3.26.0",
-    "@tiptap/vue-3": "^3.26.0",
+    "@tiptap/starter-kit": "^3.27.0",
+    "@tiptap/vue-3": "^3.27.0",
     "axios": "^1.13.5",
     "bootstrap": "^5.3.8",
     "bootstrap-icons": "^1.13.1",
