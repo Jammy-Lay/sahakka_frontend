@@ -6,30 +6,39 @@
       <document-modal @close="showModal = false" @create-document="createDocument" />
     </n-modal>
 
-    <n-modal v-model:show="deleteModal" class="rounded-4 p-4">
-      <n-card style="width: 300px" title="Delete document">
+    <n-modal v-model:show="deleteModal" class="rounded-4">
+      <n-card title="Delete document" style="width: 380px">
         <template #header-extra>
           <n-button quaternary circle @click="deleteModal = false">
-            <X/>
+            <X />
           </n-button>
         </template>
-        <div class="my-4">
-          <p class="border rounded-4 p-3 text-danger fw-bold" style="background-color: #EFF0ED;">Are you sure you want to delete?</p>
+        <div class="mt-4 px-4">
+          <p>Are you sure you want to delete?</p>
         </div>
-        <template #footer class="">
-          <n-button quaternary class="rounded-btn">Cancel</n-button>
-          <n-button type="error" class="rounded-btn" @click="deleteDocHandling">Delete</n-button>
+        <template #footer>
+          <n-button quaternary class="rounded-btn border w-50">Cancel</n-button>
+          <n-button type="error" class="rounded-btn w-50" @click="deleteDocHandling">Delete</n-button>
         </template>
       </n-card>
     </n-modal>
+
   </n-modal-provider>
 
   <main class="py-4">
 
     <div class="container-fluid p-0">
       <div class="row">
-        <div class="col-5 ms-auto text-end d-flex gap-3">
-          <input type="text" class="form-control rounded-btn shadow-none">
+        <div class="col-4">
+          <h2 class="fw-semibold fs-5 mb-1">{{ getTeamByWorkspace[0]?.title }}</h2>
+          <p class="text-secondary fs-13 mb-0">{{ getTeamByWorkspace[0]?.description }}</p>
+        </div>
+        <div class="col-5 ms-auto text-end d-flex gap-3 align-items-start">
+          <div class="form-control rounded-btn d-flex align-items-center">
+            <input v-model="searchDoc" type="text" class="search-input shadow-none outline-none border-0 w-100"
+              placeholder="Search document">
+            <Search color="var(--bs-gray)" class="" />
+          </div>
           <base-btn @click="showModal = true" class="btn rounded-btn rounded-btn" icon="PlusIcon"
             btn-name="New document">
           </base-btn>
@@ -37,14 +46,16 @@
       </div>
       <div class="pt-4"></div>
       <div class="row g-3">
-        <div v-for="(doc, index) in getDocumentByTeam" :key="index" class="col-4">
+        <div v-if="document.length > 0" v-for="(doc, index) in document" :key="index" class="col-4">
           <document-card :avatar="doc.created_by.avatar" :user-name="doc.created_by.name" :document-title="doc.title"
-            :created-at="doc.created_at" :document-id="doc.document_id" @delete-action="(docId) => { deleteModal = true; document_id = docId}"
-            @update-title="updateTitle" />
+            :created-at="doc.created_at" :document-id="doc.document_id"
+            @delete-action="(docId) => { deleteModal = true; document_id = docId }" @update-title="updateTitle" />
         </div>
+        <n-empty v-else description="No Data" class="mt-8"
+          style="--n-icon-size: 45px; font-size: 14px" />
+
       </div>
     </div>
-
   </main>
 </template>
 
@@ -53,13 +64,14 @@
   import DocumentCard from '@/components/DocumentCard.vue';
   import DocumentModal from '@/components/DocumentModal.vue';
   import { useDocumentStore } from '@/stores/user/document';
+  import { useTeamStore } from '@/stores/user/team';
   import { notify } from '@/utils/toast';
+  import { Search } from 'lucide-vue-next';
   import { storeToRefs } from 'pinia';
-  import { onMounted, ref } from 'vue';
+  import { computed, onMounted, ref } from 'vue';
   import { useRoute, useRouter } from 'vue-router';
 
   const route = useRoute();
-  const router = useRouter();
 
   const workspace_id = route.params.workspace_id;
   const team_id = route.params.team_id;
@@ -69,11 +81,22 @@
   const showModal = ref(false);
 
   const useDocument = useDocumentStore();
-  const { getDocumentByTeam } = storeToRefs(useDocument)
+  const { getDocumentByTeam } = storeToRefs(useDocument);
 
+  const searchDoc = ref('');
+  const document = computed(() => {
+    return getDocumentByTeam.value.filter(doc => {
+      return doc.title.toLowerCase().includes(searchDoc.value.trim().toLocaleLowerCase())
+    })
+  })
+
+
+  const useTeam = useTeamStore();
+  const { getTeamByWorkspace } = storeToRefs(useTeam);
 
   onMounted(async () => {
     await useDocument.getAllDocument(workspace_id, team_id)
+    await useTeam.getTeamByWorkspaceStore(workspace_id);
   })
 
   async function createDocument(title) {
@@ -164,13 +187,22 @@
   }
 
   :deep(.n-card-header) {
-    padding: 0 0 10px !important;
+    padding: 16px !important;
     border-bottom: 1px solid var(--bs-border-color);
   }
 
   :deep(.n-card__footer) {
-    padding: 10px 0 0 !important;
-    text-align: end;
+    width: 100%;
+    padding: 16px !important;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    box-sizing: border-box;
+    gap: 10px;
+  }
+
+  .search-input:focus {
+    outline: none;
   }
 
 </style>

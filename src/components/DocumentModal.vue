@@ -5,19 +5,19 @@ const inputTitle = ref('')
 </script>
 
 <template>
-  <n-card style="width: 400px" title="Create new document" class="rounded-4 p-3" :bordered="false" size="huge" role="dialog" aria-modal="true">
+  <n-card style="width: 380px" title="Create new document" class="rounded-4" :bordered="false" size="huge" role="dialog" aria-modal="true">
     <template #header-extra>
       <n-button @click="$emit('close')" quaternary circle>
         <x/>
       </n-button>
     </template>
-    <label for="" class="mt-3">Document title</label>
-    <input v-model="inputTitle" type="text" class="form-control mt-3 rounded-btn shadow-none" placeholder="Document title">
+    <div class="px-4">
+      <label for="" class="mt-3">Document title</label>
+      <input v-model="inputTitle" type="text" class="form-control mt-3 rounded-btn shadow-none" placeholder="Document title">
+    </div>
     <template #footer>
-      <div class="d-flex justify-content-end gap-2">
-        <!-- <n-button class="px-3 py-2 rounded-btn" quaternary :bordered="false" @click="$emit('close')">Close</n-button> -->
-        <n-button class="px-3 py-3 rounded-btn bg-btn w-100" quaternary :bordered="false" @click="$emit('createDocument', inputTitle)">Create Document</n-button>
-      </div>
+      <!-- <n-button class="px-3 py-2 rounded-btn" quaternary :bordered="false" @click="$emit('close')">Close</n-button> -->
+      <n-button class="px-3 py-3 rounded-btn bg-btn w-100" quaternary :bordered="false" @click="$emit('createDocument', inputTitle)">Create Document</n-button>
     </template>
   </n-card>
 </template>
