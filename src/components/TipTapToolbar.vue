@@ -1,17 +1,18 @@
 <template>
 
-
-  <div class="d-flex align-items-center border-bottom bg-white">
-    <div>
-      <button class="btn toolbar-btn rounded-0 lh-1 d-flex align-items-center gap-2 fw-semibold" @click="$router.back()">
-        <ArrowLeft size="20" stroke-width="2"/> Back
-      </button>
+  <div class="bg-white">
+    <div class="d-flex align-items-center">
+      <div>
+        <button class="btn toolbar-btn rounded-0 lh-1 d-flex align-items-center gap-2 fw-semibold" @click="$router.back()">
+          <ArrowLeft size="20" stroke-width="2"/> Back
+        </button>
+      </div>
+      <div class="h-100 border-2 border-start px-2"></div>
+      <div class="d-flex align-items-center gap-2">
+        <h5 :contenteditable="edit" @dblclick="edit = true" @blur="edit = false" class="fw-bold text-nowrap lh-1 m-0">{{ title.length > 20 && !edit ? title.substring(0, 20) + '...' : title  }}</h5>
+      </div>
     </div>
-    <div class="h-100 border-2 border-start px-2"></div>
-    <div>
-      <h5 :contenteditable="edit" @dblclick="edit = true" @blur="edit = false" class="fw-bold text-nowrap lh-1 m-0">{{ title.length > 20 && !edit ? title.substring(0, 20) + '...' : title  }}</h5>
-    </div>
-    <div class="d-flex ms-auto">
+    <div class="d-flex ms-auto border-top border-bottom flex-wrap">
       <div v-for="(tool, index) in heading" :key="index">
         <ToolbarButton
           :class="{ 'active': editor.isActive(tool.class.toLowerCase().replace(/ \d+/, ''), { level: tool.level }) }"
@@ -35,7 +36,7 @@
 </template>
 
 <script setup>
-  import { ArrowLeft, Bold, Code2, Heading1, Heading2, Heading3, Indent, Italic, List, ListOrdered, Pilcrow, Quote, Redo2, Strikethrough, Underline, Undo2 } from 'lucide-vue-next';
+  import { ArrowLeft, Bold, Code2, File, Heading1, Heading2, Heading3, Indent, Italic, List, ListOrdered, Pilcrow, Quote, Redo2, Strikethrough, Underline, Undo2 } from 'lucide-vue-next';
   import ToolbarButton from './ToolbarButton.vue';
   import { ref } from 'vue';
 

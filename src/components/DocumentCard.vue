@@ -19,18 +19,12 @@
       </template>
       <div style="height: 1rem;"></div>
       <div class="doc-title d-flex align-items-center justify-content-between">
-        <div class="doc-title-1 d-flex gap-2 w-100 align-items-center">
-          <!-- <file color="var(--bs-info)" size="26" /> -->
-          <h5 ref="editTitle" :contenteditable="edit" @dblclick.prevent="editAction" @keydown="lineBreak" @click.prevent
-            class="title w-100 m-0 fw-semibold">
-            {{ documentTitle.length > 20 && !edit ? documentTitle.substring(0, 20) + '...' : documentTitle }}
-          </h5>
-        </div>
-        <base-btn v-if="edit" class="btn rounded-btn" btn-name="Rename"
-          @click.prevent="$emit('updateTitle', documentId, editTitle.innerText, updateTitleHandling(action))" />
-        <!-- <n-icon-wrapper v-else :size="30" class="bg-dark w-fit h-fit p-1 rounded-circle">
-          <arrow-up-right size="20" />
-        </n-icon-wrapper> -->
+        <!-- <file color="var(--bs-info)" size="26" /> -->
+        <h5 ref="editTitle" :contenteditable="edit" @dblclick="editAction"
+          @blur="$emit('updateTitle', documentId, editTitle.innerText, updateTitleHandling(action))"
+          @keydown="lineBreak" @click.prevent class="title w-100 m-0 fw-semibold">
+          {{ documentTitle.length > 20 && !edit ? documentTitle.substring(0, 20) + '...' : documentTitle }}
+        </h5>
       </div>
       <div style="height: 1rem;"></div>
       <div class="doc-user d-flex justify-content-between align-items-center">
@@ -148,7 +142,7 @@
   }
 
   .decorate-container {
-    height: 140px;
+    height: 160px;
     /* background-color: var(--bs-dark); */
   }
 
@@ -182,9 +176,9 @@
     outline: 1px solid var(--bs-dark);
     background-color: hsl(from var(--bs-gray) h s l / 0.2);
     border-radius: 8px;
-    scale: .9;
     display: block;
     box-sizing: border-box;
+    padding: 2px 4px;
   }
 
   .icon-doc-1 {
