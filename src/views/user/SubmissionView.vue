@@ -8,38 +8,8 @@
         </div>
       </div>
     </div>
-    
+
     <div class="row g-4">
-      <div class="col-lg-6">
-        <div class="bg-white rounded-card p-3">
-          <div class="d-flex justify-content-between align-items-center mb-3">
-            <div class="d-flex gap-2 align-items-center">
-              <img
-                src="../../assets/image/default-avatar.png"
-                alt=""
-                class="rounded-circle"
-                style="width: 30px; height: 30px"
-              />
-              <p class="mb-0 fw-semibold fs-14">Jammy</p>
-            </div>
-            <span class="tab-info w-fit fw-medium text-orange bg-orange fs-13">
-              <CircleDashed size="14" /> Pending
-            </span>
-          </div>
-          <div class="d-flex align-items-center gap-2 text-mute mb-2 fs-13">
-            <calendar :size="15" />
-            <span>submitted time : 1 / Jan / 2026 / 09:30 AM</span>
-          </div>
-          <h6 class="mb-2 fw-semibold">Fix Login bug</h6>
-          <p class="mb-2 text-mute fs-13">Lorem ipsum dolor sit amet.</p>
-          <base-button
-            btn-name="Review"
-            icon="eye"
-            class="fs-13 d-block ms-auto"
-            @click="showModal = true"
-          />
-        </div>
-      </div>
       <div class="col-lg-6">
         <div class="bg-white rounded-card p-3">
           <div class="d-flex justify-content-between align-items-center mb-3">
@@ -122,7 +92,10 @@
                 <file-text size="15" />
                 <p class="mb-0 fs-14">Image.png</p>
               </div>
-              <div style="width: 400px; height: 200px; border-radius: 0 0 12px 12px;" class="overflow-hidden">
+              <div
+                style="width: 400px; height: 200px; border-radius: 0 0 12px 12px"
+                class="overflow-hidden"
+              >
                 <n-image
                   :src="Image"
                   object-fit="cover"
@@ -149,7 +122,7 @@
                 trigger="click"
                 placement="bottom-start"
                 :show-arrow="false"
-                style="border-radius: 12px; padding: 6px; width: 140px;"
+                style="border-radius: 12px; padding: 6px; width: 140px"
               >
                 <template #trigger>
                   <span
@@ -214,7 +187,7 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { computed, onMounted, ref } from "vue";
 import {
   ArrowLeft,
   Calendar,
@@ -225,6 +198,17 @@ import {
 } from "lucide-vue-next";
 import BaseButton from "@/components/BaseButton.vue";
 import Image from "@/assets/image/style 1.png";
+import { useSubmissionStore } from "@/stores/user/submission";
+import { useRoute, useRouter } from "vue-router";
+import { notify } from "@/utils/toast";
+
+const route = useRoute();
+const router = useRouter();
+const toast = notify(router);
+const workspace_id = computed(() => route.params.workspace_id);
+const team_id = computed(() => route.params.team_id);
+
+const submissionStore = useSubmissionStore();
 
 const showModal = ref(false);
 const showStatusPop = ref(false);
@@ -235,6 +219,10 @@ const reviewStatusConfig = {
   approved: { icon: CircleCheck, bg: "bg-green", text: "text-green", label: "Approved" },
   rejected: { icon: CircleX, bg: "bg-red", text: "text-danger", label: "Rejected" },
 };
+
+onMounted(async () => {
+  submissionStore.getAllSubmissionByTeamStore(workspace_id.value, team_id.value);
+});
 
 function handleSend() {
   if (!selectedStatus.value) {

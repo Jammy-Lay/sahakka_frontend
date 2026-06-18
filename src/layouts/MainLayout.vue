@@ -26,7 +26,8 @@
         <div class="sidebar-content">
           <TeamList />
         </div>
-        <div class="sidebar-footer d-flex align-items-center gap-2 p-2">
+        <FooterSidebarSkeleton v-if="authStore.loading" />
+        <div class="sidebar-footer d-flex align-items-center gap-2 p-2" v-else>
           <img
             :src="getMe.avatar"
             style="width: 32px; height: 32px"
@@ -57,6 +58,7 @@ import WorkspaceList from "@/components/layouts/WorkspaceList.vue";
 import TeamSectionTabs from "@/components/layouts/TeamSectionTabs.vue";
 import TeamList from "@/components/layouts/TeamList.vue";
 import Calendar from "@/components/layouts/Calendar.vue";
+import FooterSidebarSkeleton from "@/components/team/FooterSidebarSkeleton.vue";
 
 const route = useRoute();
 const leftOpen = ref(true);

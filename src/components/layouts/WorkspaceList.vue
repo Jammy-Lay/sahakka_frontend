@@ -1,6 +1,6 @@
 <template>
   <div>
-    <HeaderSkeleton v-if="workspaceStore.loading" />
+    <HeaderSkeleton v-if="workspaceStore.loading || !currentWorkspace" />
     <n-popover
       v-else
       trigger="click"
@@ -22,7 +22,7 @@
           />
           <span class="fs-13 fw-bold">
             <n-ellipsis style="max-width: 150px" :tooltip="false">
-              {{ currentWorkspace?.workspace_name ?? "My Workspace" }}
+              {{ currentWorkspace?.workspace_name }}
             </n-ellipsis>
           </span>
           <chevron-down size="16" />
@@ -100,7 +100,13 @@
               <n-ellipsis
                 style="max-width: 160px"
                 :tooltip="{
-                  style: { fontSize: '11px', padding: '4px 8px', borderRadius: '8px' },
+                  keepAliveOnHover: false,
+                  style: {
+                    fontSize: '13px',
+                    padding: '5px 8px',
+                    borderRadius: '8px',
+                    pointerEvents: 'none',
+                  },
                 }"
               >
                 {{ ws.workspace_name }}
@@ -547,7 +553,6 @@ const inviteStore = useInviteStore();
 const crudWorkspaceStore = useCrudWorkspaceStore();
 
 onMounted(async () => {
-  await authStore.getMeStore();
   await workspaceStore.getMyWorkspaceStore();
 });
 
