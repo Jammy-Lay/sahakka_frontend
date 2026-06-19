@@ -45,15 +45,15 @@
             {{ getTeamById?.description }}
           </p>
         </div>
-        <div class="col-lg-7 ms-auto text-end d-flex gap-3 align-items-start">
-          <div class="form-control rounded-btn d-flex align-items-center py-1">
+        <div class="col-lg-7 ms-auto text-end d-flex gap-3 align-items-start justify-content-end">
+          <div class="form-control rounded-btn d-flex align-items-center py-1" style="width: 300px;">
             <input
               v-model="searchDoc"
               type="text"
               class="search-input shadow-none outline-none border-0 w-100"
               placeholder="Search document"
             />
-            <Search color="var(--bs-gray)" />
+            <Search color="var(--bs-gray)" size="18" />
           </div>
           <base-btn
             @click="showModal = true"
@@ -65,7 +65,7 @@
         </div>
       </div>
       <div class="pt-4"></div>
-      <div class="row g-3" id="container">
+      <div class="row g-4" id="container">
         <div
           v-if="document.length > 0"
           v-for="(doc, index) in document"
@@ -257,24 +257,28 @@ onMounted(async () => {
   outline: none;
 }
 
+.form-control:has(.search-input:focus) {
+  outline: 1px solid #171717;
+}
+
 #container {
   container-type: inline-size;
   container-name: container;
 }
 
-@container container (max-width: 900px) {
+@container container (max-width: 960px) {
   .col-3 {
     width: calc(100% / 3);
   }
 }
 
-@container container (max-width: 700px) {
+@container container (max-width: 720px) {
   .col-3 {
     width: calc(100% / 2);
   }
 }
 
-@container container (max-width: 500px) {
+@container container (max-width: 540px) {
   .col-3 {
     width: 100%;
   }
