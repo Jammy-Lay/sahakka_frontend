@@ -7,7 +7,9 @@ export const useTeamStore = defineStore("team", () => {
   let getTeamByWorkspace = ref([]);
   let getTeamById = ref({});
   let getMember = ref({});
+  let getActivityTeam = ref([]);
   let loading = ref(true);
+  let activityLoading = ref(true);
 
   const getTeamSectionStore = async (team_id) => {
     try {
@@ -86,6 +88,21 @@ export const useTeamStore = defineStore("team", () => {
     }
   };
 
+  const getActivityTeamStore = async (workspace_id, team_id) => {
+    try {
+      activityLoading.value = true;
+      const res = await api.get(
+        `/workspace/${workspace_id}/team/${team_id}/activities`,
+      );
+      // console.log(res);
+      getActivityTeam.value = res.data.data;
+    } catch (err) {
+      throw new Error(err.response?.data?.message || "Delete team failed");
+    } finally {
+      activityLoading.value = false;
+    }
+  };
+
   return {
     getTeamSection,
     getTeamSectionStore,
@@ -97,6 +114,9 @@ export const useTeamStore = defineStore("team", () => {
     createTeam,
     updateTeam,
     deleteTeam,
-    loading
+    loading,
+    getActivityTeamStore,
+    getActivityTeam,
+    activityLoading,
   };
 });

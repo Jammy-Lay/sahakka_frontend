@@ -1,6 +1,6 @@
 <template>
     <div>
-
+        View Member
     </div>
 </template>
 

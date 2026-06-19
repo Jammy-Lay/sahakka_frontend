@@ -614,6 +614,11 @@ body .n-popover.n-tooltip {
   color: #ff8d28;
 }
 
+.act-tag-delete {
+  background: #ffc3c4;
+  color: #FF383C;
+}
+
 .act-note {
   background: #f5f5f5;
   border-radius: 12px !important;
@@ -682,23 +687,27 @@ body .n-popover.n-tooltip {
 }
 
 .bg-orange-active {
-  background-color: #ff8d28 !important;
-  color: #ffddbe !important;
+  background-color: #ffddbe !important;
+  color: #ff8d28 !important;
+  border: 1px solid #ff8d28;
 }
 
 .bg-purple-active {
-  background-color: #6155f5 !important;
-  color: #cfccfc !important;
+  background-color: #cfccfc !important;
+  color: #6155f5 !important;
+  border: 1px solid #6155f5;
 }
 
 .bg-green-active {
-  background-color: #34c759 !important;
-  color: #c2eecd !important;
+  background-color: #c2eecd !important;
+  color: #34c759 !important;
+  border: 1px solid #34c759;
 }
 
 .bg-red-active {
-  background-color: #ff383c !important;
-  color: #ffc3c4 !important;
+  background-color: #ffc3c4 !important;
+  color: #ff383c !important;
+  border: 1px solid #ff383c;
 }
 
 /* idle state — bar hidden, ready to animate */

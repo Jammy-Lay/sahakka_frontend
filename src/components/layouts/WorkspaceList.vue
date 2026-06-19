@@ -273,7 +273,10 @@
               <div class="p-1 fs-13">
                 <div
                   class="d-flex align-items-center text-danger rounded gap-2 px-2 py-1 fw-bold workspace-item"
-                  @click="handleLeave(ws)"
+                  @click="
+                    selectedWs = ws;
+                    showLeaveWorkspaceModal = true;
+                  "
                 >
                   <Log-out size="15" /> Leave
                 </div>
@@ -286,6 +289,7 @@
 
         <div
           class="d-flex align-items-center gap-2 px-2 py-1 rounded mb-1 mt-2 workspace-item"
+          @click="goViewMember"
         >
           <users size="15" />
           <span style="font-size: 13px">Members</span>
@@ -433,8 +437,7 @@
         <n-divider style="margin: 5px 0; --n-color: #e4e4e7" />
         <div class="px-4 pt-3 pb-3">
           <p class="fs-13 text-mute mb-4 text-center">
-            Are you sure you want to delete
-            <span class="fw-semibold text-dark">{{ selectedWs?.workspace_name }}</span> ?
+            Are you sure you want to delete ?
           </p>
           <div class="d-flex gap-2">
             <button
@@ -446,9 +449,10 @@
             <button
               class="btn btn-danger rounded-btn-sm fs-13 fw-medium w-50"
               @click="handleDelete"
+              :disabled="isLoading"
             >
               <span v-if="isLoading" class="spinner-border spinner-border-sm me-2"></span>
-              {{ isLoading ? "Loading..." : "Delete" }}
+              {{ isLoading ? "Deleting..." : "Delete" }}
             </button>
           </div>
         </div>
@@ -491,6 +495,43 @@
         </div>
       </div>
     </n-modal>
+
+    <!-- Leave Workspace Modal -->
+    <n-modal v-model:show="showLeaveWorkspaceModal" :mask-closable="true">
+      <div class="bg-white rounded-card" style="width: 380px">
+        <div class="d-flex align-items-center justify-content-between px-4 py-3 pb-2">
+          <span class="fw-medium fs-15">Leave Workspace</span>
+          <n-button
+            text
+            size="small"
+            @click="showLeaveWorkspaceModal = false"
+            class="hover-circle p-1 rounded-circle"
+          >
+            <X size="18" />
+          </n-button>
+        </div>
+        <n-divider style="margin: 5px 0; --n-color: #e4e4e7" />
+        <div class="px-4 pt-3 pb-3">
+          <p class="fs-13 text-mute mb-4 text-center">Are you sure you want to leave ?</p>
+          <div class="d-flex gap-2">
+            <button
+              class="btn btn-outline border rounded-btn-sm fs-13 fw-medium w-50"
+              @click="showLeaveWorkspaceModal = false"
+            >
+              Cancel
+            </button>
+            <button
+              class="btn btn-danger rounded-btn-sm fs-13 fw-medium w-50"
+              @click="handleLeave(selectedWs)"
+              :disabled="isLoading"
+            >
+              <span v-if="isLoading" class="spinner-border spinner-border-sm me-2"></span>
+              {{ isLoading ? "Leaving..." : "Leave" }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </n-modal>
   </div>
 </template>
 
@@ -513,6 +554,8 @@ const route = useRoute();
 const router = useRouter();
 const toast = notify(router);
 
+const emit = defineEmits(["close-sidebar"]);
+
 const currentRouteWorkspaceId = computed(() => route.params.workspace_id);
 const currentRouteTeamId = computed(() => route.params.team_id);
 
@@ -522,6 +565,7 @@ const showDeleteModal = ref(false);
 const showJoinPopover = ref(false);
 const showInvitePopover = ref(false);
 const showLogoutModal = ref(false);
+const showLeaveWorkspaceModal = ref(false);
 const openOptionId = ref(null);
 
 const isLoading = ref(false);
@@ -629,8 +673,28 @@ const handleDelete = async () => {
   }
 };
 
-const handleLeave = (ws) => {
-  console.log("leave", ws);
+const handleLeave = async (ws) => {
+  try {
+    isLoading.value = true;
+    await workspaceStore.leaveWorkspace(ws.workspace_id, getMe.value.user_id);
+    toast.success("Left workspace successfully");
+    showLeaveWorkspaceModal.value = false;
+    await refreshWorkspaces();
+
+    if (currentRouteWorkspaceId.value == ws.workspace_id) {
+      const fallback = myWorkspaces.value[0];
+      if (fallback) {
+        await teamStore.getTeamByWorkspaceStore(fallback.workspace_id);
+        const teamId = getTeamByWorkspace.value?.[0]?.team_id;
+        if (teamId)
+          router.push(`/workspace/${fallback.workspace_id}/team/${teamId}/tasks`);
+      }
+    }
+  } catch (error) {
+    toast.error(error.message);
+  } finally {
+    isLoading.value = false;
+  }
 };
 
 const handleJoin = async () => {
@@ -686,10 +750,20 @@ const handleCopy = async () => {
   await navigator.clipboard.writeText(passcode.value);
 };
 
-const handleLogout = () => {
+const handleLogout = async () => {
   localStorage.removeItem("lastVisitedTeam");
-  authStore.logout();
+  await authStore.logout();
   router.push({ name: "login" });
+};
+
+const goViewMember = () => {
+  showPopover.value = false;
+
+  emit("close-sidebar");
+
+  router.push(
+    `/workspace/${currentRouteWorkspaceId.value}/team/${currentRouteTeamId.value}/viewMember`
+  );
 };
 </script>
 

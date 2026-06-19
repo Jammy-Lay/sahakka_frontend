@@ -4,7 +4,7 @@
       <div
         class="navbar-left d-flex align-items-center justify-content-between ps-3 bg-accent"
       >
-        <WorkspaceList />
+        <WorkspaceList @close-sidebar="leftOpen = false" />
         <button
           class="border-0 bg-dark text-white h-100 d-flex align-items-center px-2"
           @click="leftOpen = !leftOpen"
@@ -43,7 +43,7 @@
       <main class="main-content pb-3 px-4">
         <router-view />
       </main>
-      <aside class="sidebar-right"><Calendar /></aside>
+      <aside class="sidebar-right" v-if="showCalendar"><Calendar /></aside>
     </div>
   </div>
 </template>
@@ -93,6 +93,10 @@ onMounted(async () => {
     },
     { immediate: true, deep: true }
   );
+});
+
+const showCalendar = computed(() => {
+  return route.name !== "viewMember";
 });
 </script>
 
