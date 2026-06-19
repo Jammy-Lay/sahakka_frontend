@@ -216,8 +216,7 @@
         <n-divider style="margin: 5px 0; --n-color: #e4e4e7" />
         <div class="px-4 pt-3 pb-3">
           <p class="fs-13 text-mute mb-4 text-center">
-            Are you sure you want to delete
-            <span class="fw-semibold text-dark">{{ selectedTeam?.title }}</span> ?
+            Are you sure you want to delete ?
           </p>
           <div class="d-flex gap-2">
             <button
@@ -229,9 +228,10 @@
             <button
               class="btn btn-danger rounded-btn-sm fs-13 fw-medium w-50"
               @click="handleDelete"
+              :disabled="isLoading"
             >
               <span v-if="isLoading" class="spinner-border spinner-border-sm me-2"></span>
-              {{ isLoading ? "Loading..." : "Delete" }}
+              {{ isLoading ? "Deleting..." : "Delete" }}
             </button>
           </div>
         </div>

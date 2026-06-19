@@ -1,148 +1,122 @@
- 
 <template>
   <div class="mt-4">
-    <div class="justify-content-between align-items-center">
-      <h5 class="mb-0">FrontEnd</h5>
-      <span class="text-muted fs-14">All Activity</span>
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h5 class="mb-0">Hello</h5>
+      <span class="text-mute fs-14">All Activity</span>
     </div>
 
-    <div class="mt-3 px-5">
-      <div class="row g-3">
-        <div class="col-12" v-for="el in showActivity" :key="el.id">
-          <div class="card rounded-card border">
-            <div class="card-body">
-              <!-- Fixed: Proper conditional class binding -->
-              <span :class="[
+    <!-- Loading state -->
+    <div v-if="teamStore.activityLoading" class="text-mute fs-13 text-center py-5">
+      Loading activity...
+    </div>
 
-                'fs-14',
-                'p-1',
-                'rounded-card',
-                el.action == 'create' ? ['bg-green', 'text-green'] : (el.action == 'assign') ? ['bg-blue', 'text-blue'] : ['bg-orange', 'text-orange']
-              ]">
+    <!-- Empty state -->
+    <n-empty
+      v-else-if="groupedActivities.length === 0"
+      description="No Activity Yet"
+      class="mt-5"
+      style="--n-icon-size: 45px; font-size: 14px"
+    />
 
-                <span v-if="el.action === 'create'">
-                  <Plus size="12" />
-                </span>
-                <span v-else-if="el.action === 'assign'">
-                  <UserRound size="12" />
-                </span>
-                <span v-else>
-                  <SquarePen size="12" />
-                </span>
-                {{ el.action }}
+    <!-- Activity list -->
+    <div v-else class="team-activity-list">
+      <template v-for="(group, gi) in groupedActivities" :key="gi">
+        <div class="activity-date-label">
+          <Calendar size="13" />
+          {{ group.date }}
+        </div>
+
+        <div class="row gy-1 gx-3">
+          <div class="col-lg-6" v-for="(act, ai) in group.items" :key="ai">
+            <div class="activity-card rounded-card">
+              <span class="act-tag" :class="actTagClass(act.action)">
+                <component :is="actTagIcon(act.action)" size="14" />
+                {{ act.action }}
               </span>
-
-              <div class="d-flex align-items-center justify-content-between bg-white rounded-card px-0 py-2 mt-3 w-100">
+              <div class="d-flex align-items-center justify-content-between mb-2">
                 <div class="d-flex align-items-center gap-2">
-                  <span class="pro-img">
-                    <img :src="el.created_by?.avatar || '/default-avatar.png'" alt="User avatar">
-                  </span>
-                  <span class="title-text fs-14 fw-semibold text-dark">
-                    {{ el.created_by?.name || 'Unknown User' }}
-                  </span>
+                  <img
+                    :src="act.user?.avatar"
+                    class="rounded-circle object-fit-cover"
+                    style="width: 24px; height: 24px"
+                  />
+                  <span class="fw-semibold fs-13">{{ act.user?.name }}</span>
                 </div>
-                <span class="fs-12 text-muted bg-light px-2 py-1 rounded-btn-sm">
-                  {{ formatTime(el.created_at) }}
-                </span>
+                <span class="fs-11 text-mute">{{ act.time }}</span>
               </div>
 
-              <div class="p-2 bg-accent rounded-card border mt-2">
-                <p class="p-0 m-0">{{ el.message || 'No message provided' }}</p>
-              </div>
+              <div class="act-note">{{ act.note }}</div>
             </div>
           </div>
         </div>
-
-        <!-- Empty state -->
-        <div v-if="!showActivity || showActivity.length === 0" class="col-12">
-          <div class="text-center py-5">
-            <p class="text-muted">No activity found</p>
-          </div>
-        </div>
-      </div>
+      </template>
     </div>
   </div>
 </template>
 
 <script setup>
-import { useActivityStore } from '@/stores/activity/activity';
-import { ref, onMounted, watch, computed } from 'vue';
-import { useRoute } from 'vue-router';
+import { computed, onMounted } from "vue";
+import { useRoute } from "vue-router";
+import { storeToRefs } from "pinia";
+import { Calendar, Plus, UserCheck, Send, Trash2, Pencil } from "lucide-vue-next";
+import { useTeamStore } from "@/stores/user/team";
 
-const activityStore = useActivityStore();
 const route = useRoute();
-const workspaceId = computed(() => route.params.workspace_id);
-const teamId = computed(() => route.params.team_id);
-const showActivity = computed(() => activityStore.teamActivity?.data || []);
+const workspace_id = computed(() => route.params.workspace_id);
+const team_id = computed(() => route.params.team_id);
 
-const formatTime = (dateString) => {
-  if (!dateString) return '';
-  try {
-    const date = new Date(dateString);
-    if (isNaN(date.getTime())) return '';
+const teamStore = useTeamStore();
+const { getActivityTeam } = storeToRefs(teamStore);
 
-    let hours = date.getHours();
-    const minutes = date.getMinutes().toString().padStart(2, '0');
-    const ampm = hours >= 12 ? 'PM' : 'AM';
-    hours = hours % 12 || 12;
-    return `${hours}:${minutes} ${ampm}`;
-  } catch (error) {
-    return '';
-  }
+onMounted(async () => {
+  await teamStore.getActivityTeamStore(workspace_id.value, team_id.value);
+});
+
+const formatDate = (dateString) => {
+  if (!dateString) return "N/A";
+  const date = new Date(dateString);
+  if (isNaN(date.getTime())) return "N/A";
+  const day = date.getDate();
+  const month = date.toLocaleString("en-US", { month: "short" });
+  const year = date.getFullYear();
+  return `${day} / ${month} / ${year}`;
 };
 
-const loadActivity = async () => {
-  if (workspaceId.value && teamId.value) {
-    try {
-      await activityStore.getTeamActivity(workspaceId.value, teamId.value);
-    } catch (error) {
-      console.error('Failed to load activity:', error);
-    }
-  } else {
-    console.warn('Workspace ID or Team ID is missing');
+const groupedActivities = computed(() => {
+  if (!getActivityTeam.value || !getActivityTeam.value.length) return [];
+
+  const groups = {};
+  for (const act of getActivityTeam.value) {
+    const dateKey = formatDate(act.created_at);
+    if (!groups[dateKey]) groups[dateKey] = { date: dateKey, items: [] };
+    groups[dateKey].items.push({
+      action: act.action,
+      note: act.message,
+      user: act.created_by,
+      time: new Date(act.created_at).toLocaleTimeString("en-US", {
+        hour: "2-digit",
+        minute: "2-digit",
+      }),
+      date: act.created_at,
+    });
   }
+  return Object.values(groups);
+});
+
+const actTagClass = (action) => {
+  const map = {
+    create: "act-tag-create",
+    assign: "act-tag-assign",
+    update: "act-tag-update",
+    delete: "act-tag-delete",
+  };
+  return map[action?.toLowerCase()] || "act-tag-update";
 };
 
-onMounted(loadActivity);
-
-watch([workspaceId, teamId], () => {
-  loadActivity();
-}, { deep: true });
-
+const actTagIcon = (action) => {
+  const map = { create: Plus, assign: UserCheck, update: Pencil, delete: Trash2 };
+  return map[action?.toLowerCase()];
+};
 </script>
 
-<style scoped>
-.card .btn-create {
-  padding: 4px 12px;
-  border-radius: 16px !important;
-  display: inline-block;
-  font-size: 12px;
-  font-weight: 500;
-  background-color: rgba(0, 0, 0, 0.05);
-}
-
-.pro-img {
-  width: 38px;
-  height: 38px;
-  border-radius: 50%;
-  overflow: hidden;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.pro-img img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.rounded-card {
-  border-radius: 8px;
-}
-
-.rounded-btn-sm {
-  border-radius: 12px;
-}
-</style>
+<style scoped></style>

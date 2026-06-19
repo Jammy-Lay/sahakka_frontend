@@ -605,9 +605,9 @@
                           :key="member.user_id"
                           class="d-flex align-items-center gap-2 px-2 py-1 rounded workspace-item fs-13 cursor-pointer"
                           @click="
-                            task.assigned_to = member;
-                            closePop(task.id, 'assignee');
-                            handleUpdateTask(task);
+                            selectedTask.assigned_to = member;
+                            showDetailAssigneePop = false;
+                            handleUpdateTask(selectedTask, true);
                           "
                         >
                           <img
@@ -1033,7 +1033,7 @@
                   @click="
                     task.type = key;
                     closePop(task.id, 'type');
-                    handleUpdateTask(task);
+                    handleUpdateTask(task, true);
                   "
                 >
                   <Circle size="10" :fill="cfg.fill" stroke-width="0" />
@@ -1091,7 +1091,7 @@
                     @click="
                       task.status = key;
                       closePop(task.id, 'status');
-                      handleUpdateTask(task);
+                      handleUpdateTask(task, true);
                     "
                   >
                     <component :is="cfg.icon" size="14" />
@@ -1139,7 +1139,7 @@
                     @click="
                       task.priority = key;
                       closePop(task.id, 'priority');
-                      handleUpdateTask(task);
+                      handleUpdateTask(task, true);
                     "
                   >
                     <Circle size="10" :fill="cfg.fill" stroke-width="0" />
@@ -1166,6 +1166,7 @@
                 <template #trigger>
                   <span
                     class="d-flex align-items-center gap-2 fs-13"
+                    style="margin-top: 5px"
                     :class="
                       canChangeAssigneeOnUpdate(task)
                         ? 'cursor-pointer'
@@ -1222,7 +1223,7 @@
                     @click="
                       task.assigned_to = member;
                       closePop(task.id, 'assignee');
-                      handleUpdateTask(task);
+                      handleUpdateTask(task, true);
                     "
                   >
                     <img
@@ -1269,6 +1270,7 @@
                 <template #trigger>
                   <span
                     class="fs-13 cursor-pointer rounded-3 date-trigger"
+                    style="margin-top: 2px"
                     :class="[
                       task.start_date ? 'text-dark' : 'text-mute',
                       isPopOpen(task.id, 'start_date') ? 'bg-active' : '',
@@ -1288,7 +1290,7 @@
                       (val) => {
                         task.start_date = formatToYMD(val);
                         closePop(task.id, 'start_date');
-                        handleUpdateTask(task);
+                        handleUpdateTask(task, true);
                       }
                     "
                   />
@@ -1313,6 +1315,7 @@
                 <template #trigger>
                   <span
                     class="fs-13 cursor-pointer rounded-3 date-trigger"
+                    style="margin-top: 2px"
                     :class="[
                       task.end_date ? 'text-dark' : 'text-mute',
                       isPopOpen(task.id, 'end_date') ? 'bg-active' : '',
@@ -1333,7 +1336,7 @@
                       (val) => {
                         task.end_date = formatToYMD(val);
                         closePop(task.id, 'end_date');
-                        handleUpdateTask(task);
+                        handleUpdateTask(task, true);
                       }
                     "
                   />
