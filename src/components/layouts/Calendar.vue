@@ -28,7 +28,7 @@
         class="text-dark fw-semibold position-sticky bg-body top-0 pt-4 pb-3 z-3"
         style="font-size: 18px"
       >
-        Task completion
+        My Task completion
       </h5>
       <div class="d-flex flex-column gap-3">
         <div
@@ -193,7 +193,7 @@
             </template>
             <template v-else>
               <img
-                :src="task.assigned_to?.avatar"
+                :src="task.assigned_by?.avatar"
                 class="rounded-circle object-fit-cover"
                 style="width: 30px; height: 30px"
               />
@@ -367,7 +367,7 @@
                   </template>
                   <template v-else>
                     <img
-                      :src="selectedTask.assigned_to?.avatar"
+                      :src="selectedTask.assigned_by?.avatar"
                       class="rounded-circle object-fit-cover"
                       style="width: 30px; height: 30px"
                     />
@@ -438,22 +438,23 @@
                     placement="bottom-start"
                     v-model:show="showDetailStatusPop"
                     :show-arrow="false"
+                    :disabled="isStatusLocked(selectedTask.status)"
                     style="border-radius: 12px; padding: 6px; width: 160px"
                   >
                     <template #trigger>
                       <span
-                        class="tab-info w-fit fw-medium cursor-pointer"
+                        class="tab-info w-fit fw-medium"
                         :class="[
-                          statusConfig[selectedTask.status]?.bg,
-                          statusConfig[selectedTask.status]?.text,
+                          statusConfigFull[selectedTask.status]?.bg,
+                          statusConfigFull[selectedTask.status]?.text,
+                          isStatusLocked(selectedTask.status)
+                            ? 'cursor-default'
+                            : 'cursor-pointer',
                         ]"
                         @click.stop
                       >
-                        <component
-                          :is="statusConfig[selectedTask.status]?.icon"
-                          size="14"
-                        />
-                        {{ statusConfig[selectedTask.status]?.label }}
+                        <component :is="statusConfigFull[selectedTask.status]?.icon" size="16" />
+                        {{ statusConfigFull[selectedTask.status]?.label }}
                       </span>
                     </template>
                     <div>
@@ -524,14 +525,18 @@
                     trigger="click"
                     placement="bottom-start"
                     v-model:show="showDetailAssigneePop"
-                    :disabled="!canChangeAssignee"
+                    :disabled="!canChangeAssigneeOnUpdate(selectedTask)"
                     :show-arrow="false"
-                    style="border-radius: 12px; padding: 6px; width: 180px"
+                    style="border-radius: 12px; padding: 6px; width: fit-content"
                   >
                     <template #trigger>
                       <span
                         class="d-flex align-items-center gap-2 fs-13"
-                        :class="canChangeAssignee ? 'cursor-pointer' : 'cursor-default'"
+                        :class="
+                          canChangeAssigneeOnUpdate(selectedTask)
+                            ? 'cursor-pointer'
+                            : 'cursor-default'
+                        "
                         @click.stop
                       >
                         <template v-if="!selectedTask.assigned_to?.user_id">
@@ -548,9 +553,9 @@
                             class="rounded-circle object-fit-cover"
                             style="width: 22px; height: 22px"
                           />
-                          <n-ellipsis style="max-width: 80px">{{
-                            selectedTask.assigned_to.name
-                          }}</n-ellipsis>
+                          <p class="mb-0">
+                            {{ selectedTask.assigned_to.name }}
+                          </p>
                           <span
                             v-if="selectedTask.assigned_to.user_id === getMe.user_id"
                             class="text-secondary fs-11"
@@ -561,6 +566,7 @@
                     </template>
                     <div>
                       <div
+                        v-if="canChangeAssignee"
                         class="d-flex align-items-center gap-2 px-2 py-1 rounded workspace-item fs-13 cursor-pointer"
                         @click="
                           selectedTask.assigned_to = null;
@@ -575,14 +581,15 @@
                         />
                         <span class="text-mute">No Assignee</span>
                       </div>
+
                       <div
-                        v-for="member in getMember"
+                        v-for="member in getAssigneeOptions"
                         :key="member.user_id"
                         class="d-flex align-items-center gap-2 px-2 py-1 rounded workspace-item fs-13 cursor-pointer"
                         @click="
-                          selectedTask.assigned_to = member;
-                          showDetailAssigneePop = false;
-                          handleUpdateTask(selectedTask, true);
+                          task.assigned_to = member;
+                          closePop(task.id, 'assignee');
+                          handleUpdateTask(task);
                         "
                       >
                         <img
@@ -590,12 +597,25 @@
                           class="rounded-circle object-fit-cover"
                           style="width: 22px; height: 22px"
                         />
-                        {{ member.name }}
+                        <n-ellipsis
+                          style="max-width: 80px"
+                          :tooltip="{
+                            keepAliveOnHover: false,
+                            style: { pointerEvents: 'none' },
+                          }"
+                        >
+                          {{ member.name }}
+                        </n-ellipsis>
                         <span
                           v-if="member.user_id === getMe.user_id"
                           class="text-mute fs-11"
                           >(You)</span
                         >
+                        <template v-else>
+                          <span v-if="member.role === 'moderator'" class="text-mute fs-11"
+                            >(Moderator)</span
+                          >
+                        </template>
                       </div>
                     </div>
                   </n-popover>
@@ -885,10 +905,9 @@ const { getMe } = storeToRefs(authStore);
 onMounted(async () => {
   updateTime();
   timer = setInterval(updateTime, 1000);
-  await authStore.getMeStore();
-  await teamStore.getTeamByWorkspaceStore(workspace_id);
-  await teamStore.getTeamByIdStore(workspace_id, team_id);
-  await taskStore.getTaskByTeamStore(workspace_id, team_id);
+  // await teamStore.getTeamByWorkspaceStore(workspace_id);
+  // await teamStore.getTeamByIdStore(workspace_id, team_id);
+  // await taskStore.getTaskByTeamStore(workspace_id, team_id);
   await taskStore.getSummaryTaskStore(workspace_id, team_id);
   await taskStore.getMyTaskStore(workspace_id, team_id);
 });
@@ -1034,6 +1053,22 @@ const canChangeAssignee = computed(() => {
   return myWorkspaceRole.value === "owner" || myWorkspaceRole.value === "moderator";
 });
 
+const canChangeAssigneeOnUpdate = (task) => {
+  if (myWorkspaceRole.value === "owner" || myWorkspaceRole.value === "moderator")
+    return true;
+  return !task.assigned_to?.user_id;
+};
+
+const getAssigneeOptions = computed(() => {
+  if (myWorkspaceRole.value === "owner") {
+    return getTeamById.value.members;
+  }
+  if (myWorkspaceRole.value === "moderator") {
+    return getMember.value;
+  }
+  return getMember.value.filter((m) => m.user_id === getMe.value?.user_id);
+});
+
 const openTaskModal = async (task) => {
   selectedTask.value = { ...task };
   originalTask.value = { ...task };
@@ -1129,6 +1164,9 @@ const actTagClass = (action) =>
 const actTagIcon = (action) =>
   ({ create: Plus, assign: UserCheck, update: Send }[action?.toLowerCase()] || Send);
 
+const lockedStatuses = ["submitted", "approved", "rejected"];
+const isStatusLocked = (status) => lockedStatuses.includes(status);
+
 // ── Configs ──
 const statusConfig = {
   todo: { icon: CircleCheckBig, bg: "bg-blue", text: "text-blue", label: "To Do" },
@@ -1138,6 +1176,19 @@ const statusConfig = {
     text: "text-orange",
     label: "In Progress",
   },
+};
+
+const statusConfigFull = {
+  todo: { icon: CircleCheckBig, bg: "bg-blue", text: "text-blue", label: "To Do" },
+  in_progress: {
+    icon: CircleDashed,
+    bg: "bg-orange",
+    text: "text-orange",
+    label: "In Progress",
+  },
+  submitted: { icon: Send, bg: "bg-purple", text: "text-purple", label: "Submitted" },
+  approved: { icon: CircleCheck, bg: "bg-green", text: "text-green", label: "Approved" },
+  rejected: { icon: CircleX, bg: "bg-red", text: "text-danger", label: "Rejected" },
 };
 
 const priorityConfig = {

@@ -3,7 +3,8 @@
     <!-- Header -->
     <div class="position-sticky top-0 z-1 header pt-4 pb-2 bg-body">
       <div class="d-flex align-items-start justify-content-between mb-3">
-        <div>
+        <TitleTeamSkeleton v-if="teamStore.loading" />
+        <div v-else>
           <h2 class="fw-semibold fs-5 mb-1">{{ getTeamById.title }}</h2>
           <p class="text-secondary fs-13 mb-0">{{ getTeamById.description }}</p>
         </div>
@@ -39,7 +40,7 @@
 
           <n-divider style="margin: 5px 0; --n-color: #e4e4e7" />
 
-          <div class="px-5 pt-2 pb-4">
+          <div class="px-4 pt-2 pb-4">
             <label class="mb-2 fs-13 text-dark mt-2">Title</label>
             <BaseInput
               v-model="form.title"
@@ -189,7 +190,7 @@
                 v-model:show="showAssigneePop"
                 :disabled="!canChangeAssignee"
                 :show-arrow="false"
-                style="border-radius: 12px; padding: 6px; width: 180px"
+                style="border-radius: 12px; padding: 6px; width: fit-content"
               >
                 <template #trigger>
                   <span
@@ -234,8 +235,8 @@
                 </template>
 
                 <div>
-                  <!-- No Assignee -->
                   <div
+                    v-if="canChangeAssignee"
                     class="d-flex align-items-center gap-2 px-2 py-1 rounded workspace-item fs-13 cursor-pointer"
                     @click="
                       form.assigned_to = null;
@@ -255,9 +256,8 @@
                     <span class="text-mute">No Assignee</span>
                   </div>
 
-                  <!-- Members -->
                   <div
-                    v-for="member in getTeamById.members"
+                    v-for="member in getAssigneeOptions"
                     :key="member.user_id"
                     class="d-flex align-items-center gap-2 px-2 py-1 rounded workspace-item fs-13 cursor-pointer"
                     @click="
@@ -270,10 +270,23 @@
                       class="rounded-circle object-fit-cover"
                       style="width: 22px; height: 22px"
                     />
-                    {{ member.name }}
-                    <span v-if="member.user_id === getMe.user_id" class="text-mute fs-11"
-                      >(You)</span
+                    <n-ellipsis
+                      style="max-width: 80px"
+                      :tooltip="{
+                        keepAliveOnHover: false,
+                        style: { pointerEvents: 'none' },
+                      }"
                     >
+                      {{ member.name }}
+                    </n-ellipsis>
+                    <span v-if="member.user_id === getMe.user_id" class="text-mute fs-11">
+                      (You)
+                    </span>
+                    <template v-else>
+                      <span v-if="member.role === 'moderator'" class="text-mute fs-11"
+                        >(Moderator)</span
+                      >
+                    </template>
                   </div>
                 </div>
               </n-popover>
@@ -367,7 +380,7 @@
                     </template>
                     <template v-else>
                       <img
-                        :src="selectedTask.assigned_to?.avatar"
+                        :src="selectedTask.assigned_by?.avatar"
                         class="rounded-circle object-fit-cover"
                         style="width: 30px; height: 30px"
                       />
@@ -440,22 +453,26 @@
                       placement="bottom-start"
                       v-model:show="showDetailStatusPop"
                       :show-arrow="false"
+                      :disabled="isStatusLocked(selectedTask.status)"
                       style="border-radius: 12px; padding: 6px; width: 160px"
                     >
                       <template #trigger>
                         <span
-                          class="tab-info w-fit fw-medium cursor-pointer"
+                          class="tab-info w-fit fw-medium"
                           :class="[
-                            statusConfig[selectedTask.status]?.bg,
-                            statusConfig[selectedTask.status]?.text,
+                            statusConfigFull[selectedTask.status]?.bg,
+                            statusConfigFull[selectedTask.status]?.text,
+                            isStatusLocked(selectedTask.status)
+                              ? 'cursor-default'
+                              : 'cursor-pointer',
                           ]"
                           @click.stop
                         >
                           <component
-                            :is="statusConfig[selectedTask.status]?.icon"
-                            size="14"
+                            :is="statusConfigFull[selectedTask.status]?.icon"
+                            size="16"
                           />
-                          {{ statusConfig[selectedTask.status]?.label }}
+                          {{ statusConfigFull[selectedTask.status]?.label }}
                         </span>
                       </template>
                       <div>
@@ -528,7 +545,7 @@
                       v-model:show="showDetailAssigneePop"
                       :disabled="!canChangeAssigneeOnUpdate(selectedTask)"
                       :show-arrow="false"
-                      style="border-radius: 12px; padding: 6px; width: 180px"
+                      style="border-radius: 12px; padding: 6px; width: fit-content"
                     >
                       <template #trigger>
                         <span
@@ -554,9 +571,9 @@
                               class="rounded-circle object-fit-cover"
                               style="width: 22px; height: 22px"
                             />
-                            <n-ellipsis style="max-width: 80px">{{
-                              selectedTask.assigned_to.name
-                            }}</n-ellipsis>
+                            <p class="mb-0">
+                              {{ selectedTask.assigned_to.name }}
+                            </p>
                             <span
                               v-if="selectedTask.assigned_to.user_id === getMe.user_id"
                               class="text-secondary fs-11"
@@ -590,7 +607,7 @@
                           @click="
                             selectedTask.assigned_to = member;
                             showDetailAssigneePop = false;
-                            handleUpdateTask(selectedTask);
+                            handleUpdateTask(selectedTask, true);
                           "
                         >
                           <img
@@ -598,12 +615,27 @@
                             class="rounded-circle object-fit-cover"
                             style="width: 22px; height: 22px"
                           />
-                          {{ member.name }}
+                          <n-ellipsis
+                            style="max-width: 80px"
+                            :tooltip="{
+                              keepAliveOnHover: false,
+                              style: { pointerEvents: 'none' },
+                            }"
+                          >
+                            {{ member.name }}
+                          </n-ellipsis>
                           <span
                             v-if="member.user_id === getMe.user_id"
                             class="text-mute fs-11"
                             >(You)</span
                           >
+                          <template v-else>
+                            <span
+                              v-if="member.role === 'moderator'"
+                              class="text-mute fs-11"
+                              >(Moderator)</span
+                            >
+                          </template>
                         </div>
                       </div>
                     </n-popover>
@@ -720,11 +752,57 @@
                 <p class="fw-semibold fs-15 mb-2">
                   File attachment <Link size="15" class="ms-1" />
                 </p>
-                <div class="attach-upload-box mb-4">
-                  <div class="attach-pdf-icon">
-                    <FileText size="18" color="#e24b4a" />
-                  </div>
-                  <span class="fs-13 text-mute">Embed a PDF</span>
+                <input
+                  ref="fileInputRef"
+                  type="file"
+                  accept="image/*,application/pdf"
+                  class="d-none"
+                  @change="handleFileChange"
+                />
+                <div class="attach-upload-box mb-4" @click="triggerFileInput">
+                  <template v-if="!selectedFile">
+                    <div class="attach-pdf-icon">
+                      <FileText size="18" color="#e24b4a" />
+                    </div>
+                    <span class="fs-13 text-mute">Embed a PDF or Image</span>
+                  </template>
+
+                  <template v-else>
+                    <!-- Image: show n-image thumbnail, click = built-in lightbox -->
+                    <div
+                      v-if="selectedFile.type.startsWith('image/')"
+                      class="attach-thumb"
+                      @click.stop
+                    >
+                      <n-image
+                        :src="filePreviewUrl"
+                        width="32"
+                        height="32"
+                        object-fit="cover"
+                        style="border-radius: 6px; display: block"
+                        show-toolbar-tooltip
+                      />
+                    </div>
+
+                    <div
+                      v-else
+                      class="attach-pdf-icon cursor-pointer bg-blue"
+                      @click.stop="openFilePreview"
+                    >
+                      <FileText size="18" color="#0088ff" />
+                    </div>
+
+                    <span class="fs-13 text-dark fw-medium flex-grow-1 text-truncate">
+                      {{ selectedFile.name }}
+                    </span>
+                    <button
+                      type="button"
+                      class="icon-action-btn"
+                      @click.stop="removeFile"
+                    >
+                      <X size="14" />
+                    </button>
+                  </template>
                 </div>
 
                 <!-- Messages -->
@@ -798,6 +876,7 @@
             <button
               class="btn bg-btn rounded-4 py-2 px-3 d-flex align-items-center gap-2"
               :disabled="isLoading"
+              @click="handleSubmit(selectedTask)"
             >
               <span v-if="isLoading" class="spinner-border spinner-border-sm me-2" />
               <Send v-else :size="16" />
@@ -864,6 +943,8 @@
       </div>
     </div>
 
+    <TaskSkeleton v-if="taskStore.loading" />
+
     <n-empty
       v-if="getTask.length === 0"
       description="No Data"
@@ -905,7 +986,7 @@
               </template>
               <template v-else>
                 <img
-                  :src="task.assigned_to?.avatar"
+                  :src="task.assigned_by?.avatar"
                   class="rounded-circle object-fit-cover"
                   style="width: 30px; height: 30px"
                 />
@@ -952,7 +1033,7 @@
                   @click="
                     task.type = key;
                     closePop(task.id, 'type');
-                    handleUpdateTask(task);
+                    handleUpdateTask(task, true);
                   "
                 >
                   <Circle size="10" :fill="cfg.fill" stroke-width="0" />
@@ -963,7 +1044,10 @@
 
             <button
               class="icon-action-btn-trash ms-3"
-              @click.stop="showDeleteModal = true"
+              @click.stop="
+                taskToDelete = task;
+                showDeleteModal = true;
+              "
               v-if="isOwner"
             >
               <Trash2 size="18" />
@@ -981,20 +1065,22 @@
                 trigger="click"
                 placement="bottom-start"
                 :show-arrow="false"
+                :disabled="isStatusLocked(task.status)"
                 style="border-radius: 12px; padding: 6px; width: 160px"
                 @update:show="(val) => (openPop[`${task.id}_status`] = val)"
               >
                 <template #trigger>
                   <span
-                    class="tab-info w-fit fw-medium cursor-pointer"
+                    class="tab-info w-fit fw-medium"
                     :class="[
-                      statusConfig[task.status]?.bg,
-                      statusConfig[task.status]?.text,
+                      statusConfigFull[task.status]?.bg,
+                      statusConfigFull[task.status]?.text,
+                      isStatusLocked(task.status) ? 'cursor-default' : 'cursor-pointer',
                     ]"
                     @click.stop
                   >
-                    <component :is="statusConfig[task.status]?.icon" size="16" />
-                    {{ statusConfig[task.status]?.label }}
+                    <component :is="statusConfigFull[task.status]?.icon" size="16" />
+                    {{ statusConfigFull[task.status]?.label }}
                   </span>
                 </template>
                 <div>
@@ -1005,7 +1091,7 @@
                     @click="
                       task.status = key;
                       closePop(task.id, 'status');
-                      handleUpdateTask(task);
+                      handleUpdateTask(task, true);
                     "
                   >
                     <component :is="cfg.icon" size="14" />
@@ -1053,7 +1139,7 @@
                     @click="
                       task.priority = key;
                       closePop(task.id, 'priority');
-                      handleUpdateTask(task);
+                      handleUpdateTask(task, true);
                     "
                   >
                     <Circle size="10" :fill="cfg.fill" stroke-width="0" />
@@ -1074,12 +1160,13 @@
                 placement="bottom-start"
                 :show-arrow="false"
                 :disabled="!canChangeAssigneeOnUpdate(task)"
-                style="border-radius: 12px; padding: 6px; width: 180px"
+                style="border-radius: 12px; padding: 6px; width: fit-content"
                 @update:show="(val) => (openPop[`${task.id}_assignee`] = val)"
               >
                 <template #trigger>
                   <span
                     class="d-flex align-items-center gap-2 fs-13"
+                    style="margin-top: 5px"
                     :class="
                       canChangeAssigneeOnUpdate(task)
                         ? 'cursor-pointer'
@@ -1101,9 +1188,9 @@
                         class="rounded-circle object-fit-cover"
                         style="width: 22px; height: 22px"
                       />
-                      <n-ellipsis style="max-width: 60px">{{
-                        task.assigned_to.name
-                      }}</n-ellipsis>
+                      <n-ellipsis style="max-width: 80px">
+                        {{ task.assigned_to.name }}
+                      </n-ellipsis>
                       <span
                         v-if="task.assigned_to.user_id === getMe.user_id"
                         class="text-secondary fs-11"
@@ -1136,7 +1223,7 @@
                     @click="
                       task.assigned_to = member;
                       closePop(task.id, 'assignee');
-                      handleUpdateTask(task);
+                      handleUpdateTask(task, true);
                     "
                   >
                     <img
@@ -1144,14 +1231,20 @@
                       class="rounded-circle object-fit-cover"
                       style="width: 22px; height: 22px"
                     />
-                    {{ member.name }}
+                    <n-ellipsis
+                      style="max-width: 80px"
+                      :tooltip="{
+                        keepAliveOnHover: false,
+                        style: { pointerEvents: 'none' },
+                      }"
+                    >
+                      {{ member.name }}
+                    </n-ellipsis>
                     <span v-if="member.user_id === getMe.user_id" class="text-mute fs-11"
                       >(You)</span
                     >
                     <template v-else>
-                      <span
-                        v-if="member.role === 'moderator'"
-                        class="text-mute fs-11 text-green"
+                      <span v-if="member.role === 'moderator'" class="text-mute fs-11"
                         >(Moderator)</span
                       >
                     </template>
@@ -1177,6 +1270,7 @@
                 <template #trigger>
                   <span
                     class="fs-13 cursor-pointer rounded-3 date-trigger"
+                    style="margin-top: 2px"
                     :class="[
                       task.start_date ? 'text-dark' : 'text-mute',
                       isPopOpen(task.id, 'start_date') ? 'bg-active' : '',
@@ -1196,7 +1290,7 @@
                       (val) => {
                         task.start_date = formatToYMD(val);
                         closePop(task.id, 'start_date');
-                        handleUpdateTask(task);
+                        handleUpdateTask(task, true);
                       }
                     "
                   />
@@ -1221,6 +1315,7 @@
                 <template #trigger>
                   <span
                     class="fs-13 cursor-pointer rounded-3 date-trigger"
+                    style="margin-top: 2px"
                     :class="[
                       task.end_date ? 'text-dark' : 'text-mute',
                       isPopOpen(task.id, 'end_date') ? 'bg-active' : '',
@@ -1241,7 +1336,7 @@
                       (val) => {
                         task.end_date = formatToYMD(val);
                         closePop(task.id, 'end_date');
-                        handleUpdateTask(task);
+                        handleUpdateTask(task, true);
                       }
                     "
                   />
@@ -1288,10 +1383,10 @@
             </button>
             <button
               class="btn btn-danger rounded-btn-sm fs-13 fw-medium w-50"
-              @click="handleDelete"
+              @click="handleDeleteTask(taskToDelete)"
             >
               <span v-if="isLoading" class="spinner-border spinner-border-sm me-2"></span>
-              {{ isLoading ? "Loading..." : "Delete" }}
+              {{ isLoading ? "Deleting..." : "Delete" }}
             </button>
           </div>
         </div>
@@ -1301,7 +1396,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch, nextTick } from "vue";
+import { ref, computed, onMounted, watch, nextTick, onUnmounted } from "vue";
 import {
   CircleCheckBig,
   CircleDashed,
@@ -1326,12 +1421,15 @@ import { useRoute, useRouter } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
 import { notify } from "@/utils/toast";
 import { UseWorkspaceStore } from "@/stores/user/workspace";
+import TaskSkeleton from "@/components/task/TaskSkeleton.vue";
+import TitleTeamSkeleton from "@/components/team/TitleTeamSkeleton.vue";
+import { useSubmissionStore } from "@/stores/user/submission";
 
 const route = useRoute();
 const router = useRouter();
 const toast = notify(router);
-const workspace_id = route.params.workspace_id;
-const team_id = route.params.team_id;
+const workspace_id = computed(() => route.params.workspace_id);
+const team_id = computed(() => route.params.team_id);
 
 const workspaceStore = UseWorkspaceStore();
 const { getAllWorkspace } = storeToRefs(workspaceStore);
@@ -1344,6 +1442,8 @@ const { getTeamById, getTeamByWorkspace, getMember } = storeToRefs(teamStore);
 
 const authStore = useAuthStore();
 const { getMe } = storeToRefs(authStore);
+
+const submissionStore = useSubmissionStore();
 
 const showCreateTask = ref(false);
 const isLoading = ref(false);
@@ -1364,6 +1464,7 @@ const showDetailStartDatePop = ref(false);
 const showDetailEndDatePop = ref(false);
 const showDetailAssigneePop = ref(false);
 const taskMessage = ref("");
+const taskToDelete = ref(null);
 
 const openPop = ref({});
 const isPopOpen = (taskId, field) => !!openPop.value[`${taskId}_${field}`];
@@ -1376,7 +1477,7 @@ const openTaskModal = async (task) => {
   originalTask.value = { ...task };
   showActivity.value = false;
   showTaskModal.value = true;
-  await taskStore.getTaskActivityStore(workspace_id, team_id, task.id);
+  await taskStore.getTaskActivityStore(workspace_id.value, team_id.value, task.id);
   selectedTask.value.activities = getTaskActivity.value;
 
   await nextTick();
@@ -1390,11 +1491,11 @@ const activeTab = ref("");
 
 const handleTabClick = (status) => {
   activeTab.value = status;
-  taskStore.getTaskByTeamStore(workspace_id, team_id, status);
+  taskStore.getTaskByTeamStore(workspace_id.value, team_id.value, status);
 };
 
 const currentWorkspace = computed(() => {
-  return getAllWorkspace.value.find((w) => w.workspace_id == workspace_id) ?? null;
+  return getAllWorkspace.value.find((w) => w.workspace_id == workspace_id.value) ?? null;
 });
 
 const isOwner = computed(() => currentWorkspace.value?.my_role === "owner");
@@ -1415,7 +1516,10 @@ const canChangeAssigneeOnUpdate = (task) => {
 };
 
 const getAssigneeOptions = computed(() => {
-  if (myWorkspaceRole.value === "owner" || myWorkspaceRole.value === "moderator") {
+  if (myWorkspaceRole.value === "owner") {
+    return getTeamById.value.members;
+  }
+  if (myWorkspaceRole.value === "moderator") {
     return getMember.value;
   }
   return getMember.value.filter((m) => m.user_id === getMe.value?.user_id);
@@ -1475,12 +1579,12 @@ const handleCreateTask = async () => {
   };
   try {
     isLoading.value = true;
-    await taskStore.createTask(workspace_id, team_id, payload);
-    showCreateTask.value = false;
     form.value = defaultForm();
-    await taskStore.getTaskByTeamStore(workspace_id, team_id);
-    await taskStore.getSummaryTaskStore(workspace_id, team_id);
+    await taskStore.createTask(workspace_id.value, team_id.value, payload);
+    await taskStore.getTaskByTeamStore(workspace_id.value, team_id.value);
+    await taskStore.getSummaryTaskStore(workspace_id.value, team_id.value);
     toast.success("Create Task Successfully");
+    showCreateTask.value = false;
   } catch (error) {
     toast.error(error.message);
   } finally {
@@ -1496,7 +1600,7 @@ const handleUpdateTask = async (task, forceField = null) => {
       if (!titleChanged && !descChanged) return;
     }
 
-    await taskStore.updateTask(workspace_id, team_id, task.id, {
+    await taskStore.updateTask(workspace_id.value, team_id.value, task.id, {
       title: task.title,
       description: task.description,
       type: task.type,
@@ -1509,20 +1613,134 @@ const handleUpdateTask = async (task, forceField = null) => {
 
     originalTask.value = { ...task };
 
-    await taskStore.getTaskByTeamStore(workspace_id, team_id);
-    await taskStore.getSummaryTaskStore(workspace_id, team_id);
+    await taskStore.getTaskByTeamStore(workspace_id.value, team_id.value);
+    await taskStore.getSummaryTaskStore(workspace_id.value, team_id.value);
+    await taskStore.getMyTaskStore(workspace_id.value, team_id.value);
   } catch (error) {
     toast.error(error.message);
-    await taskStore.getTaskByTeamStore(workspace_id, team_id);
+    await taskStore.getTaskByTeamStore(workspace_id.value, team_id.value);
+  }
+};
+
+const handleDeleteTask = async (task) => {
+  try {
+    isLoading.value = true;
+    await taskStore.deleteTask(workspace_id.value, team_id.value, task.id);
+    await taskStore.getTaskByTeamStore(workspace_id.value, team_id.value);
+    toast.success("Delete Task Successfully");
+    showDeleteModal.value = false;
+  } catch (error) {
+    toast.error(error.message);
+  } finally {
+    isLoading.value = false;
   }
 };
 
 onMounted(async () => {
-  await authStore.getMeStore();
-  await teamStore.getTeamByWorkspaceStore(workspace_id);
-  await teamStore.getTeamByIdStore(workspace_id, team_id);
-  await taskStore.getTaskByTeamStore(workspace_id, team_id);
-  await workspaceStore.getMyWorkspaceStore();
+  await taskStore.getTaskByTeamStore(workspace_id.value, team_id.value);
+});
+
+// ── File attachment ──
+const fileInputRef = ref(null);
+const selectedFile = ref(null);
+const filePreviewUrl = ref(null);
+
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+
+const triggerFileInput = () => {
+  fileInputRef.value?.click();
+};
+
+const handleFileChange = (e) => {
+  const file = e.target.files?.[0];
+  if (!file) return;
+
+  const isValid = file.type === "application/pdf" || file.type.startsWith("image/");
+  if (!isValid) {
+    toast.error("Only image or PDF files are allowed");
+    e.target.value = "";
+    return;
+  }
+
+  if (file.size > MAX_FILE_SIZE) {
+    toast.error("File size must be 5MB or less");
+    e.target.value = "";
+    return;
+  }
+
+  selectedFile.value = file;
+  e.target.value = "";
+};
+
+const removeFile = () => {
+  if (filePreviewUrl.value) {
+    URL.revokeObjectURL(filePreviewUrl.value);
+    filePreviewUrl.value = null;
+  }
+  selectedFile.value = null;
+};
+
+// Generate object URL for images only (used by n-image thumbnail)
+watch(selectedFile, (newFile) => {
+  if (filePreviewUrl.value) {
+    URL.revokeObjectURL(filePreviewUrl.value);
+    filePreviewUrl.value = null;
+  }
+  if (newFile && newFile.type.startsWith("image/")) {
+    filePreviewUrl.value = URL.createObjectURL(newFile);
+  }
+});
+
+// PDF only — open in new tab
+const openFilePreview = () => {
+  if (!selectedFile.value || selectedFile.value.type !== "application/pdf") return;
+  const url = URL.createObjectURL(selectedFile.value);
+  window.open(url, "_blank");
+};
+
+const handleSubmit = async (task) => {
+  if (!task) return;
+
+  if (!selectedFile.value) {
+    toast.error("Add attach a file before submitting");
+    return;
+  }
+
+  if (!taskMessage.value.trim()) {
+    toast.error("Add a message before submitting");
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append("message", taskMessage.value);
+  if (selectedFile.value) {
+    formData.append("file", selectedFile.value);
+  }
+
+  try {
+    isLoading.value = true;
+    await submissionStore.submitTask(
+      workspace_id.value,
+      team_id.value,
+      task.id,
+      formData
+    );
+
+    // reset state after a successful submit
+    taskMessage.value = "";
+    removeFile();
+    await taskStore.getTaskByTeamStore(workspace_id.value, team_id.value);
+    toast.success("Task submitted successfully");
+    showTaskModal.value = false;
+  } catch (err) {
+    toast.error(err.message);
+  } finally {
+    isLoading.value = false;
+  }
+};
+
+onUnmounted(() => {
+  if (filePreviewUrl.value) URL.revokeObjectURL(filePreviewUrl.value);
 });
 
 const formatDate = (dateString) => {
@@ -1575,6 +1793,9 @@ const actTagIcon = (action) => {
   const map = { create: Plus, assign: UserCheck, update: Send };
   return map[action?.toLowerCase()] || Send;
 };
+
+const lockedStatuses = ["submitted", "approved", "rejected"];
+const isStatusLocked = (status) => lockedStatuses.includes(status);
 
 const statusConfig = {
   todo: { icon: CircleCheckBig, bg: "bg-blue", text: "text-blue", label: "To Do" },

@@ -4,7 +4,7 @@
       <div
         class="navbar-left d-flex align-items-center justify-content-between ps-3 bg-accent"
       >
-        <WorkspaceList />
+        <WorkspaceList @close-sidebar="leftOpen = false" />
         <button
           class="border-0 bg-dark text-white h-100 d-flex align-items-center px-2"
           @click="leftOpen = !leftOpen"
@@ -26,7 +26,8 @@
         <div class="sidebar-content">
           <TeamList />
         </div>
-        <div class="sidebar-footer d-flex align-items-center gap-2 p-2">
+        <FooterSidebarSkeleton v-if="authStore.loading" />
+        <div class="sidebar-footer d-flex align-items-center gap-2 p-2" v-else>
           <img
             :src="getMe.avatar"
             style="width: 32px; height: 32px"
@@ -42,7 +43,7 @@
       <main class="main-content pb-3 px-4">
         <router-view />
       </main>
-      <aside class="sidebar-right"><Calendar /></aside>
+      <aside class="sidebar-right" v-if="showCalendar"><Calendar /></aside>
     </div>
   </div>
 </template>
@@ -57,6 +58,7 @@ import WorkspaceList from "@/components/layouts/WorkspaceList.vue";
 import TeamSectionTabs from "@/components/layouts/TeamSectionTabs.vue";
 import TeamList from "@/components/layouts/TeamList.vue";
 import Calendar from "@/components/layouts/Calendar.vue";
+import FooterSidebarSkeleton from "@/components/team/FooterSidebarSkeleton.vue";
 
 const route = useRoute();
 const leftOpen = ref(true);
@@ -91,6 +93,10 @@ onMounted(async () => {
     },
     { immediate: true, deep: true }
   );
+});
+
+const showCalendar = computed(() => {
+  return route.name !== "viewMember";
 });
 </script>
 

@@ -83,8 +83,8 @@ const currentRouteWorkspaceId = computed(() => route.params.workspace_id);
 const currentRouteTeamId = computed(() => route.params.team_id);
 const currentSection = computed(() => route.path.split("/").pop()?.toLowerCase());
 const inviteStore = useInviteStore();
-const teamStore = useTeamStore();
-const { getTeamSection } = storeToRefs(teamStore);
+// const teamStore = useTeamStore();
+// const { getTeamSection } = storeToRefs(teamStore);
 
 const showInvitePopover = ref(false);
 const inviteEmail = ref("");
@@ -102,13 +102,20 @@ const activeBorderColor = computed(() => {
   return map[currentSection.value] ?? "#0088ff";
 });
 
-onMounted(async () => {
-  await teamStore.getTeamSectionStore(currentRouteTeamId.value);
-});
+const getTeamSection = ref([
+  { id: 1, name: "Tasks" },
+  { id: 2, name: "Issues" },
+  { id: 3, name: "Documents" },
+  { id: 4, name: "Activity" },
+]);
 
-watch(currentRouteTeamId, async (team_id) => {
-  if (team_id) await teamStore.getTeamSectionStore(team_id);
-});
+// onMounted(async () => {
+//   await teamStore.getTeamSectionStore(currentRouteTeamId.value);
+// });
+
+// watch(currentRouteTeamId, async (team_id) => {
+//   if (team_id) await teamStore.getTeamSectionStore(team_id);
+// });
 
 function getSectionClass(name) {
   const map = {
