@@ -294,7 +294,7 @@ watch(
 
 onMounted(async () => {
   await teamStore.getTeamByWorkspaceStore(currentRouteWorkspaceId.value);
-  await teamStore.getTeamByIdStore(currentRouteWorkspaceId.value, currentRouteTeamId.value);
+  // await teamStore.getTeamByIdStore(currentRouteWorkspaceId.value, currentRouteTeamId.value);
 });
 
 const goSubmissionView = (teamId) => {

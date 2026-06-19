@@ -43,7 +43,7 @@
       <main class="main-content pb-3 px-4">
         <router-view />
       </main>
-      <aside class="sidebar-right" v-if="showCalendar"><Calendar /></aside>
+      <aside class="sidebar-right d-none d-lg-block" v-if="showCalendar"><Calendar /></aside>
     </div>
   </div>
 </template>
