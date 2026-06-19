@@ -87,6 +87,28 @@ const router = createRouter({
       component: () => import("../views/NoWorkspaceView.vue"),
     },
     {
+      path: "/settings",
+     component: () => import("../layouts/ProfileLyout.vue"),
+      children: [
+        {
+          path: "",
+          redirect: "/settings/profile",
+        },
+        {
+          path: "profile",
+           component: () => import("../views/profile/profileView.vue"),
+        },
+        {
+          path: "password",
+           component: () => import("../views/profile/ChangePassword.vue"),
+        },
+        // {
+        //   path: "support",
+        //   component: SupportView,
+        // },
+      ],
+    },
+    {
       path: "/admin/",
       component: () => import("../layouts/AdminLayout.vue"),
       children: [

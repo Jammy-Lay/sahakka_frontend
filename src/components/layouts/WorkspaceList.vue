@@ -25,7 +25,7 @@
               <div class="text-mute fs-11">{{ getMe.email }}</div>
             </div>
           </div>
-          <BaseButton class="fs-11 rounded-btn-sm" btnName="View Profile" />
+          <BaseButton class="fs-11 rounded-btn-sm" btnName="View Profile" @click="router.push('/settings/profile')"/>
         </div>
 
         <!-- MY WORKSPACE -->
