@@ -31,18 +31,21 @@
   </n-modal-provider>
 
   <main class="py-4">
-    <SkeletonDocument v-if="isLoading"/>
+    <div v-if="isLoading">
+      <TitleTeamSkeleton class="mb-4" />
+      <SkeletonDocument />
+    </div>
     <div class="container-fluid p-0" v-else>
       <div class="row g-2">
-        <div class="col-lg-7">
+        <div class="col-lg-5">
           <h2 class="fw-semibold fs-5 mb-1">
-            {{ getTeamByWorkspace[0]?.title }}
+            {{ getTeamById?.title }}
           </h2>
           <p class="text-secondary fs-13 mb-0">
-            {{ getTeamByWorkspace[0]?.description }}
+            {{ getTeamById?.description }}
           </p>
         </div>
-        <div class="col-lg-5 ms-auto text-end d-flex gap-3 align-items-start">
+        <div class="col-lg-7 ms-auto text-end d-flex gap-3 align-items-start">
           <div class="form-control rounded-btn d-flex align-items-center py-1">
             <input
               v-model="searchDoc"
@@ -50,7 +53,7 @@
               class="search-input shadow-none outline-none border-0 w-100"
               placeholder="Search document"
             />
-            <Search color="var(--bs-gray)"/>
+            <Search color="var(--bs-gray)" />
           </div>
           <base-btn
             @click="showModal = true"
@@ -100,6 +103,7 @@ import BaseBtn from "@/components/BaseBtn.vue";
 import DocumentCard from "@/components/DocumentCard.vue";
 import DocumentModal from "@/components/DocumentModal.vue";
 import SkeletonDocument from "@/components/Skeleton/SkeletonDocument.vue";
+import TitleTeamSkeleton from "@/components/team/TitleTeamSkeleton.vue";
 import { useDocumentStore } from "@/stores/user/document";
 import { useTeamStore } from "@/stores/user/team";
 import { notify } from "@/utils/toast";
@@ -127,7 +131,7 @@ const useDocument = useDocumentStore();
 const { getDocumentByTeam } = storeToRefs(useDocument);
 
 const useTeam = useTeamStore();
-const { getTeamByWorkspace } = storeToRefs(useTeam);
+const { getTeamById } = storeToRefs(useTeam);
 
 const document = computed(() => {
   return getDocumentByTeam.value.filter((doc) => {
@@ -180,10 +184,8 @@ async function updateTitle(docId, title) {
 
 onMounted(async () => {
   await useDocument.getAllDocument(workspace_id, team_id);
-  await useTeam.getTeamByWorkspaceStore(workspace_id);
   isLoading.value = false;
 });
-
 </script>
 
 <style scoped>

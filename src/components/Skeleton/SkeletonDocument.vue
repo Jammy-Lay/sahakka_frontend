@@ -1,7 +1,7 @@
 <template>
   <div class="skeleton-container">
     <!-- Header Section -->
-    <header class="skeleton-header">
+    <!-- <header class="skeleton-header">
       <div class="header-left">
         <div class="skeleton-text title pulse"></div>
         <div class="skeleton-text subtitle pulse"></div>
@@ -10,13 +10,13 @@
         <div class="skeleton-input pulse"></div>
         <div class="skeleton-button pulse"></div>
       </div>
-    </header>
+    </header> -->
 
     <!-- Cards Grid -->
     <main class="skeleton-grid">
-      <div v-for="n in 10" :key="n" class="skeleton-card bg-white p-3 rounded-4">
+      <div v-for="n in 12" :key="n" class="skeleton-card bg-white p-3 rounded-4">
         <!-- Thumbnail/Media Placeholder -->
-        <div class="card-media pulse"></div>
+        <div class="card-media pulse rounded-3"></div>
 
         <!-- Document Title Placeholder -->
         <div class="skeleton-text card-title pulse"></div>
@@ -104,7 +104,7 @@
 
 /* Base Skeleton Text Sizes */
 .skeleton-text {
-  background-color: #e0e0e0;
+  background-color: #e2e2e2;
   border-radius: 4px;
 }
 
@@ -142,7 +142,7 @@
 
 /* Shimmer Animation Effect */
 .pulse {
-  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background: linear-gradient(90deg, #f0f0f0 25%, #e2e2e2 50%, #f0f0f0 75%);
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite linear;
 }
