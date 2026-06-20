@@ -7,7 +7,7 @@ export const useProfileStore = defineStore("profile", () => {
   const myWorkspaces = ref([]);
   let WorkspaceMember = ref({});
   let joinedWorkspaces = ref([]);
-  let getAllWorkspace  = ref({});
+  let getAllWorkspace = ref({});
   // let count_team = ref({});
   // let count_member = ref({});
   let token = ref(localStorage.getItem("token"));
@@ -21,6 +21,7 @@ export const useProfileStore = defineStore("profile", () => {
       throw new Error(err.response?.data?.message || "failed");
     }
   };
+
   const UpdateName = async (name) => {
     try {
       const res = await api.put("/change-name", { name });
@@ -30,6 +31,7 @@ export const useProfileStore = defineStore("profile", () => {
       throw new Error(err.response?.data?.message || "failed");
     }
   };
+
   const GetTaskSummary = async (workspace_id, team_id) => {
     try {
       const res = await api.get(
@@ -57,17 +59,19 @@ export const useProfileStore = defineStore("profile", () => {
       console.log(error);
     }
   };
+
   const GetWorkspaceMember = async (workspace_id) => {
     try {
       const res = await api.get(`/workspace/${workspace_id}/teams`, {
         token,
       });
       WorkspaceMember.value = res.data.data;
-      return res.data.data  ;
+      return res.data.data;
     } catch (err) {
       throw new Error(err.response?.data?.message || "failed");
     }
   };
+
   const ChangePassword = async (
     currentPassword,
     newPassword,
@@ -92,6 +96,7 @@ export const useProfileStore = defineStore("profile", () => {
       throw new Error(err.response?.data?.message || "failed");
     }
   };
+
   const UpdateAvatar = async (formData) => {
     try {
       const response = await api.put("/change-avatar", formData, {
@@ -104,6 +109,7 @@ export const useProfileStore = defineStore("profile", () => {
       throw new Error(err.response?.data?.message || "Failed to update avatar");
     }
   };
+
   return {
     user,
     myWorkspaces,
@@ -118,47 +124,4 @@ export const useProfileStore = defineStore("profile", () => {
     ChangePassword,
     UpdateAvatar,
   };
-import api from "@/api/https";
-import { defineStore } from "pinia";
-import { ref } from "vue";
-
-export const useGetProfile = defineStore("profile", () => {
-    let loading = ref(true)
-    async function changeProfile(avatar) {
-        loading.value = true;
-        try {
-            await api.put("/change-avatar", avatar);
-        } catch (error) {
-            throw new Error(error.response?.data?.message || "Something is wrong");
-        } finally {
-            loading.value = false;
-        }
-    }
-
-    async function changeName(name) {
-        loading.value = true;
-        try {
-            await api.put("/change-name", name);
-        } catch (error) {
-            throw new Error(error.response?.data?.message || "Something is wrong");
-        } finally{
-            loading.value = false;
-        }
-    }
-    async function resetAvatar() {
-        loading.value = true;
-        try {
-            await api.delete("/delete-avatar");
-        } catch (error) {
-            throw new Error(error.response?.data?.message || "Something went wrong");
-        } finally{
-            loading.value = false;
-        }
-    }
-    return {
-        changeProfile,
-        resetAvatar,
-        changeName,
-        loading
-    };
 });

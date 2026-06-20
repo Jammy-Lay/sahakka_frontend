@@ -19,18 +19,24 @@
                 </button>
               </div>
 
-              <CropperModal v-if="showCropper" @closeModal="showCropper = false" @save="handleCroppedImage" />
+              <CropperModal
+                v-if="showCropper"
+                @closeModal="showCropper = false"
+                @save="handleCroppedImage"
+              />
 
               <div class="profile-info">
                 <div class="profile-name">{{ profileStore.user.name }}</div>
                 <div class="profile-email">{{ profileStore.user.email }}</div>
                 <div class="profile-joined">
-                  <Calendar size="12" /> Joined {{ new
-                    Date(profileStore.user.created_at).toLocaleDateString('en-GB', {
-                      day: 'numeric',
-                      month: 'short',
-                      year: 'numeric'
-                    }) }}
+                  <Calendar size="12" /> Joined
+                  {{
+                    new Date(profileStore.user.created_at).toLocaleDateString("en-GB", {
+                      day: "numeric",
+                      month: "short",
+                      year: "numeric",
+                    })
+                  }}
                 </div>
               </div>
             </div>
@@ -40,42 +46,71 @@
           <div class="card">
             <div class="card-title">Personal information</div>
             <div class="card-sub">Update your display name</div>
-            <input class="text-input form-control" v-model="displayName" placeholder="Your name" />
-            <button class="save-btn btn w-100" @click="handleSave">Save change</button>
+            <input
+              class="text-input form-control"
+              v-model="displayName"
+              placeholder="Your name"
+            />
+            <BaseButton
+              btn-name="Save Change"
+              @click="handleSave"
+              class="rounded-btn fs-14 fw-semibold py-2 mt-2"
+            />
           </div>
 
           <!-- Tasks overview card -->
           <div class="card">
-            <div class="card-header-row d-flex align-items-center justify-content-between">
+            <div
+              class="card-header-row d-flex align-items-center justify-content-between"
+            >
               <span class="card-title">My tasks overview</span>
               <button class="icon-btn"><arrow-up-right size="14" /></button>
             </div>
 
             <!-- Ring + count -->
-            <div class="tasks-summary d-flex align-items-center justify-content-between flex-wrap">
+            <div
+              class="tasks-summary d-flex align-items-center justify-content-between flex-wrap"
+            >
               <div>
                 <div class="tasks-label">Total tasks</div>
                 <div class="tasks-count">
-                  {{ tasks.done }}<span class="tasks-total"> / {{ taskSummary.total_tasks }}</span>
+                  {{ tasks.done
+                  }}<span class="tasks-total"> / {{ taskSummary.total_tasks }}</span>
                 </div>
                 <div class="tasks-pct-label">{{ tasks.pct }}% overall completion</div>
               </div>
               <div>
-                <n-progress type="circle" :percentage="completionPercentage" :stroke-width="13" style="width: 75px"
-                  color="#34C759" />
+                <n-progress
+                  type="circle"
+                  :percentage="completionPercentage"
+                  :stroke-width="13"
+                  style="width: 75px"
+                  color="#34C759"
+                />
               </div>
             </div>
 
             <!-- Priority bars -->
-            <div class="priority-header d-flex align-items-center justify-content-between">
+            <div
+              class="priority-header d-flex align-items-center justify-content-between"
+            >
               <span class="priority-title">By priority</span>
               <span class="priority-count">{{ tasks.total }} tasks</span>
             </div>
-            <div class="bar-row d-flex align-items-center justify-content-between" v-for="p in priorities"
-              :key="p.label">
+            <div
+              class="bar-row d-flex align-items-center justify-content-between"
+              v-for="p in priorities"
+              :key="p.label"
+            >
               <span class="bar-label">{{ p.label }}</span>
-              <n-progress type="line" :percentage="p.percentage" :color="p.color" :height="5" :show-indicator="false" />
-              <span class="bar-count">{{ String(p.count).padStart(2, '0') }} tasks</span>
+              <n-progress
+                type="line"
+                :percentage="p.percentage"
+                :color="p.color"
+                :height="5"
+                :show-indicator="false"
+              />
+              <span class="bar-count">{{ String(p.count).padStart(2, "0") }} tasks</span>
             </div>
 
             <!-- Approved / Rejected -->
@@ -83,8 +118,14 @@
               <div class="col-6" v-for="s in statuses" :key="s.label">
                 <div class="status-card">
                   <div class="status-label">{{ s.label }}</div>
-                  <n-progress type="circle" :percentage="s.pct" :stroke-width="13" style="width: 75px"
-                    class="my-progress" :color="s.color" />
+                  <n-progress
+                    type="circle"
+                    :percentage="s.pct"
+                    :stroke-width="13"
+                    style="width: 75px"
+                    class="my-progress"
+                    :color="s.color"
+                  />
                 </div>
               </div>
             </div>
@@ -96,11 +137,19 @@
           <div class="card">
             <!-- My workspace -->
             <div class="ws-section-title fw-medium">My workspace</div>
-            <n-empty v-if="!MyWorkspaces || MyWorkspaces.length === 0" description="No Data" class="my-2"
-              style="--n-icon-size: 25px" />
+            <n-empty
+              v-if="!MyWorkspaces || MyWorkspaces.length === 0"
+              description="No Data"
+              class="my-2"
+              style="--n-icon-size: 25px"
+            />
 
-            <div v-else class="ws-item d-flex align-items-center justify-content-between mt-2"
-              v-for="ws in MyWorkspaces.slice(0, 3)" :key="ws.workspace_id">
+            <div
+              v-else
+              class="ws-item d-flex align-items-center justify-content-between mt-2"
+              v-for="ws in MyWorkspaces.slice(0, 3)"
+              :key="ws.workspace_id"
+            >
               <img :src="ws.creator?.avatar" alt="" class="img-w me-2" />
 
               <div class="ws-info">
@@ -122,11 +171,19 @@
 
             <!-- Invited workspace -->
             <div class="ws-section-title fw-medium">Invited workspace</div>
-            <n-empty v-if="!WorkSpaceInvite || WorkSpaceInvite.length === 0" description="No Data" class="my-2"
-              style="--n-icon-size: 25px" />
+            <n-empty
+              v-if="!WorkSpaceInvite || WorkSpaceInvite.length === 0"
+              description="No Data"
+              class="my-2"
+              style="--n-icon-size: 25px"
+            />
 
-            <div v-else class="ws-item d-flex align-items-center justify-content-between mt-2"
-              v-for="ws in WorkSpaceInvite.slice(0, 3)" :key="ws.workspace_id">
+            <div
+              v-else
+              class="ws-item d-flex align-items-center justify-content-between mt-2"
+              v-for="ws in WorkSpaceInvite.slice(0, 3)"
+              :key="ws.workspace_id"
+            >
               <img :src="ws.creator?.avatar" alt="" class="img-w me-2" />
 
               <div class="ws-info">
@@ -151,14 +208,16 @@
 </template>
 
 <script setup>
-import { onMounted, ref, computed } from 'vue'
+import { onMounted, ref, computed } from "vue";
 import { useRouter, useRoute } from "vue-router";
-import { User, Lock, HelpCircle, Camera, ArrowUpRight, Calendar } from 'lucide-vue-next'
+import { User, Lock, HelpCircle, Camera, ArrowUpRight, Calendar } from "lucide-vue-next";
 import { useProfileStore } from "@/stores/profile/profile";
 import { notify } from "@/utils/toast";
-import { storeToRefs } from 'pinia';
-import AvatarCropModal from "@/components/profile/AvatarCropModal.vue"
-import CropperModal from '@/components/profile/CropperModal.vue'
+import { storeToRefs } from "pinia";
+import AvatarCropModal from "@/components/profile/AvatarCropModal.vue";
+import CropperModal from "@/components/profile/CropperModal.vue";
+import BaseButton from "@/components/BaseButton.vue";
+import { useWorkspaceStore } from "@/stores/admin/workspaces";
 
 const router = useRouter();
 const route = useRoute();
@@ -168,10 +227,12 @@ const displayName = ref("");
 const currentRouteWorkspaceId = computed(() => route.params.workspace_id);
 const currentRouteTeamId = computed(() => route.params.team_id);
 
+const workspaceStore = useWorkspaceStore();
+
 const MyWorkspaces = ref([]);
 const WorkspaceStats = ref({});
 
-const showCropper = ref(false)
+const showCropper = ref(false);
 
 const { joinedWorkspaces: WorkSpaceInvite } = storeToRefs(profileStore);
 
@@ -188,8 +249,8 @@ onMounted(async () => {
 
       const teamCount = data?.team?.length || 0;
       const memberIds = new Set();
-      data?.team?.forEach(team => {
-        team.members?.forEach(m => memberIds.add(m.user_id));
+      data?.team?.forEach((team) => {
+        team.members?.forEach((m) => memberIds.add(m.user_id));
       });
       const memberCount = memberIds.size;
 
@@ -203,39 +264,40 @@ onMounted(async () => {
   }
   for (const ws of WorkSpaceInvite.value) {
     try {
-      const data = await profileStore.GetWorkspaceMember(ws.workspace_id)
+      const data = await profileStore.GetWorkspaceMember(ws.workspace_id);
 
-      const teamCount = data?.team?.length || 0
+      const teamCount = data?.team?.length || 0;
 
-      const memberIds = new Set()
-      data?.team?.forEach(team => {
-        team.members?.forEach(m => memberIds.add(m.user_id))
-      })
-      const memberCount = memberIds.size
+      const memberIds = new Set();
+      data?.team?.forEach((team) => {
+        team.members?.forEach((m) => memberIds.add(m.user_id));
+      });
+      const memberCount = memberIds.size;
 
       WorkspaceStats.value[ws.workspace_id] = {
         teams: teamCount,
         members: memberCount,
-      }
+      };
     } catch (err) {
-      WorkspaceStats.value[ws.workspace_id] = { teams: 0, members: 0 }
+      WorkspaceStats.value[ws.workspace_id] = { teams: 0, members: 0 };
     }
   }
 });
 
 const handleCroppedImage = async (blob) => {
-  const formData = new FormData()
-  formData.append("avatar", blob, "avatar.png")
+  const formData = new FormData();
+  formData.append("avatar", blob, "avatar.png");
 
   try {
-    await profileStore.UpdateAvatar(formData)
-    await profileStore.getProfile()
-    showCropper.value = false
-    toast.success("Avatar updated")
+    await profileStore.UpdateAvatar(formData);
+    await profileStore.getProfile();
+    await profileStore.GetMyWorkspace();
+    showCropper.value = false;
+    toast.success("Avatar updated");
   } catch (err) {
-    toast.error(err.message || "Failed to update avatar")
+    toast.error(err.message || "Failed to update avatar");
   }
-}
+};
 
 const taskSummary = ref({
   total_tasks: 0,
@@ -246,7 +308,7 @@ const taskSummary = ref({
 onMounted(async () => {
   try {
     if (!currentRouteWorkspaceId.value || !currentRouteTeamId.value) {
-      console.warn('Workspace ID or Team ID is missing');
+      console.warn("Workspace ID or Team ID is missing");
       return;
     }
 
@@ -264,18 +326,46 @@ onMounted(async () => {
 const priorities = computed(() => {
   const total = taskSummary.value.total_tasks || 1;
   return [
-    { label: "Urgent", count: taskSummary.value.priority.urgent, percentage: (taskSummary.value.priority.urgent / total) * 100, color: "#EF4444" },
-    { label: "High", count: taskSummary.value.priority.high, percentage: (taskSummary.value.priority.high / total) * 100, color: "#F97316" },
-    { label: "Medium", count: taskSummary.value.priority.medium, percentage: (taskSummary.value.priority.medium / total) * 100, color: "#EAB308" },
-    { label: "Low", count: taskSummary.value.priority.low, percentage: (taskSummary.value.priority.low / total) * 100, color: "#22C55E" },
+    {
+      label: "Urgent",
+      count: taskSummary.value.priority.urgent,
+      percentage: (taskSummary.value.priority.urgent / total) * 100,
+      color: "#EF4444",
+    },
+    {
+      label: "High",
+      count: taskSummary.value.priority.high,
+      percentage: (taskSummary.value.priority.high / total) * 100,
+      color: "#F97316",
+    },
+    {
+      label: "Medium",
+      count: taskSummary.value.priority.medium,
+      percentage: (taskSummary.value.priority.medium / total) * 100,
+      color: "#EAB308",
+    },
+    {
+      label: "Low",
+      count: taskSummary.value.priority.low,
+      percentage: (taskSummary.value.priority.low / total) * 100,
+      color: "#22C55E",
+    },
   ];
 });
 
 const statuses = computed(() => {
   const total = taskSummary.value.total_tasks || 1;
   return [
-    { label: "Approved", pct: (taskSummary.value.status.approved / total) * 100, color: "#22C55E" },
-    { label: "Rejected", pct: (taskSummary.value.status.rejected / total) * 100, color: "#EF4444" },
+    {
+      label: "Approved",
+      pct: (taskSummary.value.status.approved / total) * 100,
+      color: "#22C55E",
+    },
+    {
+      label: "Rejected",
+      pct: (taskSummary.value.status.rejected / total) * 100,
+      color: "#EF4444",
+    },
   ];
 });
 
@@ -285,7 +375,7 @@ const completionPercentage = computed(() => {
   return Math.round((taskSummary.value.status.approved / total) * 100);
 });
 
-const tasks = ref({ done: 17, total: 20, pct: 85 })
+const tasks = ref({ done: 17, total: 20, pct: 85 });
 
 const handleSave = async () => {
   try {
@@ -317,7 +407,7 @@ const handleSave = async () => {
 .main {
   flex: 1;
   padding: 32px 28px;
-  background: #F2F5F9;
+  background: #f2f5f9;
   overflow-y: auto;
 }
 
@@ -326,7 +416,7 @@ const handleSave = async () => {
   font-weight: 500;
   line-height: 100%;
   letter-spacing: -2.5%;
-  color: #09090B;
+  color: #09090b;
 }
 
 .page-sub {
@@ -353,14 +443,14 @@ const handleSave = async () => {
 .card-title {
   font-size: 24px;
   font-weight: 500;
-  color: #09090B;
+  color: #09090b;
   line-height: 32px;
   letter-spacing: -0.6px;
 }
 
 .card-sub {
   font-size: 16px;
-  color: #71717A;
+  color: #71717a;
   font-weight: 400;
   line-height: 24px;
   margin-top: 2px;
@@ -377,7 +467,7 @@ const handleSave = async () => {
   width: 88px;
   height: 88px;
   border-radius: 12px;
-  border: 1px solid #E4E4E7;
+  border: 1px solid #e4e4e7;
   object-fit: cover;
 }
 
@@ -394,8 +484,8 @@ const handleSave = async () => {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #FAFAFA;
-} 
+  color: #fafafa;
+}
 .profile-info {
   min-width: 0;
 }
@@ -403,7 +493,7 @@ const handleSave = async () => {
 .profile-name {
   font-size: 24px;
   font-weight: 500;
-  color: #09090B;
+  color: #09090b;
   line-height: 32px;
   letter-spacing: -0.6px;
   word-break: break-word;
@@ -431,14 +521,14 @@ const handleSave = async () => {
 /* Input + button */
 .text-input {
   padding: 16px 16px;
-  border: 1px solid #D9D9D9;
+  border: 1px solid #d9d9d9;
   border-radius: 12px;
   font-size: 16px;
   font-weight: 400;
   color: #1a1a2e;
   outline: none;
-  transition: border .15s;
-  background: #FFFFFF;
+  transition: border 0.15s;
+  background: #ffffff;
 }
 
 .text-input:focus {
@@ -450,18 +540,18 @@ const handleSave = async () => {
   margin-top: 12px;
   padding: 10px;
   background: #171717;
-  color: #FAFAFA;
+  color: #fafafa;
   border: none;
   border-radius: 16px;
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
-  transition: opacity .15s;
+  transition: opacity 0.15s;
 }
 
 .save-btn:hover {
-  opacity: .85;
-  color: #FAFAFA;
+  opacity: 0.85;
+  color: #fafafa;
 }
 
 /* Icon button */
@@ -481,7 +571,7 @@ const handleSave = async () => {
 
 /* Tasks summary */
 .tasks-summary {
-  background: #F5F5F5;
+  background: #f5f5f5;
   border-radius: 12px;
   padding: 14px 18px;
   margin-bottom: 16px;
@@ -491,7 +581,7 @@ const handleSave = async () => {
 .tasks-label {
   font-size: 18px;
   font-weight: 400;
-  color: #09090B;
+  color: #09090b;
   line-height: 28px;
   margin-bottom: 3px;
 }
@@ -507,7 +597,7 @@ const handleSave = async () => {
 .tasks-total {
   font-size: 30px;
   font-weight: 400;
-  color: #71717A;
+  color: #71717a;
   line-height: 36px;
   letter-spacing: -0.75%;
 }
@@ -520,7 +610,7 @@ const handleSave = async () => {
 .tasks-pct-label {
   font-size: 14px;
   font-weight: 500;
-  color: #71717A;
+  color: #71717a;
   line-height: 20px;
   margin-top: 3px;
 }
@@ -533,7 +623,7 @@ const handleSave = async () => {
 .priority-title {
   font-size: 18px;
   font-weight: 400;
-  color: #09090B;
+  color: #09090b;
   line-height: 100%;
 }
 
@@ -552,7 +642,7 @@ const handleSave = async () => {
   font-size: 12px;
   font-weight: 400;
   line-height: 100%;
-  color: #09090B;
+  color: #09090b;
   flex-shrink: 0;
 }
 
@@ -578,7 +668,7 @@ const handleSave = async () => {
 
 .status-label {
   font-size: 16px;
-  color: #09090B;
+  color: #09090b;
   margin-bottom: 8px;
   font-weight: 400;
 }
@@ -587,7 +677,7 @@ const handleSave = async () => {
 .ws-section-title {
   font-size: 24px;
   font-weight: 600;
-  color: #09090B;
+  color: #09090b;
   margin-bottom: 10px;
   line-height: 1.5;
   letter-spacing: -0.6px;
@@ -595,7 +685,7 @@ const handleSave = async () => {
 
 .ws-divider {
   height: 1px;
-  background: #FFFFFF;
+  background: #ffffff;
   margin: 14px 0;
 }
 
@@ -604,7 +694,7 @@ const handleSave = async () => {
   gap: 8px;
   padding: 16px;
   cursor: pointer;
-  background-color: #F5F5F5;
+  background-color: #f5f5f5;
   border-radius: 12px;
 }
 
@@ -616,7 +706,7 @@ const handleSave = async () => {
 .ws-name {
   font-size: 18px;
   font-weight: 600;
-  color: #09090B;
+  color: #09090b;
   line-height: 28px;
   white-space: nowrap;
   overflow: hidden;
@@ -626,7 +716,7 @@ const handleSave = async () => {
 .ws-meta {
   font-size: 14px;
   font-weight: 500;
-  color: #71717A;
+  color: #71717a;
   line-height: 100%;
   margin-top: 1px;
   white-space: nowrap;
@@ -647,11 +737,11 @@ const handleSave = async () => {
   justify-content: center;
   font-size: 13px;
   flex-shrink: 0;
-  transition: opacity .15s;
+  transition: opacity 0.15s;
 }
 
 .ws-arrow-btn:hover {
-  opacity: .8;
+  opacity: 0.8;
 }
 
 /* ── Responsive tweaks (fine-tuning on top of Bootstrap grid) ── */

@@ -1,42 +1,55 @@
 <template>
   <div>
-    <div class="position-sticky top-0 z-1 pt-4 pb-2 bg-body">
+    <div class="pt-4 pb-2 bg-body">
       <div class="d-flex align-items-start justify-content-between mb-2">
         <div>
-          <h2 class="fw-semibold fs-5 mb-1">Hello</h2>
-          <p class="text-secondary fs-13 mb-0">Description</p>
+          <h2 class="fw-semibold fs-5 mb-1">Submission</h2>
         </div>
       </div>
     </div>
 
-    <div class="row g-4">
-      <div class="col-lg-6">
+    <n-empty
+      v-if="getAllSubmissionByTeam.length === 0"
+      description="No Data"
+      class="mt-8"
+      style="--n-icon-size: 45px; font-size: 14px"
+    />
+
+    <div class="row g-4" v-else>
+      <div class="col-lg-6" v-for="sub in getAllSubmissionByTeam" :key="sub.submission_id">
         <div class="bg-white rounded-card p-3">
           <div class="d-flex justify-content-between align-items-center mb-3">
             <div class="d-flex gap-2 align-items-center">
               <img
-                src="../../assets/image/default-avatar.png"
+                :src="sub.submitted_by?.avatar"
                 alt=""
-                class="rounded-circle"
+                class="rounded-circle object-fit-cover"
                 style="width: 30px; height: 30px"
               />
-              <p class="mb-0 fw-semibold fs-14">Jammy</p>
+              <p class="mb-0 fw-semibold fs-14">{{ sub.submitted_by?.name }}</p>
             </div>
-            <span class="tab-info w-fit fw-medium text-orange bg-orange fs-13">
-              <CircleDashed size="14" /> Pending
+            <span
+              class="tab-info w-fit fw-medium fs-13"
+              :class="[
+                submissionStatusConfig[sub.status]?.bg,
+                submissionStatusConfig[sub.status]?.text,
+              ]"
+            >
+              <component :is="submissionStatusConfig[sub.status]?.icon" size="14" />
+              {{ submissionStatusConfig[sub.status]?.label }}
             </span>
           </div>
           <div class="d-flex align-items-center gap-2 text-mute mb-2 fs-13">
             <calendar :size="15" />
-            <span>submitted time : 1 / Jan / 2026 / 09:30 AM</span>
+            <span>submitted time : {{ formatDateTime(sub.created_at) }}</span>
           </div>
-          <h6 class="mb-2 fw-semibold">Fix Login bug</h6>
-          <p class="mb-2 text-mute fs-13">Lorem ipsum dolor sit amet.</p>
+          <h6 class="mb-2 fw-semibold">{{ sub.task?.title }}</h6>
+          <p class="mb-2 text-mute fs-13">{{ sub.message || "No message provided" }}</p>
           <base-button
             btn-name="Review"
             icon="eye"
             class="fs-13 d-block ms-auto"
-            @click="showModal = true"
+            @click="openReview(sub)"
           />
         </div>
       </div>
@@ -44,7 +57,7 @@
 
     <!-- Review Modal -->
     <n-modal v-model:show="showModal" :mask-closable="true">
-      <div class="bg-white rounded-card" style="width: 600px">
+      <div v-if="selectedSubmission" class="bg-white rounded-card" style="width: 600px">
         <!-- Header -->
         <div class="d-flex align-items-center justify-content-between px-4 py-3">
           <div class="d-flex align-items-center gap-2">
@@ -59,16 +72,28 @@
             <div style="width: 1px; height: 20px; background: #e4e4e7" class="mx-1"></div>
             <div class="d-flex gap-2 align-items-center">
               <img
-                src="../../assets/image/default-avatar.png"
+                :src="selectedSubmission.submitted_by?.avatar"
                 alt=""
-                class="rounded-circle"
+                class="rounded-circle object-fit-cover"
                 style="width: 30px; height: 30px"
               />
-              <p class="mb-0 fw-semibold fs-14">Jammy</p>
+              <p class="mb-0 fw-semibold fs-14">
+                {{ selectedSubmission.submitted_by?.name }}
+              </p>
             </div>
           </div>
-          <span class="tab-info w-fit fw-medium text-orange bg-orange fs-13">
-            <CircleDashed size="14" /> Pending
+          <span
+            class="tab-info w-fit fw-medium fs-13"
+            :class="[
+              submissionStatusConfig[selectedSubmission.status]?.bg,
+              submissionStatusConfig[selectedSubmission.status]?.text,
+            ]"
+          >
+            <component
+              :is="submissionStatusConfig[selectedSubmission.status]?.icon"
+              size="14"
+            />
+            {{ submissionStatusConfig[selectedSubmission.status]?.label }}
           </span>
         </div>
 
@@ -78,26 +103,33 @@
         <div class="px-3 pt-3 pb-3">
           <div class="d-flex align-items-center gap-2 text-mute mb-3 fs-13">
             <calendar :size="15" />
-            <span>submitted time : 1 / Jan / 2026 / 09:30 AM</span>
+            <span>submitted time : {{ formatDateTime(selectedSubmission.created_at) }}</span>
           </div>
 
-          <h6 class="mb-2 fw-semibold">Fix Login bug</h6>
-          <p class="mb-3 text-mute fs-13">Lorem ipsum dolor sit amet.</p>
+          <h6 class="mb-2 fw-semibold">{{ selectedSubmission.task?.title }}</h6>
+          <p class="mb-3 text-mute fs-13">
+            {{ selectedSubmission.message || "No message provided" }}
+          </p>
 
           <!-- File Attachment -->
-          <div class="mb-3">
+          <div class="mb-3" v-if="selectedSubmission.file">
             <p class="fw-medium text-dark mb-2 fs-15">File attachment</p>
-            <div class="w-fit d-flex flex-column bg-accent rounded-btn border">
+
+            <!-- Image: inline preview -->
+            <div
+              v-if="isImageFile(selectedSubmission.file)"
+              class="w-fit d-flex flex-column bg-accent rounded-btn border"
+            >
               <div class="d-flex align-items-center gap-2 p-2 ps-3 text-mute">
                 <file-text size="15" />
-                <p class="mb-0 fs-14">Image.png</p>
+                <p class="mb-0 fs-14">{{ getFileName(selectedSubmission.file) }}</p>
               </div>
               <div
                 style="width: 400px; height: 200px; border-radius: 0 0 12px 12px"
                 class="overflow-hidden"
               >
                 <n-image
-                  :src="Image"
+                  :src="selectedSubmission.file"
                   object-fit="cover"
                   class="w-100 h-100"
                   style="display: block"
@@ -105,6 +137,23 @@
                 />
               </div>
             </div>
+
+            <!-- PDF (or any non-image): click opens in new tab -->
+            <a
+              v-else
+              :href="selectedSubmission.file"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="attach-upload-box mb-0 text-decoration-none"
+              style="cursor: pointer"
+            >
+              <div class="attach-pdf-icon bg-blue">
+                <FileText size="18" color="#0088ff" />
+              </div>
+              <span class="fs-13 text-dark fw-medium flex-grow-1 text-truncate">
+                {{ getFileName(selectedSubmission.file) }}
+              </span>
+            </a>
           </div>
 
           <div class="mb-2">
@@ -177,6 +226,7 @@
               btn-name="Send"
               icon="send"
               class="py-2 rounded-card px-3 fs-14"
+              :disabled="isLoading"
               @click="handleSend"
             />
           </div>
@@ -197,10 +247,10 @@ import {
   CircleDashed,
 } from "lucide-vue-next";
 import BaseButton from "@/components/BaseButton.vue";
-import Image from "@/assets/image/style 1.png";
 import { useSubmissionStore } from "@/stores/user/submission";
 import { useRoute, useRouter } from "vue-router";
 import { notify } from "@/utils/toast";
+import { storeToRefs } from "pinia";
 
 const route = useRoute();
 const router = useRouter();
@@ -209,11 +259,35 @@ const workspace_id = computed(() => route.params.workspace_id);
 const team_id = computed(() => route.params.team_id);
 
 const submissionStore = useSubmissionStore();
+const { getAllSubmissionByTeam } = storeToRefs(submissionStore);
 
 const showModal = ref(false);
 const showStatusPop = ref(false);
 const selectedStatus = ref(null);
 const feedback = ref("");
+const selectedSubmission = ref(null);
+const isLoading = ref(false);
+
+const submissionStatusConfig = {
+  submitted: {
+    icon: CircleDashed,
+    bg: "bg-orange",
+    text: "text-orange",
+    label: "Pending",
+  },
+  approved: {
+    icon: CircleCheck,
+    bg: "bg-green",
+    text: "text-green",
+    label: "Approved",
+  },
+  rejected: {
+    icon: CircleX,
+    bg: "bg-red",
+    text: "text-danger",
+    label: "Rejected",
+  },
+};
 
 const reviewStatusConfig = {
   approved: { icon: CircleCheck, bg: "bg-green", text: "text-green", label: "Approved" },
@@ -224,9 +298,43 @@ onMounted(async () => {
   submissionStore.getAllSubmissionByTeamStore(workspace_id.value, team_id.value);
 });
 
-function handleSend() {
+const formatDateTime = (dateString) => {
+  if (!dateString) return "N/A";
+  const date = new Date(dateString);
+  if (isNaN(date.getTime())) return "N/A";
+  const day = date.getDate();
+  const month = date.toLocaleString("en-US", { month: "short" });
+  const year = date.getFullYear();
+  const time = date.toLocaleTimeString("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  });
+  return `${day} / ${month} / ${year} / ${time}`;
+};
+
+const getFileName = (url) => {
+  if (!url) return "";
+  try {
+    return decodeURIComponent(url.split("/").pop());
+  } catch {
+    return url.split("/").pop();
+  }
+};
+
+const isImageFile = (url) => /\.(jpe?g|png|gif|webp)$/i.test(url || "");
+
+const openReview = (sub) => {
+  selectedSubmission.value = sub;
+  selectedStatus.value =
+    sub.status === "approved" || sub.status === "rejected" ? sub.status : null;
+  feedback.value = "";
+  showModal.value = true;
+};
+
+async function handleSend() {
   if (!selectedStatus.value) {
-    console.warn("Please select a status first!");
+    toast.error("Please select a review status first");
     return;
   }
 
@@ -235,11 +343,27 @@ function handleSend() {
     feedback: feedback.value,
   };
 
-  console.log("Review Payload:", payload);
+  try {
+    isLoading.value = true;
+    await submissionStore.updateSubmission(
+      workspace_id.value,
+      team_id.value,
+      selectedSubmission.value.submission_id,
+      payload
+    );
 
-  feedback.value = "";
-  selectedStatus.value = null;
-  showModal.value = false;
+    await submissionStore.getAllSubmissionByTeamStore(workspace_id.value, team_id.value);
+
+    toast.success("Submission reviewed successfully");
+    feedback.value = "";
+    selectedStatus.value = null;
+    selectedSubmission.value = null;
+    showModal.value = false;
+  } catch (error) {
+    toast.error(error.message);
+  } finally {
+    isLoading.value = false;
+  }
 }
 </script>
 

@@ -1,55 +1,60 @@
 <template>
-  <div class="mt-4">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-      <h5 class="mb-0">Hello</h5>
-      <span class="text-mute fs-14">All Activity</span>
-    </div>
-
-    <!-- Loading state -->
-    <div v-if="teamStore.activityLoading" class="text-mute fs-13 text-center py-5">
-      Loading activity...
-    </div>
-
-    <!-- Empty state -->
-    <n-empty
-      v-else-if="groupedActivities.length === 0"
-      description="No Activity Yet"
-      class="mt-5"
-      style="--n-icon-size: 45px; font-size: 14px"
-    />
-
-    <!-- Activity list -->
-    <div v-else class="team-activity-list">
-      <template v-for="(group, gi) in groupedActivities" :key="gi">
-        <div class="activity-date-label">
-          <Calendar size="13" />
-          {{ group.date }}
+  <div>
+    <TeamActivitySkeleton v-if="teamStore.activityLoading"/>
+    <div v-else class="mt-4">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+          <h2 class="fw-semibold fs-5 mb-1">{{ getTeamById.title }}</h2>
+          <p class="text-secondary fs-13 mb-0">{{ getTeamById.description }}</p>
         </div>
+        <button
+          class="btn btn-white bg-white rounded-btn border-1 border-white fs-13 d-flex align-items-center gap-1"
+        >
+          <Filter size="16" /> Filter
+        </button>
+      </div>
 
-        <div class="row gy-1 gx-3">
-          <div class="col-lg-6" v-for="(act, ai) in group.items" :key="ai">
-            <div class="activity-card rounded-card">
-              <span class="act-tag" :class="actTagClass(act.action)">
-                <component :is="actTagIcon(act.action)" size="14" />
-                {{ act.action }}
-              </span>
-              <div class="d-flex align-items-center justify-content-between mb-2">
-                <div class="d-flex align-items-center gap-2">
-                  <img
-                    :src="act.user?.avatar"
-                    class="rounded-circle object-fit-cover"
-                    style="width: 24px; height: 24px"
-                  />
-                  <span class="fw-semibold fs-13">{{ act.user?.name }}</span>
+      <!-- Empty state -->
+      <n-empty
+        v-if="groupedActivities.length === 0"
+        description="No Activity Yet"
+        class="mt-5"
+        style="--n-icon-size: 45px; font-size: 14px"
+      />
+
+      <!-- Activity list -->
+      <div v-else class="team-activity-list">
+        <template v-for="(group, gi) in groupedActivities" :key="gi">
+          <div class="activity-date-label">
+            <Calendar size="13" />
+            {{ group.date }}
+          </div>
+
+          <div class="row gy-1 gx-3">
+            <div class="col-lg-6" v-for="(act, ai) in group.items" :key="ai">
+              <div class="activity-card rounded-card">
+                <span class="act-tag" :class="actTagClass(act.action)">
+                  <component :is="actTagIcon(act.action)" size="14" />
+                  {{ act.action }}
+                </span>
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                  <div class="d-flex align-items-center gap-2">
+                    <img
+                      :src="act.user?.avatar"
+                      class="rounded-circle object-fit-cover"
+                      style="width: 24px; height: 24px"
+                    />
+                    <span class="fw-semibold fs-13">{{ act.user?.name }}</span>
+                  </div>
+                  <span class="fs-11 text-mute">{{ act.time }}</span>
                 </div>
-                <span class="fs-11 text-mute">{{ act.time }}</span>
-              </div>
 
-              <div class="act-note">{{ act.note }}</div>
+                <div class="act-note">{{ act.note }}</div>
+              </div>
             </div>
           </div>
-        </div>
-      </template>
+        </template>
+      </div>
     </div>
   </div>
 </template>
@@ -60,13 +65,14 @@ import { useRoute } from "vue-router";
 import { storeToRefs } from "pinia";
 import { Calendar, Plus, UserCheck, Send, Trash2, Pencil } from "lucide-vue-next";
 import { useTeamStore } from "@/stores/user/team";
+import TeamActivitySkeleton from "@/components/Skeleton/TeamActivitySkeleton.vue";
 
 const route = useRoute();
 const workspace_id = computed(() => route.params.workspace_id);
 const team_id = computed(() => route.params.team_id);
 
 const teamStore = useTeamStore();
-const { getActivityTeam } = storeToRefs(teamStore);
+const { getActivityTeam, getTeamById } = storeToRefs(teamStore);
 
 onMounted(async () => {
   await teamStore.getActivityTeamStore(workspace_id.value, team_id.value);
@@ -107,14 +113,14 @@ const actTagClass = (action) => {
   const map = {
     create: "act-tag-create",
     assign: "act-tag-assign",
-    update: "act-tag-update",
+    submit: "act-tag-submit",
     delete: "act-tag-delete",
   };
-  return map[action?.toLowerCase()] || "act-tag-update";
+  return map[action?.toLowerCase()];
 };
 
 const actTagIcon = (action) => {
-  const map = { create: Plus, assign: UserCheck, update: Pencil, delete: Trash2 };
+  const map = { create: Plus, assign: UserCheck, submit: Send, delete: Trash2 };
   return map[action?.toLowerCase()];
 };
 </script>

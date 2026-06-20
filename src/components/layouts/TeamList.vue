@@ -95,6 +95,7 @@
                     style="width: 25px; height: 25px; cursor: pointer"
                     class="btn-option d-flex justify-content-center align-items-center rounded-circle"
                     :class="{ 'btn-option-active': showPopover[t.team_id] }"
+                    @click.prevent
                   >
                     <ellipsis size="16" />
                   </div>
@@ -294,7 +295,6 @@ watch(
 
 onMounted(async () => {
   await teamStore.getTeamByWorkspaceStore(currentRouteWorkspaceId.value);
-  // await teamStore.getTeamByIdStore(currentRouteWorkspaceId.value, currentRouteTeamId.value);
 });
 
 const goSubmissionView = (teamId) => {
@@ -414,10 +414,24 @@ const openDelete = (t) => {
 const handleDelete = async () => {
   isLoading.value = true;
   try {
-    await teamStore.deleteTeam(currentRouteWorkspaceId.value, selectedTeam.value.team_id);
+    const deletedTeamId = selectedTeam.value.team_id;
+
+    await teamStore.deleteTeam(currentRouteWorkspaceId.value, deletedTeamId);
     toast.success("Team deleted successfully");
     showDeleteModal.value = false;
+
     await teamStore.getTeamByWorkspaceStore(currentRouteWorkspaceId.value);
+
+    if (String(currentRouteTeamId.value) === String(deletedTeamId)) {
+      const remaining = teamList.value;
+      if (remaining.length > 0) {
+        router.push(
+          `/workspace/${currentRouteWorkspaceId.value}/team/${remaining[0].team_id}/${currentSection.value}`
+        );
+      } else {
+        router.push(`/workspace/${currentRouteWorkspaceId.value}`);
+      }
+    }
   } catch (error) {
     console.error("Failed to delete team:", error);
     console.log(error.toast);
