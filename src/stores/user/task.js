@@ -10,10 +10,12 @@ export const useTaskStore = defineStore("task", () => {
   let getSummaryTask = ref({});
   let getMyTask = ref([]);
   let loading = ref(true);
+  let summaryLoading = ref(true);
+  let myTaskLoading = ref(true);
 
-  const getTaskByTeamStore = async (workspace_id, team_id, status = "") => {
+  const getTaskByTeamStore = async (workspace_id, team_id, status = "", silent = false) => {
     try {
-      loading.value = true;
+      if (!silent) loading.value = true;
       const res = await api.get(
         `/workspace/${workspace_id}/team/${team_id}/tasks?status=${status}`,
       );
@@ -31,7 +33,7 @@ export const useTaskStore = defineStore("task", () => {
     } catch (err) {
       throw new Error(err.response?.data?.message || "Get task failed");
     } finally {
-      loading.value = false;
+      if (!silent) loading.value = false;
     }
   };
 
@@ -84,25 +86,31 @@ export const useTaskStore = defineStore("task", () => {
     }
   };
 
-  const getSummaryTaskStore = async (workspace_id, team_id) => {
-    try {
+  const getSummaryTaskStore = async (workspace_id, team_id, silent = false) => {
+    try { 
+      if (!silent) summaryLoading.value = true;
       const res = await api.get(
         `/workspace/${workspace_id}/team/${team_id}/my-tasks/summary`,
       );
       getSummaryTask.value = res.data.data;
     } catch (err) {
       throw new Error(err.response?.data?.message || "Get summary task failed");
+    } finally {
+      if (!silent) summaryLoading.value = false;
     }
   };
 
-  const getMyTaskStore = async (workspace_id, team_id, status = "") => {
+  const getMyTaskStore = async (workspace_id, team_id, status = "", silent = false) => {
     try {
+      if (!silent) myTaskLoading.value = true;
       const res = await api.get(
         `/workspace/${workspace_id}/team/${team_id}/my-tasks?status=${status}`,
       );
       getMyTask.value = res.data.data;
     } catch (err) {
       throw new Error(err.response?.data?.message || "Get my task failed");
+    } finally {
+      if (!silent) myTaskLoading.value = false;
     }
   };
 
@@ -121,6 +129,8 @@ export const useTaskStore = defineStore("task", () => {
     getSummaryTaskStore,
     getMyTaskStore,
     loading,
+    summaryLoading,
+    myTaskLoading,
     deleteTask
   };
 });

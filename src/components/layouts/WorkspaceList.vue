@@ -87,7 +87,7 @@
           @click="switchWorkspace(ws.workspace_id)"
           :class="[
             'd-flex align-items-center justify-content-between text-dark px-2 py-1 mb-1 rounded workspace-item',
-            { 'workspace-item--active': openOptionId === ws.workspace_id },
+            { 'workspace-item--active': openOptionId === ws.workspace_id || isCurrentWorkspace(ws.workspace_id) },
           ]"
         >
           <div class="d-flex align-items-center gap-2">
@@ -139,6 +139,7 @@
                 @click="
                   selectedWs = ws;
                   renameName = ws.workspace_name;
+                  showPopover = false;
                   showRenameModal = true;
                 "
               >
@@ -148,7 +149,9 @@
                 class="d-flex align-items-center rounded gap-2 px-2 py-1 text-danger fw-bold workspace-item"
                 @click="
                   selectedWs = ws;
+                  showPopover = false;
                   showDeleteModal = true;
+
                 "
               >
                 <Trash2 size="13" /> Delete
@@ -226,7 +229,7 @@
             @click="switchWorkspace(ws.workspace_id)"
             :class="[
               'd-flex align-items-center justify-content-between text-dark px-2 py-1 mb-1 rounded workspace-item',
-              { 'workspace-item--active': openOptionId === ws.workspace_id },
+              { 'workspace-item--active': openOptionId === ws.workspace_id || isCurrentWorkspace(ws.workspace_id) },
             ]"
           >
             <div class="d-flex align-items-center gap-2">
@@ -275,6 +278,7 @@
                   class="d-flex align-items-center text-danger rounded gap-2 px-2 py-1 fw-bold workspace-item"
                   @click="
                     selectedWs = ws;
+                    showPopover = false;
                     showLeaveWorkspaceModal = true;
                   "
                 >
@@ -536,7 +540,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from "vue";
+import { ref, onMounted, computed, watch } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { storeToRefs } from "pinia";
 import { useAuthStore } from "@/stores/auth";
@@ -558,6 +562,8 @@ const emit = defineEmits(["close-sidebar"]);
 
 const currentRouteWorkspaceId = computed(() => route.params.workspace_id);
 const currentRouteTeamId = computed(() => route.params.team_id);
+const isCurrentWorkspace = (id) => String(id) === String(currentWorkspaceId.value);
+
 
 const showPopover = ref(false);
 const showRenameModal = ref(false);
@@ -567,6 +573,10 @@ const showInvitePopover = ref(false);
 const showLogoutModal = ref(false);
 const showLeaveWorkspaceModal = ref(false);
 const openOptionId = ref(null);
+
+watch(showPopover, (val) => {
+  if (!val) openOptionId.value = null;
+});
 
 const isLoading = ref(false);
 const isInviteLoading = ref(false);
@@ -605,12 +615,12 @@ const refreshWorkspaces = async () => {
 };
 
 const switchWorkspace = async (id) => {
+  showPopover.value = false;
   currentWorkspaceId.value = id;
   await teamStore.getTeamByWorkspaceStore(id);
   const savedTeamId = workspaceStore.lastVisitedTeam[id];
   const targetTeamId = savedTeamId ?? getTeamByWorkspace.value?.[0]?.team_id;
   if (targetTeamId) {
-    showPopover.value = false;
     router.push(`/workspace/${id}/team/${targetTeamId}/tasks`);
   }
 };
@@ -624,9 +634,10 @@ const handleCreateWorkspace = async () => {
   try {
     isLoading.value = true;
     await crudWorkspaceStore.createWorkspace(name);
-    newWorkspaceName.value = "";
+    showPopover.value = false;
     toast.success("Workspace created successfully");
-    await refreshWorkspaces(); // ← silent refresh, no skeleton
+    newWorkspaceName.value = "";
+    await refreshWorkspaces();
   } catch (error) {
     toast.error(error.message);
   } finally {
@@ -642,11 +653,12 @@ const handleRename = async () => {
   try {
     isLoading.value = true;
     await crudWorkspaceStore.updateWorkspace(selectedWs.value.workspace_id, name);
+    showPopover.value = false;
     toast.success("Workspace updated successfully");
     showRenameModal.value = false;
     renameName.value = "";
     selectedWs.value = null;
-    await refreshWorkspaces(); // ← silent refresh, no skeleton
+    await refreshWorkspaces();
   } catch (error) {
     toast.error(error.message);
   } finally {
@@ -662,10 +674,11 @@ const handleDelete = async () => {
   try {
     isLoading.value = true;
     await crudWorkspaceStore.deleteWorkspace(selectedWs.value.workspace_id);
+    showPopover.value = false;
     toast.success("Workspace deleted successfully");
     showDeleteModal.value = false;
     selectedWs.value = null;
-    await refreshWorkspaces(); // ← silent refresh, no skeleton
+    await refreshWorkspaces(); 
   } catch (error) {
     toast.error(error.message);
   } finally {
@@ -677,6 +690,7 @@ const handleLeave = async (ws) => {
   try {
     isLoading.value = true;
     await workspaceStore.leaveWorkspace(ws.workspace_id, getMe.value.user_id);
+    showPopover.value = false;
     toast.success("Left workspace successfully");
     showLeaveWorkspaceModal.value = false;
     await refreshWorkspaces();
@@ -703,6 +717,7 @@ const handleJoin = async () => {
 
   try {
     await crudWorkspaceStore.joinByToken(token);
+    showPopover.value = false;
     toast.success("Joined workspace successfully");
     joinCode.value = "";
     showJoinPopover.value = false;
@@ -778,6 +793,10 @@ const goViewMember = () => {
 
 .btn-option--active {
   background: #e4e4e7 !important;
+}
+
+.workspace-item--active {
+  background-color: #f4f4f5;
 }
 
 :deep(.n-scrollbar-rail.n-scrollbar-rail--vertical) {

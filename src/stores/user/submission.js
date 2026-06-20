@@ -32,10 +32,27 @@ export const useSubmissionStore = defineStore("submission", () => {
     }
   };
 
+  const updateSubmission = async (
+    workspace_id,
+    team_id,
+    submission_id,
+    form,
+  ) => {
+    try {
+      await api.put(
+        `/workspace/${workspace_id}/team/${team_id}/submission/${submission_id}/status`,
+        form,
+      );
+    } catch (err) {
+      throw new Error(err.response?.data?.message || "Get submissions failed");
+    }
+  };
+
   return {
     getAllSubmissionByTeam,
     getAllSubmissionByTeamStore,
     loading,
     submitTask,
+    updateSubmission
   };
 });

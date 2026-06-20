@@ -311,7 +311,7 @@ import {
 import { Cropper, CircleStencil } from "vue-advanced-cropper";
 import "vue-advanced-cropper/dist/style.css";
 import { notify } from "@/utils/toast";
-import { useGetProfile } from "@/stores/profile/profile";
+import { useGetProfile } from "@/stores/admin/profile";
 import { useAuthStore } from "@/stores/auth";
 import { useRouter } from "vue-router";
 import SkeletonSetting from "@/components/Skeleton/SkeletonSetting.vue";
