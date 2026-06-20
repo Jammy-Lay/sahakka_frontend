@@ -64,6 +64,11 @@ const router = createRouter({
           name: "activity",
           component: () => import("../views/user/ActivityView.vue"),
         },
+        {
+          path: ":workspace_id/team/:team_id/viewMember",
+          name: "viewMember",
+          component: () => import("../views/user/ViewMember.vue"),
+        },
       ],
     },
     {

@@ -3,6 +3,7 @@ import { defineStore } from "pinia";
 import { ref, computed } from "vue";
 
 export const UseWorkspaceStore = defineStore("workspace", () => {
+  let loading = ref(true);
   let myWorkspaces = ref([]);
   let joinedWorkspaces = ref([]);
   let getAllWorkspace = ref([]);
@@ -28,7 +29,10 @@ export const UseWorkspaceStore = defineStore("workspace", () => {
 
     // only save with userId, no fallback needed
     if (user_id) {
-      localStorage.setItem(`lastVisited_${user_id}`, JSON.stringify({ workspace_id, team_id }));
+      localStorage.setItem(
+        `lastVisited_${user_id}`,
+        JSON.stringify({ workspace_id, team_id }),
+      );
     }
 
     // clean up old key forever
@@ -37,6 +41,7 @@ export const UseWorkspaceStore = defineStore("workspace", () => {
 
   const getMyWorkspaceStore = async () => {
     try {
+      loading.value = true;
       const res = await api.get("/getMyWorkspace");
       const data = res.data.data;
       myWorkspaces.value = data.filter((w) => w.my_role === "owner");
@@ -44,12 +49,23 @@ export const UseWorkspaceStore = defineStore("workspace", () => {
         (w) => w.my_role === "member" || w.my_role === "moderator",
       );
       getAllWorkspace.value = data;
-    } catch (error) {
-      console.log(error);
+    } catch (err) {
+      throw new Error(err.response?.data?.message || "Get Workspace failed");
+    } finally {
+      loading.value = false;
+    }
+  };
+
+  const leaveWorkspace = async (workspace_id, user_id) => {
+    try {
+      await api.delete(`/workspace/${workspace_id}/leave/${user_id}`);
+    } catch (err) {
+      throw new Error(err.response?.data?.message || "Get Workspace failed");
     }
   };
 
   return {
+    loading,
     myWorkspaces,
     joinedWorkspaces,
     getAllWorkspace,
@@ -58,5 +74,6 @@ export const UseWorkspaceStore = defineStore("workspace", () => {
     lastVisitedTeam,
     setLastVisitedTeam,
     getMyWorkspaceStore,
+    leaveWorkspace
   };
 });

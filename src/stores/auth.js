@@ -4,6 +4,7 @@ import api from "@/api/https";
 
 export const useAuthStore = defineStore("auth", () => {
   let user = ref({});
+  let loading = ref(true);
   let token = ref(localStorage.getItem("token"));
   let isLoggedIn = computed(() => !!token.value);
 
@@ -34,11 +35,14 @@ export const useAuthStore = defineStore("auth", () => {
   };
 
   const getMeStore = async () => {
+    loading.value = true;
     try {
       const res = await api.get("/getMe");
       getMe.value = res.data.data;
     } catch (err) {
       throw new Error(err.response?.data?.message || "failed");
+    } finally{
+      loading.value = false;
     }
   };
 
@@ -103,5 +107,6 @@ export const useAuthStore = defineStore("auth", () => {
     resentOtp,
     verifyOtp,
     register,
+    loading
   };
 });

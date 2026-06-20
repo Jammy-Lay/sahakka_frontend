@@ -9,9 +9,11 @@ export const useTaskStore = defineStore("task", () => {
   let getTaskActivity = ref([]);
   let getSummaryTask = ref({});
   let getMyTask = ref([]);
+  let loading = ref(true);
 
   const getTaskByTeamStore = async (workspace_id, team_id, status = "") => {
     try {
+      loading.value = true;
       const res = await api.get(
         `/workspace/${workspace_id}/team/${team_id}/tasks?status=${status}`,
       );
@@ -28,6 +30,8 @@ export const useTaskStore = defineStore("task", () => {
       getTask.value = tasks.filter((t) => ["task", "feature"].includes(t.type));
     } catch (err) {
       throw new Error(err.response?.data?.message || "Get task failed");
+    } finally {
+      loading.value = false;
     }
   };
 
@@ -43,6 +47,16 @@ export const useTaskStore = defineStore("task", () => {
       await api.post(`/workspace/${workspace_id}/team/${team_id}/task`, form);
     } catch (err) {
       throw new Error(err.response?.data?.message || "Create task failed");
+    }
+  };
+
+  const deleteTask = async (workspace_id, team_id, task_id) => {
+    try {
+      await api.delete(
+        `/workspace/${workspace_id}/team/${team_id}/task/${task_id}`,
+      );
+    } catch (err) {
+      throw new Error(err.response?.data?.message || "Delete task failed");
     }
   };
 
@@ -106,5 +120,7 @@ export const useTaskStore = defineStore("task", () => {
     updateTask,
     getSummaryTaskStore,
     getMyTaskStore,
+    loading,
+    deleteTask
   };
 });

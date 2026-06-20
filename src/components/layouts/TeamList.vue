@@ -1,5 +1,6 @@
 <template>
-  <div class="px-3">
+  <TeamListSkeleton v-if="teamStore.loading" />
+  <div class="px-3" v-else>
     <div class="d-flex align-items-center justify-content-between py-3">
       <h6 class="fs-13 fw-semibold mb-0">Team</h6>
       <button
@@ -51,6 +52,7 @@
         </div>
       </n-modal>
     </div>
+
     <n-scrollbar style="max-height: 635px">
       <div class="d-flex flex-column gap-2">
         <router-link
@@ -214,8 +216,7 @@
         <n-divider style="margin: 5px 0; --n-color: #e4e4e7" />
         <div class="px-4 pt-3 pb-3">
           <p class="fs-13 text-mute mb-4 text-center">
-            Are you sure you want to delete
-            <span class="fw-semibold text-dark">{{ selectedTeam?.title }}</span> ?
+            Are you sure you want to delete ?
           </p>
           <div class="d-flex gap-2">
             <button
@@ -227,9 +228,10 @@
             <button
               class="btn btn-danger rounded-btn-sm fs-13 fw-medium w-50"
               @click="handleDelete"
+              :disabled="isLoading"
             >
               <span v-if="isLoading" class="spinner-border spinner-border-sm me-2"></span>
-              {{ isLoading ? "Loading..." : "Delete" }}
+              {{ isLoading ? "Deleting..." : "Delete" }}
             </button>
           </div>
         </div>
@@ -248,6 +250,7 @@ import { notify } from "@/utils/toast";
 import BaseInput from "../BaseInput.vue";
 import BaseButton from "../BaseButton.vue";
 import { useTaskStore } from "@/stores/user/task.js";
+import TeamListSkeleton from "../team/TeamListSkeleton.vue";
 
 const route = useRoute();
 const router = useRouter();
@@ -291,6 +294,7 @@ watch(
 
 onMounted(async () => {
   await teamStore.getTeamByWorkspaceStore(currentRouteWorkspaceId.value);
+  // await teamStore.getTeamByIdStore(currentRouteWorkspaceId.value, currentRouteTeamId.value);
 });
 
 const goSubmissionView = (teamId) => {

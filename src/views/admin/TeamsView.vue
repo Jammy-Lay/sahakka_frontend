@@ -1,11 +1,14 @@
 <template>
     <div v-if="loading">
-        <Loading />
+        <SkeletonTeam></SkeletonTeam>
     </div>
     <div v-else>
         <div class="row">
-            <div class="col-4">
-                <BaseTitle title="Teams" />
+            <div class="col-4 pb-4">
+                <div class="d-flex align-items-center gap-2">
+                    <Users  class="text-prime" :size="30" />
+                    <BaseTitle title="Teams" class="mb-0" />
+                </div>
             </div>
             <div class="col-8">
                 <div class="d-flex justify-content-end">
@@ -52,6 +55,7 @@ import BaseTitle from "@/components/BaseTitle.vue";
 import Loading from "@/components/layouts/Loading.vue";
 import { useToast } from "vue-toastification";
 import BaseCardTeam from "@/components/BaseCardTeam.vue";
+import SkeletonTeam from "@/components/Skeleton/SkeletonTeam.vue";
 
 const useTeam = useTeamstore();
 const useTask = useTaskstore();

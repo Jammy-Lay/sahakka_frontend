@@ -1,6 +1,6 @@
 <template>
     <div v-if="loading">
-        <Loading />
+        <SkeletonTeamDetail />
     </div>
     <div v-else class="page-bg p-4">
         <router-link to="/admin/teams" class="btn btn-outline-dark mb-3 d-flex align-items-center gap-2 w-fit">
@@ -43,7 +43,7 @@
                             <div class="stat-box d-flex align-items-center gap-2 rounded-3 p-3">
                                 <div
                                     class="stat-icon stat-blue rounded-3 d-flex align-items-center justify-content-center">
-                                    <Building2 size="16" />
+                                    <Layers-2 size="16" />
                                 </div>
                                 <div>
                                     <div class="stat-label">Workspace</div>
@@ -156,6 +156,7 @@ import { useTeamstore } from "@/stores/admin/teams";
 import Loading from "@/components/layouts/Loading.vue";
 import { useToast } from "vue-toastification";
 import { useTaskstore } from "@/stores/admin/tasks";
+import SkeletonTeamDetail from "@/components/Skeleton/SkeletonTeamDetail.vue";
 
 const toast = useToast();
 const loading = ref(false);
@@ -263,7 +264,7 @@ onMounted(async () => {
 }
 
 .team-card {
-    border-left: 3px solid #378add !important;
+    border-left: 3px solid #4361ee !important;
     border-radius: 0 14px 14px 0 !important;
     border: 0.5px solid #e8e8e8;
 }
