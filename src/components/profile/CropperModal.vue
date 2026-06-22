@@ -22,7 +22,10 @@
                     <button class="btn-cancel" @click="handleClose"> <!-- ✅ changed from $emit('closeModal') -->
                         Cancel
                     </button>
-                    <button v-if="imageUrl" class="btn-save" @click="crop">Save</button>
+                    <button v-if="imageUrl" class="btn-save" :disabled="props.disable" @click="crop">
+                        <span v-if="props.disable" class="spinner-border spinner-border-sm me-2" />
+                        {{ props.disable ? "Saving..." : "Save" }}
+                    </button>
                 </div>
             </div>
         </div>
@@ -37,10 +40,18 @@ import 'vue-advanced-cropper/dist/style.css'
 
 const emit = defineEmits(['closeModal', 'save'])
 
+const props = defineProps({
+    disable: {
+        type: Boolean,
+        default: false,
+    }
+})
+
 const imageUrl = ref(null)
 const cropperRef = ref(null)
 const fileInputRef = ref(null)
-const MAX_SIZE_MB = 2 
+const MAX_SIZE_MB = 2
+
 
 const triggerFileInput = () => fileInputRef.value?.click()
 

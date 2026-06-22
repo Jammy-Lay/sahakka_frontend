@@ -103,12 +103,12 @@ const handleChangePassword = async () => {
       !form.newPassword ||
       !form.confirmPassword
     ) {
-      alert("All fields are required");
+      toast.error("Password is required");
       return;
     }
 
     if (form.newPassword !== form.confirmPassword) {
-      alert("Passwords do not match");
+      toast.error("Passwords do not match");
       return;
     }
 
@@ -124,7 +124,7 @@ const handleChangePassword = async () => {
     form.newPassword = "";
     form.confirmPassword = "";
   } catch (err) {
-    alert(err.message);
+    toast.error(err.message);
   }
 };
 

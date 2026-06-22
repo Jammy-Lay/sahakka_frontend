@@ -23,8 +23,8 @@
                 v-if="showCropper"
                 @closeModal="showCropper = false"
                 @save="handleCroppedImage"
+                :disable="isLoading"
               />
-
               <div class="profile-info">
                 <div class="profile-name">{{ profileStore.user.name }}</div>
                 <div class="profile-email">{{ profileStore.user.email }}</div>
@@ -51,11 +51,14 @@
               v-model="displayName"
               placeholder="Your name"
             />
-            <BaseButton
-              btn-name="Save Change"
+            <button
+              class="btn bg-btn rounded-btn fs-14 fw-semibold py-2 mt-2"
+              :disabled="isLoading"
               @click="handleSave"
-              class="rounded-btn fs-14 fw-semibold py-2 mt-2"
-            />
+            >
+              <span v-if="isLoading" class="spinner-border spinner-border-sm me-2" />
+              {{ isLoading ? "Saving..." : "Save Change" }}
+            </button>
           </div>
 
           <!-- Tasks overview card -->
@@ -233,6 +236,7 @@ const MyWorkspaces = ref([]);
 const WorkspaceStats = ref({});
 
 const showCropper = ref(false);
+const isLoading = ref(false);
 
 const { joinedWorkspaces: WorkSpaceInvite } = storeToRefs(profileStore);
 
@@ -287,7 +291,7 @@ onMounted(async () => {
 const handleCroppedImage = async (blob) => {
   const formData = new FormData();
   formData.append("avatar", blob, "avatar.png");
-
+  isLoading.value = true;
   try {
     await profileStore.UpdateAvatar(formData);
     await profileStore.getProfile();
@@ -296,6 +300,8 @@ const handleCroppedImage = async (blob) => {
     toast.success("Avatar updated");
   } catch (err) {
     toast.error(err.message || "Failed to update avatar");
+  } finally {
+    isLoading.value = false;
   }
 };
 
@@ -378,12 +384,15 @@ const completionPercentage = computed(() => {
 const tasks = ref({ done: 17, total: 20, pct: 85 });
 
 const handleSave = async () => {
+  isLoading.value = true;
   try {
     await profileStore.UpdateName(displayName.value);
     toast.success("Name updated");
   } catch (err) {
     toast.error(err.message);
     console.error(err.message);
+  } finally {
+    isLoading.value = false;
   }
 };
 </script>

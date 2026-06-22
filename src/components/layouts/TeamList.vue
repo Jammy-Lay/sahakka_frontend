@@ -43,11 +43,14 @@
               input-class="py-1 fs-13 rounded-btn-sm mb-4"
             />
             <!-- Create team -->
-            <BaseButton
-              btnName="Create team"
-              class="w-100 fs-13 rounded-btn py-2"
+            <button
+              class="btn bg-btn w-100 fs-13 rounded-btn py-2"
+              :disabled="isLoading"
               @click="handleCreateTeam"
-            />
+            >
+              <span v-if="isLoading" class="spinner-border spinner-border-sm me-2" />
+              {{ isLoading ? "Creating..." : "Create Team" }}
+            </button>
           </div>
         </div>
       </n-modal>
@@ -191,11 +194,14 @@
             input-placeholder="Description"
             input-class="py-1 fs-13 rounded-btn-sm mb-4"
           />
-          <BaseButton
-            btnName="Save"
-            class="w-100 fs-13 rounded-btn py-2"
+          <button
+            class="btn bg-btn w-100 fs-13 rounded-btn py-2"
+            :disabled="isLoading"
             @click="handleRename"
-          />
+          >
+            <span v-if="isLoading" class="spinner-border spinner-border-sm me-2" />
+            {{ isLoading ? "Saving..." : "Save" }}
+          </button>
         </div>
       </div>
     </n-modal>
@@ -329,6 +335,7 @@ const teamName = ref("");
 const description = ref("");
 
 const handleCreateTeam = async () => {
+  isLoading.value = true;
   if (!teamName.value.trim()) {
     toast.error("Name is required");
     return;
@@ -358,6 +365,8 @@ const handleCreateTeam = async () => {
   } catch (error) {
     console.error("Failed to create team:", error);
     toast.error(error.message);
+  } finally {
+    isLoading.value = false;
   }
 };
 
@@ -375,6 +384,7 @@ const openRename = (t) => {
 };
 
 const handleRename = async () => {
+  isLoading.value = true;
   if (!renameName.value.trim()) {
     toast.error("Name is required");
     return;
@@ -399,6 +409,8 @@ const handleRename = async () => {
   } catch (error) {
     console.error("Failed to rename team:", error);
     toast.error(error.message);
+  } finally {
+    isLoading.value = false;
   }
 };
 

@@ -35,9 +35,9 @@
                     <div class="col-lg-auto text-center text-lg-start">
                         <div class="avatar-container">
                             <!-- Avatar image -->
-                            <n-avatar
-                                :src="auth.getMe?.avatar || 'http://localhost:3000/uploads/avatars/default-avatar.png'"
-                                :size="150" round object-fit="cover" />
+                            <n-avatar :src="auth.getMe?.avatar ||
+                                'http://localhost:3000/uploads/avatars/default-avatar.png'
+                                " :size="150" round object-fit="cover" />
                             <!-- Pencil trigger button with dropdown -->
                             <n-dropdown :options="avatarDropdownOptions" placement="bottom-start" trigger="click"
                                 @select="handleAvatarDropdown">
@@ -190,8 +190,8 @@
                 </template>
                 <div class="px-4 py-3">
                     <p class="text-secondary mb-0" style="font-size: 0.9rem; line-height: 1.6">
-                        Are you sure you want to remove your profile photo? Your avatar will
-                        be reset to the default image.
+                        Are you sure you want to remove your profile photo? Your avatar will be reset
+                        to the default image.
                     </p>
                 </div>
                 <template #footer>
@@ -208,37 +208,42 @@
             </n-card>
         </n-modal>
 
-        <!-- LOGOUT MODAL -->
         <n-modal v-model:show="showLogoutModal" :mask-closable="true" transform-origin="center">
-            <n-card style="width: 400px" class="rounded-3 shadow-lg" :bordered="false" content-style="padding: 0;">
+            <n-card style="width: 450px" class="rounded-4 shadow-lg" :bordered="false" content-style="padding: 0;">
                 <template #header>
-                    <div class="d-flex align-items-center gap-2 py-1">
-                        <div class="logout-icon-box rounded-3">
-                            <n-icon color="#3b82f6" size="20">
+                    <div class="d-flex align-items-center gap-3 py-2">
+                        <div class="d-flex align-items-center justify-content-center rounded-3"
+                            style="width: 44px; height: 44px; background: #fff1f2">
+                            <n-icon color="#D03050" size="22">
                                 <LogOut />
                             </n-icon>
                         </div>
                         <div>
-                            <div class="fw-bold fs-6 mb-0">Sign Out</div>
+                            <div class="fw-bold mb-0" style="font-size: 1rem">Sign Out</div>
                             <div class="text-muted" style="font-size: 0.78rem">
                                 You'll need to sign in again to continue
                             </div>
                         </div>
                     </div>
                 </template>
-                <div class="px-4 py-3">
-                    <p class="text-secondary mb-0" style="font-size: 0.9rem; line-height: 1.6">
-                        Are you sure you want to sign out of your account?
+
+                <div class="px-4 py-2">
+                    <p class="text-secondary mb-0" style="font-size: 0.88rem; line-height: 1.7">
+                        Are you sure you want to sign out of <strong>{{ MyProfileStore?.name || "Your Name" }}</strong>?
                     </p>
                 </div>
+
                 <template #footer>
-                    <n-space justify="end" class="py-1">
-                        <n-button class="rounded-3" @click="showLogoutModal = false">Cancel</n-button>
-                        <n-button class="rounded-3" type="primary" color="#3b82f6" :loading="logoutLoading"
-                            @click="confirmLogout">
-                            <template #icon><n-icon>
+                    <n-space justify="end" class="py-2">
+                        <n-button class="rounded-3 px-4" @click="showLogoutModal = false">
+                            Cancel
+                        </n-button>
+                        <n-button class="rounded-3 px-4" type="error" :loading="logoutLoading" @click="confirmLogout">
+                            <template #icon>
+                                <n-icon>
                                     <LogOut />
-                                </n-icon></template>
+                                </n-icon>
+                            </template>
                             Yes, Sign Out
                         </n-button>
                     </n-space>
@@ -300,13 +305,31 @@
 import { ref, h, computed, onMounted } from "vue";
 import BaseTitle from "@/components/BaseTitle.vue";
 import {
-    NButton, NCard, NModal, NAvatar, NTag, NIcon,
-    NDivider, NSpace, NInput, NDropdown,
+    NButton,
+    NCard,
+    NModal,
+    NAvatar,
+    NTag,
+    NIcon,
+    NDivider,
+    NSpace,
+    NInput,
+    NDropdown,
 } from "naive-ui";
 import {
-    Mail, Calendar, LogOut, Camera, Pencil,
-    ShieldCheck, ChevronRight, MousePointer2, Move,
-    KeyRound, Check, Crop, Trash2,
+    Mail,
+    Calendar,
+    LogOut,
+    Camera,
+    Pencil,
+    ShieldCheck,
+    ChevronRight,
+    MousePointer2,
+    Move,
+    KeyRound,
+    Check,
+    Crop,
+    Trash2,
 } from "lucide-vue-next";
 import { Cropper, CircleStencil } from "vue-advanced-cropper";
 import "vue-advanced-cropper/dist/style.css";
@@ -318,7 +341,6 @@ import SkeletonSetting from "@/components/Skeleton/SkeletonSetting.vue";
 
 const profile = useGetProfile();
 const auth = useAuthStore();
-
 
 const router = useRouter();
 const toast = notify();
@@ -345,7 +367,6 @@ const maskedEmail = computed(() => {
     const [local, domain] = email.split("@");
     const masked = local[0] + "*".repeat(local.length - 1);
     const maskedDomain = domain[0] + "*".repeat(local.length - 1);
-
 
     return `${masked}@${maskedDomain}.com`;
 });
@@ -539,9 +560,7 @@ function formatDate(dateString) {
     justify-content: center;
     cursor: pointer;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
-    transition:
-        background 0.18s ease,
-        transform 0.15s ease;
+    transition: background 0.18s ease, transform 0.15s ease;
     z-index: 3;
 }
 
