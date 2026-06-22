@@ -235,7 +235,7 @@ const stats = computed(() => [
         icon: ChartPie,
     },
 ]);
-onMounted(() => fetchDashboard());
+
 const usersStore = useUserStore();
 
 // ── Real computed metrics from store ────────────────────────────────────────
@@ -248,8 +248,8 @@ const newUsersCount = computed(() =>
 );
 
 // ── Project Overview ─────────────────────────────────────────────────────────
-const getUserStats = async () => {
-    await usersStore.fetchUsers();
+// Reads from already-loaded store — does NOT call fetchUsers() again
+const getUserStats = () => {
     const allUsers = usersStore.users || [];
     const totalUsers = allUsers.length;
     const activeUsers = allUsers.filter(u => u.is_active === 1).length;
@@ -268,8 +268,8 @@ const getUserStats = async () => {
 };
 
 const projectSummary = ref([]);
-const loadProjectSummary = async () => {
-    const stats = await getUserStats();
+const loadProjectSummary = () => {
+    const stats = getUserStats();
     projectSummary.value = [
         { label: "Active Users", value: stats.activeUsers },
         { label: "Verified Users", value: stats.verifiedUsers },
@@ -278,8 +278,8 @@ const loadProjectSummary = async () => {
 };
 
 const overviewProjects = ref([]);
-const generateOverview = async () => {
-    const stats = await getUserStats();
+const generateOverview = () => {
+    const stats = getUserStats();
     overviewProjects.value = [
         { name: "Active Users Growth", progress: stats.activeProgress },
         { name: "User Verified", progress: stats.verifiedProgress },
@@ -372,6 +372,7 @@ const updateChart = () => {
         chartInstance.update();
     }
 };
+
 const rangeOptions = [
     { label: "Last Week", key: "week" },
     { label: "Last Month", key: "month" },
@@ -386,12 +387,16 @@ function handleRangeSelect(key) {
     updateChart();
 }
 
+// ── Single onMounted ─────────────────────────────────────────────────────────
 onMounted(async () => {
-    await fetchDashboard();
-    await usersStore.fetchUsers();
+    // 1. Fetch API data and user store in parallel (fetchUsers only once)
+    await Promise.all([fetchDashboard(), usersStore.fetchUsers()]);
+
+    // 2. Now that store is loaded, derive stats synchronously
     loadProjectSummary();
     generateOverview();
 
+    // 3. Initialize chart with loaded data
     const initial = getRangeData();
 
     chartInstance = new Chart(chartRef.value, {

@@ -22,11 +22,10 @@
                         <h3 class="pt-3">Teams</h3>
                         <div class="row g-3 mt-1">
                             <div v-for="team in teamCards" :key="team.project.team_id" class="col-12 col-lg-6">
-                                <BaseCardTeam :project="team.project" :stats="team.stats"
-                                    :title="team.project.name"
-                                    :members="team.project.membersList"
-                                    :owner="team.project.owner"
-                                    @click="goDetail(team.project.workspace_id, team.project.team_id)" />
+                                <BaseCardTeam :workspace="team.project.workspace_name" :title="team.project.name"
+                                    :description="team.project.description" :progress="team.project.progress"
+                                    :owner="team.project.owner" :members="team.project.membersList"
+                                    @view="goDetail(team.project.workspace_id, team.project.team_id)" />
                             </div>
                         </div>
                     </div>
@@ -41,7 +40,7 @@
                     <!-- Title -->
                     <div class="col-12">
                         <div class="d-flex align-items-center gap-2">
-                            <Clock  class="text-prime" :size="30" />
+                            <Clock class="text-prime" :size="30" />
                             <BaseTitle title="Activies" class="mb-0" />
                         </div>
                     </div>
@@ -75,16 +74,14 @@ import { useWorkspaceStore } from "@/stores/admin/workspaces";
 import { useTeamstore } from "@/stores/admin/teams";
 import { useTaskstore } from "@/stores/admin/tasks";
 
-import { Users, ChartPie, Clock } from "lucide-vue-next";
+import { Users, ChartPie, Clock, ArrowLeft } from "lucide-vue-next";
 import BaseCard from "@/components/BaseCard.vue";
 import BaseTitle from "@/components/BaseTitle.vue";
 import { NTag } from "naive-ui";
 import router from "@/router";
-import Loading from "@/components/layouts/Loading.vue";
 import { useToast } from "vue-toastification";
 import BaseCardTeam from "@/components/BaseCardTeam.vue";
 import SkeletonWorkspaceDetail from "@/components/Skeleton/SkeletonWorkspaceDetail.vue";
-
 
 const route = useRoute();
 const loading = ref(false);
@@ -98,32 +95,33 @@ const workspace = ref(null);
 const teams = ref([]);
 const tasks = ref([]);
 
-/* TRUNCATE */
 const truncateText = (text, length = 18) => {
     if (!text) return "";
     return text.length > length ? text.slice(0, length) + "..." : text;
 };
 
 const workspace_id = Number(route.params.id);
+
 /* LOAD DATA */
 const loadData = async () => {
-    loading.value = true
+    loading.value = true;
     try {
         await useWorkspace.fetchWorkspaces();
         await useTeam.fetchTeams();
         await useTask.fetchTasks();
 
         workspace.value = useWorkspace.workspaces.find(
-            w => w.workspace_id === workspace_id
+            (w) => w.workspace_id === workspace_id
         );
 
         teams.value = useTeam.teams.filter(
-            t => t.workspace?.workspace_id === workspace_id
+            (t) => t.workspace?.workspace_id === workspace_id
         );
 
         tasks.value = useTask.tasks;
     } catch (error) {
-        toast.error("Failed to load");
+        console.error(error);
+        toast.error(`Failed to load: ${error.message}`);
     } finally {
         loading.value = false;
     }
@@ -134,33 +132,35 @@ const totalMembers = computed(() =>
     teams.value.reduce((sum, t) => sum + (t.members?.length || 0), 0)
 );
 
-const totalTasks = computed(() =>
-    tasks.value.filter(t =>
-        teams.value.map(tm => tm.team_id).includes(t.team_id)
-    ).length
+const teamIds = computed(() =>
+    teams.value.map((team) => team.team_id)
 );
 
-/* PROGRESS */
-const progress = computed(() => {
-    const done = tasks.value.filter(t =>
-        teams.value.map(tm => tm.team_id).includes(t.team_id) &&
-        t.status === "done"
-    ).length;
+const workspaceTasks = computed(() =>
+    useTask.tasks.filter((task) =>
+        teamIds.value.includes(task.team?.id)
+    )
+);
 
+const totalTasks = computed(() => workspaceTasks.value.length);
+
+const progress = computed(() => {
+    const approved = workspaceTasks.value.filter(
+        (task) => task.status?.trim() === "approved"
+    ).length;
     return totalTasks.value === 0
         ? 0
-        : Math.round((done / totalTasks.value) * 100);
+        : Math.round((approved / totalTasks.value) * 100);
 });
 
-/* WORKSPACE CARD */
 const workspaceCard = computed(() => ({
     name: workspace.value?.workspace_name,
     owner: workspace.value?.creator?.user_name || "Unknown",
     progress: progress.value,
-    membersList: teams.value.flatMap(t => t.members || [])
+    membersList: teams.value.flatMap((t) => t.members || []),
 }));
 
-/* STATS */
+/* WORKSPACE STATS */
 const workspaceStats = computed(() => [
     { label: "Teams", value: teams.value.length, icon: Users, color: "#3b82f6" },
     { label: "Members", value: totalMembers.value, icon: Users, color: "#a855f7" },
@@ -169,26 +169,36 @@ const workspaceStats = computed(() => [
 
 /* TEAM CARDS */
 const teamCards = computed(() =>
-    teams.value.map(team => {
-        const teamTasks = tasks.value.filter(t => t.team_id === team.team_id);
+    teams.value.map((team) => {
+        // FIX: use useTask.tasks (live store) not tasks.value (local ref)
+        const teamTasks = useTask.tasks.filter(
+            (t) => t.team?.id === team.team_id
+        );
+
         const totalTeamTasks = teamTasks.length;
-        const doneTasks = teamTasks.filter(t => t.status === "done").length;
+        const doneTasks = teamTasks.filter(
+            (t) => t.status?.trim() === "approved"
+        ).length;
+        const teamProgress = totalTeamTasks === 0
+            ? 0
+            : Math.round((doneTasks / totalTeamTasks) * 100);
+
+        const memberCount = team.members?.length || 0;
+        const owner = team.members?.find((m) => m.role === "owner") ?? team.members?.[0];
+
         return {
             project: {
                 team_id: team.team_id,
+                workspace_id: team.workspace?.workspace_id,
+                workspace_name: team.workspace?.workspace_name,
                 name: team.title,
-                workspace_id: team.workspace?.workspace_id,     
-                workspace_name: team.workspace?.workspace_name,  
-                name: team.title,                                 
                 description: team.description,
                 membersList: team.members || [],
-                owner: team.members?.find((m) => m.role === "owner") ?? team.members?.[0],
-                progress: totalTeamTasks === 0
-                    ? 0
-                    : Math.round((doneTasks / totalTeamTasks) * 100),
+                owner,
+                progress: teamProgress,
             },
             stats: [
-                { label: "Members", value: team.members?.length || 0, icon: Users, color: "#3b82f6" },
+                { label: "Members", value: memberCount, icon: Users, color: "#3b82f6" },
                 { label: "Tasks", value: totalTeamTasks, icon: ChartPie, color: "#10b981" },
             ],
         };
@@ -200,15 +210,15 @@ const recentUsersList = computed(() =>
     [...useTeam.teams]
         .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
         .slice(0, 3)
-        .map(t => ({
+        .map((t) => ({
             team: t.title,
-            owner: t.members?.find(m => m.role === "owner")?.name || "Unknown",
+            owner: t.members?.find((m) => m.role === "owner")?.name || "Unknown",
             status: "New",
             type: "info",
         }))
 );
 
-/* TABLE */
+/* TABLE COLUMNS */
 const reportColumns = [
     {
         title: "Teams",
@@ -216,10 +226,7 @@ const reportColumns = [
         render(row) {
             return h(
                 "span",
-                {
-                    class: "text-truncate d-inline-block",
-                    style: "max-width:160px;"
-                },
+                { class: "text-truncate d-inline-block", style: "max-width:160px;" },
                 truncateText(row.team, 18)
             );
         },
@@ -230,10 +237,7 @@ const reportColumns = [
         render(row) {
             return h(
                 "span",
-                {
-                    class: "fw-bold text-truncate d-inline-block",
-                    style: "max-width:140px;"
-                },
+                { class: "fw-bold text-truncate d-inline-block", style: "max-width:140px;" },
                 truncateText(row.owner, 16)
             );
         },
@@ -244,16 +248,14 @@ const reportColumns = [
         render(row) {
             return h(
                 NTag,
-                {
-                    round: true,
-                    bordered: false,
-                    type: row.type,
-                },
-                { default: () => row.status },
+                { round: true, bordered: false, type: row.type },
+                { default: () => row.status }
             );
         },
     },
-]; const goDetail = (workspace_id, team_id) =>
+];
+
+const goDetail = (workspace_id, team_id) =>
     router.push(`/admin/workspace/${workspace_id}/teams/${team_id}`);
 
 onMounted(loadData);

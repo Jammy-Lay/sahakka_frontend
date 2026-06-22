@@ -1,5 +1,5 @@
 <template>
-  <main class="main">
+  <main class="main bg-body">
     <div class="page-header">
       <h1 class="page-title">Password setting</h1>
       <p class="page-sub text-muted">Change password</p>
@@ -19,13 +19,12 @@
         <form @submit.prevent="handleChangePassword">
           <!-- Old Password -->
           <div class="form-group">
-            <label class="form-label">Old password</label>
+            <label class="form-label">Current password</label>
             <input
               type="password"
               class="text-input"
               v-model="form.currentPassword"
-              placeholder="Old password"
-              required
+              placeholder="current password"
             />
           </div>
 
@@ -38,7 +37,6 @@
               v-model="form.newPassword"
               placeholder="New password"
               @input="validatePassword"
-              required
             />
           </div>
 
@@ -66,29 +64,28 @@
               class="text-input"
               v-model="form.confirmPassword"
               placeholder="Confirm new password"
-              required
             />
           </div>
 
-          <!-- Forgot Password Link -->
-          <div class="forgot-password-wrap">
-            <a
-              href="#"
-              class="form-label text-decoration-none"
-              @click.prevent="handleForgotPassword"
-              >Forgot password?</a
-            >
-          </div>
-
           <!-- Submit Button -->
-          <button type="submit" class="save-btn font-medium">Change password</button>
+          <button
+            type="submit"
+            class="save-btn font-medium"
+            :disabled="isLoading"
+          >
+            <span
+              v-if="isLoading"
+              class="spinner-border spinner-border-sm me-2"
+            />
+            {{ isLoading ? "Changing..." : "Change password" }}
+          </button>
         </form>
       </div>
     </div>
   </main>
 </template>
 <script setup>
-import { reactive } from "vue";
+import { reactive, ref } from "vue";
 import { useProfileStore } from "@/stores/profile/profile";
 import { notify } from "@/utils/toast";
 import { useRouter, useRoute } from "vue-router";
@@ -96,6 +93,7 @@ import { useRouter, useRoute } from "vue-router";
 const router = useRouter();
 const profileStore = useProfileStore();
 const toast = notify(router);
+let isLoading = ref(false);
 
 const form = reactive({
   currentPassword: "",
@@ -116,6 +114,7 @@ const validatePassword = () => {
 };
 
 const handleChangePassword = async () => {
+  isLoading.value = true;
   try {
     if (!form.currentPassword || !form.newPassword || !form.confirmPassword) {
       toast.error("Password is required");
@@ -139,11 +138,9 @@ const handleChangePassword = async () => {
     form.confirmPassword = "";
   } catch (err) {
     toast.error(err.message);
+  } finally {
+    isLoading.value = false;
   }
-};
-
-const handleForgotPassword = () => {
-  console.log("Forgot password");
 };
 </script>
 
