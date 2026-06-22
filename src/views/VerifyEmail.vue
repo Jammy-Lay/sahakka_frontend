@@ -1,18 +1,19 @@
 <template>
   <div class="min-vh-100 d-flex justify-content-center align-items-center bg-body">
     <div class="text-center bg-white p-5 rounded-4" style="width: 460px">
-      <div class="d-flex align-items-center justify-content-center gap-2 mb-5">
+      <div class="d-flex align-items-center justify-content-center gap-2 mb-4">
         <n-avatar :src="Logo" :size="60" class="bg-white" />
         <h3 class="mb-0 fw-bold">Sahakka</h3>
       </div>
 
       <!-- Success -->
       <template v-if="status === 'success'">
-        <div class="d-flex align-items-center justify-content-center gap-2 mb-3">
-          <CircleCheck :size="45" color="#22c55e" class="mb-3" />
-          <h4 class="fw-semibold mb-2">Email Verified!</h4>
-        </div>
-        <p class="text-mute fs-14 mb-4">Your email has been verified successfully.</p>
+        <h4
+          class="fw-semibold mb-2 d-flex align-items-center justify-content-center gap-3"
+        >
+          <CircleCheckBig class="text-green" size="40" /> Email Verified!
+        </h4>
+        <p class="text-mute fs-14">Your email has been verified successfully.</p>
         <button class="btn bg-btn w-100 rounded-btn py-2" @click="router.push('/login')">
           Sign In Now
         </button>
@@ -20,11 +21,12 @@
 
       <!-- Already Verified -->
       <template v-else-if="status === 'already_verified'">
-        <div class="d-flex align-items-center justify-content-center gap-2 mb-3">
-          <Info :size="45" color="#3b82f6" class="mb-3" />
-          <h4 class="fw-semibold mb-2">Already Verified</h4>
-        </div>
-        <p class="text-mute fs-14 mb-4">Your email is already verified. Just log in.</p>
+        <h4
+          class="fw-semibold mb-2 d-flex align-items-center justify-content-center gap-2"
+        >
+          <circle-alert class="text-blue" size="40" /> Already Verified
+        </h4>
+        <p class="text-mute fs-14">Your email is already verified. Just log in.</p>
         <button class="btn bg-btn w-100 rounded-btn py-2" @click="router.push('/login')">
           Sign In Now
         </button>
@@ -32,11 +34,12 @@
 
       <!-- Expired -->
       <template v-else-if="status === 'expired'">
-        <div class="d-flex align-items-center justify-content-center gap-2 mb-3">
-          <Clock :size="45" class="mb-3 text-danger" />
-          <h4 class="fw-semibold mb-2">Link Expired</h4>
-        </div>
-        <p class="text-mute fs-14 mb-4">
+        <h4
+          class="fw-semibold mb-2 d-flex align-items-center justify-content-center gap-2"
+        >
+          <clock4 class="text-danger" size="40" /> Link Expired
+        </h4>
+        <p class="text-mute fs-14">
           Your verification link has expired. Request a new one.
         </p>
         <button class="btn bg-btn w-100 rounded-btn py-2" @click="showModal = true">
@@ -46,11 +49,12 @@
 
       <!-- Resend -->
       <template v-else-if="status === 'resend'">
-        <div class="d-flex align-items-center justify-content-center gap-2 mb-3">
-          <Refresh-ccw :size="45" class="mb-3 text-dark" />
-          <h4 class="fw-semibold mb-2">Resend Verification Link</h4>
-        </div>
-        <p class="text-mute fs-14 mb-4">Didn't receive the verification email?</p>
+        <h4
+          class="fw-semibold mb-2 d-flex align-items-center justify-content-center gap-2"
+        >
+          <refresh-cw class="text-purple" size="40" /> Resend Verification Link
+        </h4>
+        <p class="text-mute fs-14">Didn't receive the verification email?</p>
         <button class="btn bg-btn w-100 rounded-btn py-2" @click="showModal = true">
           Resend Verification Email
         </button>

@@ -61,7 +61,7 @@
         <router-link
           v-for="t in teamList"
           :key="t.team_id"
-          :to="`/workspace/${currentRouteWorkspaceId}/team/${t.team_id}/${currentSection}`"
+          :to="`/workspace/${currentRouteWorkspaceId}/team/${t.team_id}/tasks`"
           class="text-decoration-none"
         >
           <div
@@ -127,10 +127,10 @@
               </n-popover>
             </div>
             <div class="d-flex align-items-center gap-2 mb-1">
-              <p class="mb-0 fs-12">60%</p>
+              <p class="mb-0 fs-12">{{ getTeamPercent(t.team_id) }}%</p>
               <n-progress
                 type="line"
-                :percentage="60"
+                :percentage="getTeamPercent(t.team_id)"
                 color="#34C759"
                 :height="5"
                 processing
@@ -258,6 +258,7 @@ import BaseInput from "../BaseInput.vue";
 import BaseButton from "../BaseButton.vue";
 import { useTaskStore } from "@/stores/user/task.js";
 import TeamListSkeleton from "../team/TeamListSkeleton.vue";
+import { useSubmissionStore } from "@/stores/user/submission.js";
 
 const route = useRoute();
 const router = useRouter();
@@ -286,15 +287,27 @@ const workspaceStore = UseWorkspaceStore();
 const { getAllWorkspace } = storeToRefs(workspaceStore);
 
 const taskStore = useTaskStore();
+const { tasksByTeam } = storeToRefs(taskStore);
+const submissionStore = useSubmissionStore();
+
+const getTeamPercent = (teamId) => {
+  const tasks = tasksByTeam.value[teamId];
+  if (!tasks || tasks.length === 0) return 0;
+  const approved = tasks.filter((t) => t.status === "approved").length;
+  return Math.round((approved / tasks.length) * 100);
+};
 
 watch(
   () => route.params.team_id,
   async (teamId) => {
     if (!teamId) return;
-    await teamStore.getTeamByIdStore(currentRouteWorkspaceId.value, teamId);
-    await taskStore.getTaskByTeamStore(currentRouteWorkspaceId.value, teamId);
-    await taskStore.getSummaryTaskStore(currentRouteWorkspaceId.value, teamId);
-    await taskStore.getMyTaskStore(currentRouteWorkspaceId.value, teamId);
+    await Promise.all([
+      teamStore.getTeamByIdStore(currentRouteWorkspaceId.value, teamId),
+      taskStore.getTaskByTeamStore(currentRouteWorkspaceId.value, teamId),
+      submissionStore.getAllSubmissionByTeamStore(currentRouteWorkspaceId.value, teamId),
+      taskStore.getSummaryTaskStore(currentRouteWorkspaceId.value, teamId),
+      taskStore.getMyTaskStore(currentRouteWorkspaceId.value, teamId),
+    ]);
   },
   { immediate: true }
 );
