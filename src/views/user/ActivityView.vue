@@ -49,7 +49,7 @@
                   <span class="fs-11 text-mute">{{ act.time }}</span>
                 </div>
 
-                <div class="act-note">{{ act.note }}</div>
+                <div class="act-note text-truncate">{{ act.note }}</div>
               </div>
             </div>
           </div>
@@ -63,7 +63,7 @@
 import { computed, onMounted } from "vue";
 import { useRoute } from "vue-router";
 import { storeToRefs } from "pinia";
-import { Calendar, Plus, UserCheck, Send, Trash2, Pencil } from "lucide-vue-next";
+import { Calendar, Plus, UserCheck, Send, Trash2, Pencil, Eye } from "lucide-vue-next";
 import { useTeamStore } from "@/stores/user/team";
 import TeamActivitySkeleton from "@/components/Skeleton/TeamActivitySkeleton.vue";
 
@@ -115,12 +115,13 @@ const actTagClass = (action) => {
     assign: "act-tag-assign",
     submit: "act-tag-submit",
     delete: "act-tag-delete",
+    review: "act-tag-review",
   };
   return map[action?.toLowerCase()];
 };
 
 const actTagIcon = (action) => {
-  const map = { create: Plus, assign: UserCheck, submit: Send, delete: Trash2 };
+  const map = { create: Plus, assign: UserCheck, submit: Send, delete: Trash2, review: Eye };
   return map[action?.toLowerCase()];
 };
 </script>

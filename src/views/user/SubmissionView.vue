@@ -1,56 +1,63 @@
 <template>
   <div>
-    <div class="pt-4 pb-2 bg-body">
-      <div class="d-flex align-items-start justify-content-between mb-2">
-        <div>
-          <h2 class="fw-semibold fs-5 mb-1">Submission</h2>
+    <SubmissionSkeleton v-if="submissionStore.loading" />
+    <div v-else>
+      <div class="pt-4 pb-2 bg-body">
+        <div class="d-flex align-items-start justify-content-between mb-2">
+          <div>
+            <h2 class="fw-semibold fs-5 mb-1">Submissions</h2>
+          </div>
         </div>
       </div>
-    </div>
 
-    <n-empty
-      v-if="getAllSubmissionByTeam.length === 0"
-      description="No Data"
-      class="mt-8"
-      style="--n-icon-size: 45px; font-size: 14px"
-    />
+      <n-empty
+        v-if="getAllSubmissionByTeam.length === 0"
+        description="No Data"
+        class="mt-8"
+        style="--n-icon-size: 45px; font-size: 14px"
+      />
 
-    <div class="row g-4" v-else>
-      <div class="col-lg-6" v-for="sub in getAllSubmissionByTeam" :key="sub.submission_id">
-        <div class="bg-white rounded-card p-3">
-          <div class="d-flex justify-content-between align-items-center mb-3">
-            <div class="d-flex gap-2 align-items-center">
-              <img
-                :src="sub.submitted_by?.avatar"
-                alt=""
-                class="rounded-circle object-fit-cover"
-                style="width: 30px; height: 30px"
-              />
-              <p class="mb-0 fw-semibold fs-14">{{ sub.submitted_by?.name }}</p>
+      <div class="row g-3" v-else>
+        <div
+          class="col-lg-6"
+          v-for="sub in getAllSubmissionByTeam"
+          :key="sub.submission_id"
+        >
+          <div class="bg-white rounded-card p-3">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <div class="d-flex gap-2 align-items-center">
+                <img
+                  :src="sub.submitted_by?.avatar"
+                  alt=""
+                  class="rounded-circle object-fit-cover"
+                  style="width: 30px; height: 30px"
+                />
+                <p class="mb-0 fw-semibold fs-14">{{ sub.submitted_by?.name }}</p>
+              </div>
+              <span
+                class="tab-info w-fit fw-medium fs-13"
+                :class="[
+                  submissionStatusConfig[sub.status]?.bg,
+                  submissionStatusConfig[sub.status]?.text,
+                ]"
+              >
+                <component :is="submissionStatusConfig[sub.status]?.icon" size="14" />
+                {{ submissionStatusConfig[sub.status]?.label }}
+              </span>
             </div>
-            <span
-              class="tab-info w-fit fw-medium fs-13"
-              :class="[
-                submissionStatusConfig[sub.status]?.bg,
-                submissionStatusConfig[sub.status]?.text,
-              ]"
-            >
-              <component :is="submissionStatusConfig[sub.status]?.icon" size="14" />
-              {{ submissionStatusConfig[sub.status]?.label }}
-            </span>
+            <div class="d-flex align-items-center gap-2 text-mute mb-2 fs-13">
+              <calendar :size="15" />
+              <span>submitted time : {{ formatDateTime(sub.created_at) }}</span>
+            </div>
+            <h6 class="mb-2 fw-semibold">{{ sub.task?.title }}</h6>
+            <p class="mb-2 text-mute fs-13">{{ sub.message || "No message provided" }}</p>
+            <base-button
+              btn-name="Review"
+              icon="eye"
+              class="fs-13 d-block ms-auto"
+              @click="openReview(sub)"
+            />
           </div>
-          <div class="d-flex align-items-center gap-2 text-mute mb-2 fs-13">
-            <calendar :size="15" />
-            <span>submitted time : {{ formatDateTime(sub.created_at) }}</span>
-          </div>
-          <h6 class="mb-2 fw-semibold">{{ sub.task?.title }}</h6>
-          <p class="mb-2 text-mute fs-13">{{ sub.message || "No message provided" }}</p>
-          <base-button
-            btn-name="Review"
-            icon="eye"
-            class="fs-13 d-block ms-auto"
-            @click="openReview(sub)"
-          />
         </div>
       </div>
     </div>
@@ -103,7 +110,9 @@
         <div class="px-3 pt-3 pb-3">
           <div class="d-flex align-items-center gap-2 text-mute mb-3 fs-13">
             <calendar :size="15" />
-            <span>submitted time : {{ formatDateTime(selectedSubmission.created_at) }}</span>
+            <span
+              >submitted time : {{ formatDateTime(selectedSubmission.created_at) }}</span
+            >
           </div>
 
           <h6 class="mb-2 fw-semibold">{{ selectedSubmission.task?.title }}</h6>
@@ -222,13 +231,15 @@
             >
               Close
             </button>
-            <base-button
-              btn-name="Send"
-              icon="send"
-              class="py-2 rounded-card px-3 fs-14"
+            <button
+              class="btn bg-btn rounded-4 py-2 px-3 d-flex align-items-center gap-2"
               :disabled="isLoading"
               @click="handleSend"
-            />
+            >
+              <span v-if="isLoading" class="spinner-border spinner-border-sm me-2" />
+              <Send v-else :size="16" />
+              {{ isLoading ? "Sending..." : "Send" }}
+            </button>
           </div>
         </div>
       </div>
@@ -251,6 +262,7 @@ import { useSubmissionStore } from "@/stores/user/submission";
 import { useRoute, useRouter } from "vue-router";
 import { notify } from "@/utils/toast";
 import { storeToRefs } from "pinia";
+import SubmissionSkeleton from "@/components/Skeleton/SubmissionSkeleton.vue";
 
 const route = useRoute();
 const router = useRouter();
@@ -269,7 +281,7 @@ const selectedSubmission = ref(null);
 const isLoading = ref(false);
 
 const submissionStatusConfig = {
-  submitted: {
+  pending: {
     icon: CircleDashed,
     bg: "bg-orange",
     text: "text-orange",
@@ -354,10 +366,10 @@ async function handleSend() {
 
     await submissionStore.getAllSubmissionByTeamStore(workspace_id.value, team_id.value);
 
-    toast.success("Submission reviewed successfully");
     feedback.value = "";
     selectedStatus.value = null;
     selectedSubmission.value = null;
+    toast.success("Submission reviewed successfully");
     showModal.value = false;
   } catch (error) {
     toast.error(error.message);

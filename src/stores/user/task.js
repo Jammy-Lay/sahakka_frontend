@@ -9,6 +9,7 @@ export const useTaskStore = defineStore("task", () => {
   let getTaskActivity = ref([]);
   let getSummaryTask = ref({});
   let getMyTask = ref([]);
+  let tasksByTeam = ref({});
   let loading = ref(true);
   let summaryLoading = ref(true);
   let myTaskLoading = ref(true);
@@ -22,6 +23,7 @@ export const useTaskStore = defineStore("task", () => {
       const tasks = res.data.data.tasks;
 
       getTaskByTeam.value = tasks;
+      tasksByTeam.value[team_id] = tasks;
 
       // bug + improvement → getTaskByType
       getIssueTask.value = tasks.filter((t) =>
@@ -131,6 +133,7 @@ export const useTaskStore = defineStore("task", () => {
     loading,
     summaryLoading,
     myTaskLoading,
-    deleteTask
+    deleteTask,
+    tasksByTeam
   };
 });
