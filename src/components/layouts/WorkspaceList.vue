@@ -205,11 +205,14 @@
                   input-placeholder="XXXXXXXX"
                   input-class="fs-14 bg-white mb-2 py-2 rounded-btn-sm"
                 />
-                <BaseButton
-                  btnName="Join"
-                  class="w-100 fs-14 py-2 rounded-btn-sm"
-                  @click="handleJoin"
-                />
+                <button
+  class="btn bg-btn w-100 fs-14 py-2 rounded-btn-sm"
+  :disabled="isLoading"
+  @click="handleJoin"
+>
+  <span v-if="isLoading" class="spinner-border spinner-border-sm me-2" />
+  {{ isLoading ? "Joining..." : "Join" }}
+</button>
               </div>
             </div>
           </n-popover>
@@ -372,11 +375,14 @@
                   </button>
                 </div>
               </div>
-              <BaseButton
-                btnName="Generate passcode"
-                class="w-100 fs-14 rounded-btn-sm py-2"
-                @click="handleGenerate"
-              />
+              <button
+  class="btn bg-btn w-100 fs-14 rounded-btn-sm py-2"
+  :disabled="isLoading"
+  @click="handleGenerate"
+>
+  <span v-if="isLoading" class="spinner-border spinner-border-sm me-2" />
+  {{ isLoading ? "Generating..." : "Generate passcode" }}
+</button>
             </div>
           </div>
         </n-popover>
@@ -712,6 +718,7 @@ const handleLeave = async (ws) => {
 };
 
 const handleJoin = async () => {
+  isLoading.value = true;
   const token = joinCode.value.trim();
   if (!token) return toast.error("Token is required");
 
@@ -724,6 +731,8 @@ const handleJoin = async () => {
     await refreshWorkspaces(); // ← silent refresh, no skeleton
   } catch (error) {
     toast.error(error.message);
+  } finally{
+    isLoading.value = false;
   }
 };
 
@@ -747,6 +756,7 @@ const handleInvite = async () => {
 };
 
 const handleGenerate = async () => {
+  isLoading.value = true;
   isGenerateLoading.value = true;
   try {
     const res = await inviteStore.generatePasscode(
@@ -758,6 +768,7 @@ const handleGenerate = async () => {
     console.error(error);
   } finally {
     isGenerateLoading.value = false;
+    isLoading.value = false;
   }
 };
 

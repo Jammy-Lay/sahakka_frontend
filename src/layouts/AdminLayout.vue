@@ -37,41 +37,47 @@
 
           <!-- LOGOUT MODAL -->
           <n-modal v-model:show="showLogoutModal" :mask-closable="true" transform-origin="center">
-            <n-card style="width: 400px" class="rounded-3 shadow-lg" :bordered="false" content-style="padding: 0;">
-              <template #header>
-                <div class="d-flex align-items-center gap-2 py-1">
-                  <div class="logout-icon-box rounded-3">
-                    <n-icon color="#3b82f6" size="20">
-                      <LogOut />
-                    </n-icon>
-                  </div>
-                  <div>
-                    <div class="fw-bold fs-6 mb-0">Sign Out</div>
-                    <div class="text-muted" style="font-size: 0.78rem">
-                      You'll need to sign in again to continue
+            <n-card style="width: 450px" class="rounded-4 shadow-lg" :bordered="false" content-style="padding: 0;">
+                <template #header>
+                    <div class="d-flex align-items-center gap-3 py-2">
+                        <div class="d-flex align-items-center justify-content-center rounded-3"
+                            style="width: 44px; height: 44px; background: #fff1f2">
+                            <n-icon color="#D03050" size="22">
+                                <LogOut />
+                            </n-icon>
+                        </div>
+                        <div>
+                            <div class="fw-bold mb-0" style="font-size: 1rem">Sign Out</div>
+                            <div class="text-muted" style="font-size: 0.78rem">
+                                You'll need to sign in again to continue
+                            </div>
+                        </div>
                     </div>
-                  </div>
+                </template>
+
+                <div class="px-4 py-2">
+                    <p class="text-secondary mb-0" style="font-size: 0.88rem; line-height: 1.7">
+                        Are you sure you want to sign out of <strong>{{ MyProfileStore?.name || "Your Name" }}</strong>?
+                    </p>
                 </div>
-              </template>
-              <div class="px-4 py-3">
-                <p class="text-secondary mb-0" style="font-size: 0.9rem; line-height: 1.6">
-                  Are you sure you want to sign out of your account?
-                </p>
-              </div>
-              <template #footer>
-                <n-space justify="end" class="py-1">
-                  <n-button class="rounded-3" @click="showLogoutModal = false">Cancel</n-button>
-                  <n-button class="rounded-3 bg-danger border-0" type="primary" :loading="logoutLoading"
-                    @click="confirmLogout">
-                    <template #icon><n-icon>
-                        <LogOut />
-                      </n-icon></template>
-                    Yes, Sign Out
-                  </n-button>
-                </n-space>
-              </template>
+
+                <template #footer>
+                    <n-space justify="end" class="py-2">
+                        <n-button class="rounded-3 px-4" @click="showLogoutModal = false">
+                            Cancel
+                        </n-button>
+                        <n-button class="rounded-3 px-4" type="error" :loading="logoutLoading" @click="confirmLogout">
+                            <template #icon>
+                                <n-icon>
+                                    <LogOut />
+                                </n-icon>
+                            </template>
+                            Yes, Sign Out
+                        </n-button>
+                    </n-space>
+                </template>
             </n-card>
-          </n-modal>
+        </n-modal>
 
         </div>
       </div>

@@ -11,7 +11,7 @@
                         Home
                     </div>
 
-                    <div class="sidebar-brand">Sahakka</div>
+                    <div class="sidebar-brand" @click="goHome" style="cursor: pointer;">Sahakka</div>
                 </div>
 
                 <!-- NAV -->

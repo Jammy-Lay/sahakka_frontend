@@ -20,12 +20,12 @@ export default defineConfig(({ mode }) => {
 
     server: {
       proxy: {
-        [env.VITE_API_PREFIX]: {
+        "/sahakka-api": {
           target: env.BASE_URL,
           changeOrigin: true,
-          secure: false
-        }
-      }
-    }
+          secure: false,
+        },
+      },
+    },
   }
 })
