@@ -92,6 +92,11 @@ const router = createRouter({
       component: () => import("../views/AboutView.vue"),
     },
     {
+      path: "/not-verify",
+      name: "not-verify",
+      component: () => import("../views/NotVerifyEmailView.vue"),
+    },
+    {
       path: "/no-workspace",
       name: "no-workspace",
       component: () => import("../views/NoWorkspaceView.vue"),

@@ -1,27 +1,29 @@
 <template>
   <n-scrollbar style="max-height: 100%">
     <!-- HEADER SKELETON -->
-    <div class="position-sticky top-0 z-1 header pt-4 pb-2 bg-body">
-      <div class="d-flex align-items-start justify-content-between mb-3">
-        <!-- title -->
-        <div>
-          <div class="skeleton header-title mb-2"></div>
-          <div class="skeleton header-desc"></div>
+    <template v-if="showHeader">
+      <div class="position-sticky top-0 z-1 header pt-4 pb-2 bg-body">
+        <div class="d-flex align-items-start justify-content-between mb-3">
+          <!-- title -->
+          <div>
+            <div class="skeleton header-title mb-2"></div>
+            <div class="skeleton header-desc"></div>
+          </div>
+
+          <!-- buttons -->
+          <div class="d-flex gap-2">
+            <div class="skeleton header-btn"></div>
+
+            <div class="skeleton header-btn primary"></div>
+          </div>
         </div>
 
-        <!-- buttons -->
-        <div class="d-flex gap-2">
-          <div class="skeleton header-btn"></div>
-
-          <div class="skeleton header-btn primary"></div>
+        <!-- tabs -->
+        <div class="d-flex flex-wrap gap-2 mb-3">
+          <div v-for="i in 6" :key="i" class="skeleton tab"></div>
         </div>
       </div>
-
-      <!-- tabs -->
-      <div class="d-flex flex-wrap gap-2 mb-3">
-        <div v-for="i in 6" :key="i" class="skeleton tab"></div>
-      </div>
-    </div>
+    </template>
 
     <!-- TASK CARDS -->
     <div class="task-grid text-nowrap">
@@ -65,6 +67,15 @@
     </div>
   </n-scrollbar>
 </template>
+
+<script setup>
+defineProps({
+  showHeader: {
+    type: Boolean,
+    default: true,
+  },
+});
+</script>
 
 <style scoped>
 .skeleton {
