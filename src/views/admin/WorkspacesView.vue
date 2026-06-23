@@ -148,10 +148,6 @@ const getWorkspaces = async () => {
         await useTask.fetchTasks();
         const teamsData = useTeam.teams;
         const tasksData = useTask.tasks;
-        // Add this temporarily inside getWorkspaces() after fetching:
-        console.log("workspace sample:", JSON.stringify(useWorkspace.workspaces[0], null, 2));
-        console.log("team sample:", JSON.stringify(teamsData[0], null, 2));
-        console.log("task sample:", JSON.stringify(tasksData[0], null, 2));
 
         projects.value = useWorkspace.workspaces.map((workspace) => {
             // teams
@@ -268,13 +264,13 @@ const stats = computed(() => [
     },
 ]);
 const recentUsersList = computed(() => {
-    return [...useWorkspace.workspaces]
-        .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+    return [...projects.value]
+        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
         .slice(0, 3)
-        .map((w) => ({
-            workspace: w.workspace_name,
-            owner: w.creator?.user_name || "Unknown",
-            date: formatDate(w.created_at),
+        .map((p) => ({
+            workspace: p.name,
+            owner: p.owner,
+            date: formatDate(p.createdAt),
         }));
 });
 

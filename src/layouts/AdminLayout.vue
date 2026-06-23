@@ -74,7 +74,7 @@
           <n-layout-sider collapse-mode="width" :collapsed-width="70" :width="240" :collapsed="collapsed"
             @collapse="collapsed = true" @expand="collapsed = false"
             class="py-2 d-none d-lg-flex position-relative rounded-4">
-            <n-menu v-model:value="activeKey" :collapsed="collapsed" :collapsed-width="64" :collapsed-icon-size="18"
+            <n-menu v-model:value="activeKey" :collapsed="collapsed" :collapsed-width="64" :collapsed-icon-size="20"
               :options="menuOptions" :expanded-keys="expandedKeys" @update:expanded-keys="onUpdateExpandedKeys"
               @update:value="handleMenuClick" />
 
