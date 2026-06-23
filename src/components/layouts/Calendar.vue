@@ -894,6 +894,7 @@ import {
   UserCheck,
   Link,
   MessageCircle,
+  Eye,
 } from "lucide-vue-next";
 import { useTaskStore } from "@/stores/user/task";
 import { storeToRefs } from "pinia";
@@ -922,11 +923,10 @@ const { getMe } = storeToRefs(authStore);
 onMounted(async () => {
   updateTime();
   timer = setInterval(updateTime, 1000);
-  // await teamStore.getTeamByWorkspaceStore(workspace_id);
-  // await teamStore.getTeamByIdStore(workspace_id, team_id);
-  // await taskStore.getTaskByTeamStore(workspace_id, team_id);
-  await taskStore.getSummaryTaskStore(workspace_id, team_id);
-  await taskStore.getMyTaskStore(workspace_id, team_id);
+  await Promise.all([
+    await taskStore.getSummaryTaskStore(workspace_id, team_id),
+    await taskStore.getMyTaskStore(workspace_id, team_id),
+  ]);
 });
 
 // Access your data source
@@ -1173,13 +1173,20 @@ const groupedActivities = computed(() => {
   return Object.values(groups);
 });
 
-const actTagClass = (action) =>
-  ({ create: "act-tag-create", assign: "act-tag-assign", update: "act-tag-update" }[
-    action?.toLowerCase()
-  ] || "act-tag-update");
+const actTagClass = (action) => {
+  const map = {
+    create: "act-tag-create",
+    assign: "act-tag-assign",
+    submit: "act-tag-submit",
+    review: "act-tag-review",
+  };
+  return map[action?.toLowerCase()];
+};
 
-const actTagIcon = (action) =>
-  ({ create: Plus, assign: UserCheck, update: Send }[action?.toLowerCase()] || Send);
+const actTagIcon = (action) => {
+  const map = { create: Plus, assign: UserCheck, submit: Send, review: Eye };
+  return map[action?.toLowerCase()];
+};
 
 const lockedStatuses = ["submitted", "approved", "rejected"];
 const isStatusLocked = (status) => lockedStatuses.includes(status);

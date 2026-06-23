@@ -137,7 +137,7 @@
                 :show-indicator="false"
               />
             </div>
-            <n-avatar-group :options="mapMembers(t.members)" :size="25" :max="4">
+            <n-avatar-group :options="mapMembers(t.members)" :size="25" :max="6">
               <template #avatar="{ option: { name, src } }">
                 <n-tooltip
                   :style="{
@@ -291,9 +291,12 @@ const { tasksByTeam } = storeToRefs(taskStore);
 const submissionStore = useSubmissionStore();
 
 const getTeamPercent = (teamId) => {
-  const tasks = tasksByTeam.value[teamId];
+  const tasks = taskStore.tasksByTeam[teamId];
+
   if (!tasks || tasks.length === 0) return 0;
+
   const approved = tasks.filter((t) => t.status === "approved").length;
+
   return Math.round((approved / tasks.length) * 100);
 };
 
@@ -304,16 +307,25 @@ watch(
     await Promise.all([
       teamStore.getTeamByIdStore(currentRouteWorkspaceId.value, teamId),
       taskStore.getTaskByTeamStore(currentRouteWorkspaceId.value, teamId),
-      submissionStore.getAllSubmissionByTeamStore(currentRouteWorkspaceId.value, teamId),
       taskStore.getSummaryTaskStore(currentRouteWorkspaceId.value, teamId),
       taskStore.getMyTaskStore(currentRouteWorkspaceId.value, teamId),
+      submissionStore.getAllSubmissionByTeamStore(currentRouteWorkspaceId.value, teamId),
     ]);
   },
   { immediate: true }
 );
 
 onMounted(async () => {
-  await teamStore.getTeamByWorkspaceStore(currentRouteWorkspaceId.value);
+  await Promise.all([
+    workspaceStore.getMyWorkspaceStore(), // if needed here
+    teamStore.getTeamByWorkspaceStore(currentRouteWorkspaceId.value),
+  ]);
+
+  teamList.value
+    .filter((t) => String(t.team_id) !== String(currentRouteTeamId.value))
+    .forEach((t) =>
+      taskStore.prefetchTeamTasks(currentRouteWorkspaceId.value, t.team_id)
+    );
 });
 
 const goSubmissionView = (teamId) => {
