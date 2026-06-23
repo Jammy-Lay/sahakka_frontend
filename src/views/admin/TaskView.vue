@@ -24,7 +24,7 @@
             <div class="row">
                 <div v-for="col in columns" :key="col.key" class="col-12 col-sm-6 col-lg-4 col-xl">
                     <div class="board-col h-100">
-                        <div class="col-header d-flex align-items-end justify-content-between mb-3"
+                        <div class="col-header d-flex align-items-end justify-content-between mb-4"
                             :class="col.titleClass">
                             <div class="col-title-pill d-flex align-items-center gap-2">
                                 <component :is="col.icon" :size="14" />
@@ -36,9 +36,9 @@
                         <n-scrollbar style="max-height: 67vh">
                             <div v-for="task in tasksByStatus(col.key)" :key="task.id" class="task-card">
                                 <!-- Header -->
-                                <div class="d-flex align-items-start justify-content-between gap-2 mb-2">
+                                <div class="d-flex align-items-start justify-content-between gap- mb-2">
                                     <div>
-                                        <span class="task-title">{{ task.title }}</span>
+                                        <span class="task-title text-truncate-1">{{ task.title }}</span>
                                         <div class="task-id">#{{ task.id }} • {{ task.type }}</div>
                                     </div>
                                     <span v-if="task.priority" class="badge-priority" :class="`badge-${task.priority}`">
@@ -47,14 +47,14 @@
                                 </div>
 
                                 <!-- Description -->
-                                <p class="task-desc">{{ task.description || "No description" }}</p>
+                                <p class="task-desc text-truncate-3">{{ task.description || "No description" }}</p>
 
                                 <!-- Team -->
                                 <div class="info-box" v-if="task.team">
                                     <i class="bi bi-people"></i>
                                     <div>
-                                        <div class="info-title">{{ task.team.name }}</div>
-                                        <div class="info-sub">{{ task.team.description }}</div>
+                                        <div class="info-title text-truncate-1">{{ task.team.name }}</div>
+                                        <div class="info-sub text-truncate-3">{{ task.team.description }}</div>
                                     </div>
                                 </div>
 
@@ -77,7 +77,7 @@
                                                 style="width:100%;height:100%;border-radius:50%;object-fit:cover;" />
                                             <span v-else>{{ initials(task.assignedUser?.name) }}</span>
                                         </div>
-                                        <span class="task-meta">{{ task.assignedUser?.name || "Unassigned" }}</span>
+                                        <span class="task-meta text-truncate-1">{{ task.assignedUser?.name || "Unassigned" }}</span>
                                     </div>
                                     <span class="task-meta">{{ formatDate(task.createdAt) }}</span>
                                 </div>
@@ -156,7 +156,7 @@ const formatDate = (d) => {
 .board-col {
     background-color: #f5f5f5;
     border-radius: 12px;
-    padding: 14px 12px;
+    padding: 14px 0px;
     /* removed: flex: 0 0 295px */
 }
 
@@ -211,7 +211,7 @@ const formatDate = (d) => {
     border: 0.5px solid #e3e3e3;
     border-radius: 12px;
     padding: 12px;
-    margin-bottom: 8px;
+    margin-bottom: 22px;
     transition: border-color 0.15s, box-shadow 0.15s;
     cursor: pointer;
 }
@@ -367,5 +367,25 @@ const formatDate = (d) => {
 
 .form-control:has(.search-input:focus) {
   outline: 1px solid #171717;
+}
+.text-truncate-1 {
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.text-truncate-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.text-truncate-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
 }
 </style>
