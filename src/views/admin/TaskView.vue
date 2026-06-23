@@ -7,16 +7,15 @@
             <div class="row justify-content-between">
                 <div class="col-4">
                     <div class="d-flex align-items-center gap-2">
-                        <Users  class="text-prime" :size="30" />
+                        <ChartPie class="text-prime" :size="30" />
                         <BaseTitle title="Tasks" class="mb-0" />
                     </div>
                 </div>
                 <div class="mb-4 col-12 col-sm-6 col-md-4 col-lg-3 px-0">
-                    <div class="search-wrapper border-0 shadow-sm">
-                        <Search size="18" class="search-icon" />
-
-                        <input v-model="search" type="text" class="form-control form-control-sm border-0"
-                            placeholder="Search by team name..." @input="currentPage = 1" />
+                    <div class="form-control rounded-btn d-flex align-items-center py-1" style="width: 300px;">
+                        <input v-model="search" type="text" class="search-input shadow-none outline-none border-0 w-100"
+                            placeholder="Search by team name..." />
+                        <Search color="var(--bs-gray)" size="18" />
                     </div>
                 </div>
             </div>
@@ -25,11 +24,12 @@
             <div class="row">
                 <div v-for="col in columns" :key="col.key" class="col-12 col-sm-6 col-lg-4 col-xl">
                     <div class="board-col h-100">
-                        <div class="col-header d-flex align-items-end justify-content-between mb-3" :class="col.titleClass">
+                        <div class="col-header d-flex align-items-end justify-content-between mb-3"
+                            :class="col.titleClass">
                             <div class="col-title-pill d-flex align-items-center gap-2">
-                                    <component :is="col.icon" :size="14" />
-                                    <span>{{ col.label }}</span>
-                                </div>
+                                <component :is="col.icon" :size="14" />
+                                <span>{{ col.label }}</span>
+                            </div>
                             <span class="col-count">{{ tasksByStatus(col.key).length }}</span>
                         </div>
 
@@ -64,7 +64,7 @@
                                         formatDate(task.dates.start)
                                             }}</span></div>
                                     <div><i class="bi bi-calendar-check"></i> End: <span>{{ formatDate(task.dates.end)
-                                    }}</span>
+                                            }}</span>
                                     </div>
                                 </div>
 
@@ -360,31 +360,12 @@ const formatDate = (d) => {
 .date-section i {
     margin-right: 4px;
 }
-.search-wrapper {
-    width: 100%;
-    max-width: 420px;
-    height: 46px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    background: #ffffff;
-    border-radius: 14px;
-    padding: 0 14px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-    transition: all 0.25s ease;
+
+.search-input:focus {
+  outline: none;
 }
 
-.search-wrapper:focus-within {
-    box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15), 0 8px 20px rgba(99, 102, 241, 0.15);
-}
-
-.search-icon {
-    color: #9ca3af;
-    flex-shrink: 0;
-}
-.search-wrapper .form-control:focus {
-    outline: none !important;
-    box-shadow: none !important;
-    border-color: transparent !important;
+.form-control:has(.search-input:focus) {
+  outline: 1px solid #171717;
 }
 </style>

@@ -1,82 +1,99 @@
 <template>
-  <main class="main">
-      <div class="page-header">
-        <h1 class="page-title">Password setting</h1>
-        <p class="page-sub text-muted">Change password</p>
+  <main class="main bg-body">
+    <div class="page-header">
+      <h1 class="page-title">Password setting</h1>
+      <p class="page-sub text-muted">Change password</p>
+    </div>
+
+    <!-- Security Tip Banner -->
+    <div class="security-tip-banner">
+      <alert-circle size="16" class="tip-icon" />
+      <span>Security Tip: Use a unique password not used on other sites.</span>
+    </div>
+
+    <!-- Password Card Centering Layout Wrapper -->
+    <div class="form-container">
+      <div class="card password-card">
+        <h2 class="card-title-form">Change password</h2>
+
+        <form @submit.prevent="handleChangePassword">
+          <!-- Old Password -->
+          <div class="form-group">
+            <label class="form-label">Current password</label>
+            <input
+              type="password"
+              class="text-input"
+              v-model="form.currentPassword"
+              placeholder="current password"
+            />
+          </div>
+
+          <!-- New Password -->
+          <div class="form-group">
+            <label class="form-label">New password</label>
+            <input
+              type="password"
+              class="text-input"
+              v-model="form.newPassword"
+              placeholder="New password"
+              @input="validatePassword"
+            />
+          </div>
+
+          <!-- Password Requirements Indicators -->
+          <div class="requirements-box">
+            <div class="requirement-item" :class="{ met: validation.length }">
+              <CircleCheck size="14" class="status-icon" />
+              <span>At least 8 characters</span>
+            </div>
+            <div class="requirement-item" :class="{ met: validation.number }">
+              <CircleCheck size="14" class="status-icon" />
+              <span>Contains a number</span>
+            </div>
+            <div class="requirement-item" :class="{ met: validation.special }">
+              <CircleCheck size="14" class="status-icon" />
+              <span>Contains a special character (!@#$%^&*)</span>
+            </div>
+          </div>
+
+          <!-- Confirm New Password -->
+          <div class="form-group">
+            <label class="form-label">Confirm new password</label>
+            <input
+              type="password"
+              class="text-input"
+              v-model="form.confirmPassword"
+              placeholder="Confirm new password"
+            />
+          </div>
+
+          <!-- Submit Button -->
+          <button
+            type="submit"
+            class="save-btn font-medium"
+            :disabled="isLoading"
+          >
+            <span
+              v-if="isLoading"
+              class="spinner-border spinner-border-sm me-2"
+            />
+            {{ isLoading ? "Changing..." : "Change password" }}
+          </button>
+        </form>
       </div>
-
-      <!-- Security Tip Banner -->
-      <div class="security-tip-banner">
-        <alert-circle size="16" class="tip-icon" />
-        <span>Security Tip: Use a unique password not used on other sites.</span>
-      </div>
-
-      <!-- Password Card Centering Layout Wrapper -->
-      <div class="form-container">
-        <div class="card password-card">
-          <h2 class="card-title-form">Change password</h2>
-
-          <form @submit.prevent="handleChangePassword">
-            <!-- Old Password -->
-            <div class="form-group">
-              <label class="form-label">Old password</label>
-              <input type="password" class="text-input" v-model="form.currentPassword" placeholder="Old password"
-                required />
-            </div>
-
-            <!-- New Password -->
-            <div class="form-group">
-              <label class="form-label">New password</label>
-              <input type="password" class="text-input" v-model="form.newPassword" placeholder="New password"
-                @input="validatePassword" required />
-            </div>
-
-            <!-- Password Requirements Indicators -->
-            <div class="requirements-box">
-              <div class="requirement-item" :class="{ 'met': validation.length }">
-                <CircleCheck  size="14" class="status-icon" />
-                <span>At least 8 characters</span>
-              </div>
-              <div class="requirement-item" :class="{ 'met': validation.number }">
-                <CircleCheck  size="14" class="status-icon" />
-                <span>Contains a number</span>
-              </div>
-              <div class="requirement-item" :class="{ 'met': validation.special }">
-                <CircleCheck  size="14" class="status-icon" />
-                <span>Contains a special character (!@#$%^&*)</span>
-              </div>
-            </div>
-
-            <!-- Confirm New Password -->
-            <div class="form-group">
-              <label class="form-label">Confirm new password</label>
-              <input type="password" class="text-input" v-model="form.confirmPassword"
-                placeholder="Confirm new password" required />
-            </div>
-
-            <!-- Forgot Password Link -->
-            <div class="forgot-password-wrap">
-              <a href="#" class="form-label text-decoration-none" @click.prevent="handleForgotPassword" >Forgot password?</a>
-            </div>
-
-            <!-- Submit Button -->
-            <button type="submit" class="save-btn font-medium">Change password</button>
-          </form>
-        </div>
-      </div>
-    </main>
+    </div>
+  </main>
 </template>
 <script setup>
-import { reactive } from "vue";
+import { reactive, ref } from "vue";
 import { useProfileStore } from "@/stores/profile/profile";
 import { notify } from "@/utils/toast";
 import { useRouter, useRoute } from "vue-router";
 
-
 const router = useRouter();
 const profileStore = useProfileStore();
 const toast = notify(router);
-
+let isLoading = ref(false);
 
 const form = reactive({
   currentPassword: "",
@@ -97,12 +114,9 @@ const validatePassword = () => {
 };
 
 const handleChangePassword = async () => {
+  isLoading.value = true;
   try {
-    if (
-      !form.currentPassword ||
-      !form.newPassword ||
-      !form.confirmPassword
-    ) {
+    if (!form.currentPassword || !form.newPassword || !form.confirmPassword) {
       toast.error("Password is required");
       return;
     }
@@ -119,17 +133,14 @@ const handleChangePassword = async () => {
     );
     toast.success("Password changed successfully");
 
-
     form.currentPassword = "";
     form.newPassword = "";
     form.confirmPassword = "";
   } catch (err) {
     toast.error(err.message);
+  } finally {
+    isLoading.value = false;
   }
-};
-
-const handleForgotPassword = () => {
-  console.log("Forgot password");
 };
 </script>
 
@@ -153,7 +164,7 @@ const handleForgotPassword = () => {
 .page-title {
   font-size: 30px;
   font-weight: 500;
-  color: #09090B;
+  color: #09090b;
   line-height: 100%;
   letter-spacing: -2.5%;
 }
@@ -161,7 +172,7 @@ const handleForgotPassword = () => {
 .page-sub {
   font-size: 16px;
   font-weight: 400;
-  color: #71717A;
+  color: #71717a;
   margin-top: 4px;
   margin-bottom: 20px;
 }
@@ -171,12 +182,12 @@ const handleForgotPassword = () => {
   display: flex;
   align-items: center;
   gap: 8px;
-  background-color: #F5F5F5;
-  border: 1px solid #E4E4E7;
+  background-color: #f5f5f5;
+  border: 1px solid #e4e4e7;
   border-radius: 6px;
   padding: 10px 14px;
   font-size: 13px;
-  color: #71717A;
+  color: #71717a;
   margin-bottom: 40px;
   width: 100%;
 }
@@ -196,7 +207,7 @@ const handleForgotPassword = () => {
 }
 
 .password-card {
-  background: #FFFFFF;
+  background: #ffffff;
   width: 100%;
   max-width: 460px;
   border-radius: 20px;
@@ -208,7 +219,7 @@ const handleForgotPassword = () => {
 .card-title-form {
   font-size: 24px;
   font-weight: 500;
-  color: #09090B;
+  color: #09090b;
   margin-bottom: 24px;
   letter-spacing: -0.6px;
   line-height: 24px;
@@ -223,29 +234,29 @@ const handleForgotPassword = () => {
   display: block;
   font-size: 16px;
   font-weight: 400;
-  color: #1E1E1E;
+  color: #1e1e1e;
   margin-bottom: 8px;
 }
 
 .text-input {
   width: 100%;
   padding: 12px 14px;
-  border: 1px solid #D9D9D9;
+  border: 1px solid #d9d9d9;
   border-radius: 12px;
   font-size: 14px;
   font-weight: 400;
   color: #18181b;
   outline: none;
   transition: border-color 0.15s, box-shadow 0.15s;
-  background: #FFFFFF;
+  background: #ffffff;
 }
 
 .text-input:focus {
-  border-color: #D9D9D9;
+  border-color: #d9d9d9;
 }
 
 .text-input::placeholder {
-  color: #B3B3B3;
+  color: #b3b3b3;
   font-size: 16px;
   font-weight: 500;
   letter-spacing: 0px;
@@ -308,13 +319,13 @@ const handleForgotPassword = () => {
   width: 100%;
   padding: 14px;
   background: #171717;
-  color: #FAFAFA;
+  color: #fafafa;
   border: none;
   border-radius: 12px;
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
-  transition: background-color .15s;
+  transition: background-color 0.15s;
 }
 
 .save-btn:hover {
