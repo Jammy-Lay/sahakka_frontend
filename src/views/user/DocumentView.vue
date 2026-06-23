@@ -17,7 +17,7 @@
         <div class="mt-4 px-4">
           <p>Are you sure you want to delete?</p>
         </div>
-        <template #footer>
+        <template #footer> 
           <n-button quaternary class="rounded-btn border w-50">Cancel</n-button>
           <n-button
             type="error"
