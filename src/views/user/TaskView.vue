@@ -1695,9 +1695,9 @@ const handleDeleteTask = async (task) => {
   }
 };
 
-// onMounted(async () => {
-//   await taskStore.getTaskByTeamStore(workspace_id.value, team_id.value);
-// });
+onMounted(async () => {
+  await taskStore.getTaskByTeamStore(workspace_id.value, team_id.value);
+});
 
 // ── File attachment ──
 const fileInputRef = ref(null);

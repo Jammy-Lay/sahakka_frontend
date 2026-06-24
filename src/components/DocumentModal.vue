@@ -5,15 +5,23 @@ const inputTitle = ref('')
 </script>
 
 <template>
-  <n-card style="width: 380px" title="Create new document" class="rounded-4" :bordered="false" size="huge" role="dialog" aria-modal="true">
+  <n-card style="width: 380px" title="Create new document" class="rounded-4" :bordered="false" size="small" role="dialog" aria-modal="true">
     <template #header-extra>
-      <n-button @click="$emit('close')" quaternary circle>
+      <!-- <n-button @click="$emit('close')" quaternary circle>
         <x/>
-      </n-button>
+      </n-button> -->
+       <n-button
+            text
+            size="small"
+            @click="$emit('close')"
+            class="hover-circle p-1 rounded-circle"
+          >
+            <X size="18" />
+          </n-button>
     </template>
-    <div class="px-4">
+    <div class="px-3">
       <label for="" class="mt-3">Document title</label>
-      <input v-model="inputTitle" type="text" class="form-control mt-3 rounded-btn shadow-none" placeholder="Document title">
+      <input v-model="inputTitle" type="text" class="form-control mt-2 rounded-btn shadow-none w-100" placeholder="Document title">
     </div>
     <template #footer>
       <!-- <n-button class="px-3 py-2 rounded-btn" quaternary :bordered="false" @click="$emit('close')">Close</n-button> -->

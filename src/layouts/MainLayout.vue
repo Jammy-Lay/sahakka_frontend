@@ -96,7 +96,7 @@ onMounted(async () => {
 });
 
 const showCalendar = computed(() => {
-  return route.name !== "viewMember";
+  return route.name !== "viewMember" && route.name !== "submissions";
 });
 </script>
 

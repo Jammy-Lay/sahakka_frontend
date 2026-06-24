@@ -1,34 +1,76 @@
 <template>
-  <n-modal-provider>
-    <n-modal v-model:show="showModal">
-      <document-modal
-        @close="showModal = false"
-        @create-document="createDocument"
-      />
-    </n-modal>
-
-    <n-modal v-model:show="deleteModal" class="rounded-4">
-      <n-card title="Delete document" style="width: 380px">
-        <template #header-extra>
-          <n-button quaternary circle @click="deleteModal = false">
-            <X />
-          </n-button>
-        </template>
-        <div class="mt-4 px-4">
-          <p>Are you sure you want to delete?</p>
-        </div>
-        <template #footer> 
-          <n-button quaternary class="rounded-btn border w-50">Cancel</n-button>
-          <n-button
-            type="error"
-            class="rounded-btn w-50"
-            @click="deleteDocHandling"
-            >Delete</n-button
+  <n-modal v-model:show="deleteModal" :mask-closable="true">
+    <div class="bg-white rounded-card" style="width: 380px">
+      <div class="d-flex align-items-center justify-content-between px-4 py-3 pb-2">
+        <span class="fw-medium fs-15">Delete Team</span>
+        <n-button
+          text
+          size="small"
+          @click="deleteModal = false"
+          class="hover-circle p-1 rounded-circle"
+        >
+          <X size="18" />
+        </n-button>
+      </div>
+      <n-divider style="margin: 5px 0; --n-color: #e4e4e7" />
+      <div class="px-4 pt-3 pb-3">
+        <p class="fs-13 text-mute mb-4 text-center">Are you sure you want to delete ?</p>
+        <div class="d-flex gap-2">
+          <button
+            class="btn btn-outline border rounded-btn-sm fs-13 fw-medium w-50"
+            @click="deleteModal = false"
           >
-        </template>
-      </n-card>
-    </n-modal>
-  </n-modal-provider>
+            Cancel
+          </button>
+          <button
+            class="btn btn-danger rounded-btn-sm fs-13 fw-medium w-50"
+            @click="deleteDocHandling"
+            :disabled="loading"
+          >
+            <span v-if="loading" class="spinner-border spinner-border-sm me-2"></span>
+            {{ loading ? "Deleting..." : "Delete" }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </n-modal>
+
+  <n-modal v-model:show="showModal" :mask-closable="true">
+    <div class="bg-white rounded-card" style="width: 400px">
+      <!-- Header -->
+      <div class="d-flex align-items-center justify-content-between px-4 py-3 pb-2">
+        <span class="fw-medium fs-15">Create Document</span>
+        <n-button
+          text
+          size="small"
+          @click="showModal = false"
+          class="hover-circle p-1 rounded-circle"
+        >
+          <x size="18" />
+        </n-button>
+      </div>
+
+      <n-divider style="margin: 5px 0; --n-color: #e4e4e7" />
+
+      <div class="px-4 pt-2 pb-3">
+        <label class="mb-2 fs-12 fw-medium d-block">Document Name</label>
+        <BaseInput
+          v-model="documentName"
+          input-placeholder="Document name"
+          input-class="py-1 fs-13 rounded-btn-sm mb-3"
+        />
+        <!-- Create team -->
+        <button
+          class="btn bg-btn w-100 fs-13 rounded-btn py-2"
+          :disabled="loading"
+          @click="createDocument"
+        >
+          <span v-if="loading" class="spinner-border spinner-border-sm me-2" />
+          {{ loading ? "Creating..." : "Create Document" }}
+        </button>
+      </div>
+    </div>
+  </n-modal>
 
   <main class="py-4">
     <div v-if="isLoading">
@@ -45,33 +87,38 @@
             {{ getTeamById?.description }}
           </p>
         </div>
-        <div class="col-lg-7 ms-auto text-end d-flex gap-3 align-items-start justify-content-end">
-          <div class="form-control rounded-btn d-flex align-items-center py-1" style="width: 300px;">
+        <div
+          class="col-lg-7 ms-auto text-end d-flex gap-3 align-items-start justify-content-end"
+        >
+          <div
+            class="form-control rounded-btn d-flex align-items-center py-2"
+            style="width: 300px"
+          >
             <input
               v-model="searchDoc"
               type="text"
-              class="search-input shadow-none outline-none border-0 w-100"
+              class="search-input shadow-none outline-none border-0 w-100 fs-13"
               placeholder="Search document"
             />
             <Search color="var(--bs-gray)" size="18" />
           </div>
           <base-btn
             @click="showModal = true"
-            class="btn rounded-btn rounded-btn"
+            class="btn rounded-btn rounded-btn pe-3 ps-3 fs-13 py-2"
             icon="PlusIcon"
             btn-name="New document"
           >
           </base-btn>
         </div>
       </div>
-      <div class="pt-4"></div>
-      <div class="row g-4" id="container">
-        <div
-          v-if="document.length > 0"
-          v-for="(doc, index) in document"
-          :key="index"
-          class="col-3"
-        >
+      <n-empty
+        v-if="document.length === 0"
+        description="No Data"
+        class="mt-8"
+        style="--n-icon-size: 45px; font-size: 14px"
+      />
+      <div v-else class="row pt-4">
+        <div v-for="(doc, index) in document" :key="index" class="col-md-6 col-lg-4">
           <document-card
             :avatar="doc.created_by.avatar"
             :user-name="doc.created_by.name"
@@ -87,12 +134,6 @@
             @update-title="updateTitle"
           />
         </div>
-        <n-empty
-          v-else
-          description="No Data"
-          class="mt-8"
-          style="--n-icon-size: 45px; font-size: 14px"
-        />
       </div>
     </div>
   </main>
@@ -100,8 +141,8 @@
 
 <script setup>
 import BaseBtn from "@/components/BaseBtn.vue";
+import BaseInput from "@/components/BaseInput.vue";
 import DocumentCard from "@/components/DocumentCard.vue";
-import DocumentModal from "@/components/DocumentModal.vue";
 import SkeletonDocument from "@/components/Skeleton/SkeletonDocument.vue";
 import TitleTeamSkeleton from "@/components/team/TitleTeamSkeleton.vue";
 import { useDocumentStore } from "@/stores/user/document";
@@ -113,15 +154,20 @@ import { computed, onMounted, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
 const route = useRoute();
+const router = useRouter();
+const toast = notify(router);
 
-const workspace_id = route.params.workspace_id;
-const team_id = route.params.team_id;
+const workspace_id = computed(() => route.params.workspace_id);
+const team_id = computed(() => route.params.team_id);
 
 const isLoading = ref(true);
+const loading = ref(false);
 
 // Document and search
 const document_id = ref(null);
 const searchDoc = ref("");
+
+const documentName = ref("");
 
 // Show modal
 const showModal = ref(false);
@@ -135,55 +181,89 @@ const { getTeamById } = storeToRefs(useTeam);
 
 const document = computed(() => {
   return getDocumentByTeam.value.filter((doc) => {
-    return doc.title
-      .toLowerCase()
-      .includes(searchDoc.value.trim().toLocaleLowerCase());
+    return doc.title.toLowerCase().includes(searchDoc.value.trim().toLocaleLowerCase());
   });
 });
 
-async function createDocument(title) {
-  const newDoc = await useDocument.createDocument(workspace_id, team_id, title);
-  showModal.value = false;
-  if (newDoc) {
-    getDocumentByTeam.value.unshift(newDoc.data);
-    notify().success(newDoc.message);
+async function createDocument() {
+  if (!documentName.value) {
+    toast.error("Name is required");
     return;
   }
-  notify().error(newDoc.message);
+  if (documentName.value.length < 3) {
+    toast.error("Name must be at least 3 characters");
+    return;
+  }
+
+  try {
+    loading.value = true;
+    const newDoc = await useDocument.createDocument(
+      workspace_id.value,
+      team_id.value,
+      documentName.value
+    );
+    documentName.value = "";
+    getDocumentByTeam.value.unshift(newDoc.data);
+    showModal.value = false;
+    toast.success(newDoc.message);
+  } catch (error) {
+    toast.error(error.message);
+  } finally {
+    loading.value = false;
+  }
 }
 
 async function deleteDocHandling() {
-  const deleteDoc = await useDocument.deleteDocument(
-    workspace_id,
-    team_id,
-    document_id.value,
-  );
-  deleteModal.value = false;
-  if (deleteDoc.result) {
-    const indexofDoc = getDocumentByTeam.value.findIndex(
-      (doc) => doc.document_id === document_id.value,
+  try {
+    loading.value = true;
+    const deleteDoc = await useDocument.deleteDocument(
+      workspace_id.value,
+      team_id.value,
+      document_id.value
     );
-    getDocumentByTeam.value.splice(indexofDoc, 1);
-    return notify().success(deleteDoc.message);
+    deleteModal.value = false;
+    if (deleteDoc.result) {
+      const indexofDoc = getDocumentByTeam.value.findIndex(
+        (doc) => doc.document_id === document_id.value
+      );
+      getDocumentByTeam.value.splice(indexofDoc, 1);
+      return toast.success(deleteDoc.message);
+    }
+  } catch (error) {
+    toast.error(error.message);
+  } finally {
+    loading.value = false;
   }
-  notify().error(deleteDoc.message);
 }
 
 async function updateTitle(docId, title) {
-  const updateTitle = await useDocument.updateTitleDocument(
-    workspace_id,
-    team_id,
-    docId,
-    title,
-  );
-  if (updateTitle) {
-    return notify().success(updateTitle);
+  try {
+    const currentDoc = getDocumentByTeam.value.find((doc) => doc.document_id === docId);
+
+    // same name -> no update and no toast
+    if (currentDoc?.title === title.trim()) {
+      return;
+    }
+
+    const updateTitle = await useDocument.updateTitleDocument(
+      workspace_id.value,
+      team_id.value,
+      docId,
+      title.trim()
+    );
+
+    if (updateTitle) {
+      currentDoc.title = title.trim();
+      toast.success(updateTitle);
+    }
+  } catch (error) {
+    toast.error(error.message);
+    await useDocument.getAllDocument(workspace_id.value, team_id.value);
   }
-  notify().error(updateTitle);
 }
 
 onMounted(async () => {
-  await useDocument.getAllDocument(workspace_id, team_id);
+  await useDocument.getAllDocument(workspace_id.value, team_id.value);
   isLoading.value = false;
 });
 </script>
@@ -259,28 +339,5 @@ onMounted(async () => {
 
 .form-control:has(.search-input:focus) {
   outline: 1px solid #171717;
-}
-
-#container {
-  container-type: inline-size;
-  container-name: container;
-}
-
-@container container (max-width: 960px) {
-  .col-3 {
-    width: calc(100% / 3);
-  }
-}
-
-@container container (max-width: 720px) {
-  .col-3 {
-    width: calc(100% / 2);
-  }
-}
-
-@container container (max-width: 540px) {
-  .col-3 {
-    width: 100%;
-  }
 }
 </style>

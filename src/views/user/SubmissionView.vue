@@ -19,7 +19,7 @@
 
       <div class="row g-3" v-else>
         <div
-          class="col-lg-6"
+          class="col-md-6 col-lg-4"
           v-for="sub in getAllSubmissionByTeam"
           :key="sub.submission_id"
         >
