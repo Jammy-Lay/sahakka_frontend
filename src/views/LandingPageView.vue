@@ -341,6 +341,7 @@
   .cursor {
     top: 100px;
     left: 100%;
+    transform: translateX(-100px) translateY(-50px);
     animation-name: cursor-moving;
     animation-duration: 500ms;
     animation-timing-function: ease-in;
