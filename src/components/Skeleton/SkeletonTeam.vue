@@ -2,8 +2,8 @@
     <div>
         <div class="row bg-body mb-3 pb-3">
             <div class="col-4">
-                <div class="d-flex align-items-center gap-2">
-                    <div class="skeleton" style="width:30px; height:30px; border-radius:6px;"></div>
+                <div class="d-flex align-items-center gap-2 pt-3">
+                    <div class="skeleton" style="width:30px; height:35px; border-radius:6px;"></div>
                     <div class="skeleton" style="width:110px; height:35px;"></div>
                 </div>
             </div>
@@ -52,4 +52,5 @@ import SkeletonBaseCardTeam from "@/components/Skeleton/SkeletonBaseCardTeam.vue
     animation: shimmer 1.2s infinite linear;
     border-radius: 8px;
 }
+
 </style>

@@ -16,11 +16,11 @@
                         </n-icon></template>
                     Change Password
                 </n-button>
-                <n-button type="error" class="rounded-3 px-3" size="medium" @click="showLogoutModal = true">
+                <n-button color="#DC3545" class="rounded-3 px-3" size="medium" @click="showLogoutModal = true">
                     <template #icon><n-icon>
                             <LogOut />
                         </n-icon></template>
-                    Sign out
+                    Log out
                 </n-button>
             </div>
         </div>
@@ -35,9 +35,9 @@
                     <div class="col-lg-auto text-center text-lg-start">
                         <div class="avatar-container">
                             <!-- Avatar image -->
-                            <n-avatar
-                                :src="auth.getMe?.avatar || 'http://localhost:3000/uploads/avatars/default-avatar.png'"
-                                :size="150" round object-fit="cover" />
+                            <n-avatar :src="auth.getMe?.avatar ||
+                                'http://localhost:3000/uploads/avatars/default-avatar.png'
+                                " :size="150" round object-fit="cover" />
                             <!-- Pencil trigger button with dropdown -->
                             <n-dropdown :options="avatarDropdownOptions" placement="bottom-start" trigger="click"
                                 @select="handleAvatarDropdown">
@@ -190,8 +190,8 @@
                 </template>
                 <div class="px-4 py-3">
                     <p class="text-secondary mb-0" style="font-size: 0.9rem; line-height: 1.6">
-                        Are you sure you want to remove your profile photo? Your avatar will
-                        be reset to the default image.
+                        Are you sure you want to remove your profile photo? Your avatar will be reset
+                        to the default image.
                     </p>
                 </div>
                 <template #footer>
@@ -208,42 +208,33 @@
             </n-card>
         </n-modal>
 
-        <!-- LOGOUT MODAL -->
-        <n-modal v-model:show="showLogoutModal" :mask-closable="true" transform-origin="center">
-            <n-card style="width: 400px" class="rounded-3 shadow-lg" :bordered="false" content-style="padding: 0;">
-                <template #header>
-                    <div class="d-flex align-items-center gap-2 py-1">
-                        <div class="logout-icon-box rounded-3">
-                            <n-icon color="#3b82f6" size="20">
-                                <LogOut />
-                            </n-icon>
-                        </div>
-                        <div>
-                            <div class="fw-bold fs-6 mb-0">Sign Out</div>
-                            <div class="text-muted" style="font-size: 0.78rem">
-                                You'll need to sign in again to continue
-                            </div>
-                        </div>
-                    </div>
-                </template>
-                <div class="px-4 py-3">
-                    <p class="text-secondary mb-0" style="font-size: 0.9rem; line-height: 1.6">
-                        Are you sure you want to sign out of your account?
-                    </p>
+        <n-modal v-model:show="showLogoutModal" :mask-closable="true">
+            <div class="bg-white rounded-card" style="width: 380px">
+                <div class="d-flex align-items-center justify-content-between px-4 py-3 pb-2">
+                    <span class="fw-medium fs-15">Log Out</span>
+                    <n-button text size="small" @click="showLogoutModal = false"
+                        class="hover-circle p-1 rounded-circle">
+                        <X size="18" />
+                    </n-button>
                 </div>
-                <template #footer>
-                    <n-space justify="end" class="py-1">
-                        <n-button class="rounded-3" @click="showLogoutModal = false">Cancel</n-button>
-                        <n-button class="rounded-3" type="primary" color="#3b82f6" :loading="logoutLoading"
+                <n-divider style="margin: 5px 0; --n-color: #e4e4e7" />
+                <div class="px-4 pt-3 pb-3">
+                    <p class="fs-13 text-mute mb-4 text-center">
+                        Are you sure you want to log out?
+                    </p>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-outline border rounded-btn-sm fs-13 fw-medium w-50"
+                            @click="showLogoutModal = false">
+                            Cancel
+                        </button>
+                        <button class="btn btn-danger rounded-btn-sm fs-13 fw-medium w-50" :disabled="logoutLoading"
                             @click="confirmLogout">
-                            <template #icon><n-icon>
-                                    <LogOut />
-                                </n-icon></template>
-                            Yes, Sign Out
-                        </n-button>
-                    </n-space>
-                </template>
-            </n-card>
+                            <span v-if="logoutLoading" class="spinner-border spinner-border-sm me-2" />
+                            {{ logoutLoading ? "Logging out..." : "Log out" }}
+                        </button>
+                    </div>
+                </div>
+            </div>
         </n-modal>
 
         <!-- Change Password Modal -->
@@ -281,7 +272,7 @@
                 <template #footer>
                     <n-space justify="end" class="py-1">
                         <n-button class="rounded-3" @click="closePasswordModal">Cancel</n-button>
-                        <n-button class="rounded-3" type="primary" color="#3b82f6" :loading="pwLoading"
+                        <n-button class="rounded-3" type="primary" color="#171717" :loading="pwLoading"
                             :disabled="!passwordForm.current || !passwordForm.new || !passwordForm.cf"
                             @click="submitPassword">
                             <template #icon><n-icon>
@@ -300,25 +291,42 @@
 import { ref, h, computed, onMounted } from "vue";
 import BaseTitle from "@/components/BaseTitle.vue";
 import {
-    NButton, NCard, NModal, NAvatar, NTag, NIcon,
-    NDivider, NSpace, NInput, NDropdown,
+    NButton,
+    NCard,
+    NModal,
+    NAvatar,
+    NTag,
+    NIcon,
+    NDivider,
+    NSpace,
+    NInput,
+    NDropdown,
 } from "naive-ui";
 import {
-    Mail, Calendar, LogOut, Camera, Pencil,
-    ShieldCheck, ChevronRight, MousePointer2, Move,
-    KeyRound, Check, Crop, Trash2,
+    Mail,
+    Calendar,
+    LogOut,
+    Camera,
+    Pencil,
+    ShieldCheck,
+    ChevronRight,
+    MousePointer2,
+    Move,
+    KeyRound,
+    Check,
+    Crop,
+    Trash2,
 } from "lucide-vue-next";
 import { Cropper, CircleStencil } from "vue-advanced-cropper";
 import "vue-advanced-cropper/dist/style.css";
 import { notify } from "@/utils/toast";
-import { useGetProfile } from "@/stores/profile/profile";
+import { useGetProfile } from "@/stores/admin/profile";
 import { useAuthStore } from "@/stores/auth";
 import { useRouter } from "vue-router";
 import SkeletonSetting from "@/components/Skeleton/SkeletonSetting.vue";
 
 const profile = useGetProfile();
 const auth = useAuthStore();
-
 
 const router = useRouter();
 const toast = notify();
@@ -345,7 +353,6 @@ const maskedEmail = computed(() => {
     const [local, domain] = email.split("@");
     const masked = local[0] + "*".repeat(local.length - 1);
     const maskedDomain = domain[0] + "*".repeat(local.length - 1);
-
 
     return `${masked}@${maskedDomain}.com`;
 });
@@ -539,9 +546,7 @@ function formatDate(dateString) {
     justify-content: center;
     cursor: pointer;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
-    transition:
-        background 0.18s ease,
-        transform 0.15s ease;
+    transition: background 0.18s ease, transform 0.15s ease;
     z-index: 3;
 }
 

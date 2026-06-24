@@ -16,6 +16,7 @@ export const useInviteStore = defineStore("invite", () => {
       throw new Error(err.response?.data?.message);
     }
   };
+
   const generatePasscode = async (workspace_id, team_id) => {
     try {
       const res = await api.post(
@@ -30,8 +31,21 @@ export const useInviteStore = defineStore("invite", () => {
     }
   };
 
+  const joinInvite = async (token) => {
+    try {
+      const res = await api.post("/invite/join", {
+        token,
+      });
+
+      return res.data;
+    } catch (err) {
+      throw new Error(err.response?.data?.message || "join invite failed");
+    }
+  };
+
   return {
     generatePasscode,
     inviteByEmail,
+    joinInvite,
   };
 });

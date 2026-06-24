@@ -1,44 +1,81 @@
 <template>
   <n-scrollbar style="max-height: 100%">
+    <!-- HEADER SKELETON -->
+    <template v-if="showHeader">
+      <div class="position-sticky top-0 z-1 header pt-4 pb-2 bg-body">
+        <div class="d-flex align-items-start justify-content-between mb-3">
+          <!-- title -->
+          <div>
+            <div class="skeleton header-title mb-2"></div>
+            <div class="skeleton header-desc"></div>
+          </div>
+
+          <!-- buttons -->
+          <div class="d-flex gap-2">
+            <div class="skeleton header-btn"></div>
+
+            <div class="skeleton header-btn primary"></div>
+          </div>
+        </div>
+
+        <!-- tabs -->
+        <div class="d-flex flex-wrap gap-2 mb-3">
+          <div v-for="i in 6" :key="i" class="skeleton tab"></div>
+        </div>
+      </div>
+    </template>
+
+    <!-- TASK CARDS -->
     <div class="task-grid text-nowrap">
       <div
-        v-for="i in 4"
+        v-for="i in 6"
         :key="i"
         class="bg-white rounded-card border border-0"
         style="padding: 20px; min-height: 220px"
       >
-        <!-- top user -->
-        <div class="d-flex align-items-center justify-content-between mb-4">
+        <!-- user -->
+        <div class="d-flex align-items-center justify-content-between mb-3">
           <div class="d-flex align-items-center gap-2">
             <div class="skeleton avatar"></div>
 
             <div class="skeleton user-text"></div>
           </div>
 
-          <!-- type -->
           <div class="skeleton type"></div>
         </div>
 
-        <!-- meta grid -->
+        <!-- meta -->
+
         <div class="meta-grid mb-4">
           <div v-for="x in 6" :key="x" class="meta-item d-flex flex-column gap-2">
-            <!-- label -->
-            <div class="skeleton label"></div>
+            <div class="d-flex align-items-center gap-1">
+              <div class="skeleton icon"></div>
 
-            <!-- value -->
+              <div class="skeleton label"></div>
+            </div>
+
             <div class="skeleton value"></div>
           </div>
         </div>
 
         <!-- title -->
-        <div class="skeleton task-title mb-3"></div>
+        <div class="skeleton card-title mb-3"></div>
 
         <!-- description -->
-        <div class="skeleton desc mb-1"></div>
+        <div class="skeleton desc small"></div>
       </div>
     </div>
   </n-scrollbar>
 </template>
+
+<script setup>
+defineProps({
+  showHeader: {
+    type: Boolean,
+    default: true,
+  },
+});
+</script>
 
 <style scoped>
 .skeleton {
@@ -69,7 +106,35 @@
   }
 }
 
-/* user */
+/* header */
+
+.header-title {
+  width: 180px;
+  height: 22px;
+}
+
+.header-desc {
+  width: 250px;
+  height: 14px;
+}
+
+.header-btn {
+  width: 80px;
+  height: 34px;
+  border-radius: 10px;
+}
+
+.header-btn.primary {
+  width: 110px;
+}
+
+.tab {
+  width: 110px;
+  height: 32px;
+  border-radius: 20px;
+}
+
+/* card */
 
 .avatar {
   width: 30px;
@@ -78,42 +143,43 @@
 }
 
 .user-text {
-  width: 100px;
-  height: 12px;
+  width: 110px;
+  height: 13px;
 }
 
 .type {
-  width: 60px;
+  width: 65px;
   height: 28px;
   border-radius: 20px;
 }
 
-/* meta */
+.icon {
+  width: 15px;
+  height: 15px;
+  border-radius: 5px;
+}
 
 .label {
   width: 55px;
   height: 14px;
-  border-radius: 8px;
 }
 
 .value {
-  width: 70px;
-  height: 20px;
-  border-radius: 8px;
+  width: 75px;
+  height: 22px;
 }
 
-/* title */
-
-.task-title {
-  width: 180px;
-  height: 18px;
-  border-radius: 8px;
+.card-title {
+  width: 170px;
+  height: 20px;
 }
 
 .desc {
-  width: 80%;
-  height: 12px;
-  border-radius: 8px;
+  width: 85%;
+  height: 13px;
 }
 
+.desc.small {
+  width: 55%;
+}
 </style>

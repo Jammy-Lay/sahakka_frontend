@@ -36,41 +36,32 @@
           </n-dropdown>
 
           <!-- LOGOUT MODAL -->
-          <n-modal v-model:show="showLogoutModal" :mask-closable="true" transform-origin="center">
-            <n-card style="width: 400px" class="rounded-3 shadow-lg" :bordered="false" content-style="padding: 0;">
-              <template #header>
-                <div class="d-flex align-items-center gap-2 py-1">
-                  <div class="logout-icon-box rounded-3">
-                    <n-icon color="#3b82f6" size="20">
-                      <LogOut />
-                    </n-icon>
-                  </div>
-                  <div>
-                    <div class="fw-bold fs-6 mb-0">Sign Out</div>
-                    <div class="text-muted" style="font-size: 0.78rem">
-                      You'll need to sign in again to continue
-                    </div>
-                  </div>
-                </div>
-              </template>
-              <div class="px-4 py-3">
-                <p class="text-secondary mb-0" style="font-size: 0.9rem; line-height: 1.6">
-                  Are you sure you want to sign out of your account?
-                </p>
+          <n-modal v-model:show="showLogoutModal" :mask-closable="true">
+            <div class="bg-white rounded-card" style="width: 380px">
+              <div class="d-flex align-items-center justify-content-between px-4 py-3 pb-2">
+                <span class="fw-medium fs-15">Log Out</span>
+                <n-button text size="small" @click="showLogoutModal = false" class="hover-circle p-1 rounded-circle">
+                  <X size="18" />
+                </n-button>
               </div>
-              <template #footer>
-                <n-space justify="end" class="py-1">
-                  <n-button class="rounded-3" @click="showLogoutModal = false">Cancel</n-button>
-                  <n-button class="rounded-3 bg-danger border-0" type="primary" :loading="logoutLoading"
+              <n-divider style="margin: 5px 0; --n-color: #e4e4e7" />
+              <div class="px-4 pt-3 pb-3">
+                <p class="fs-13 text-mute mb-4 text-center">
+                  Are you sure you want to log out?
+                </p>
+                <div class="d-flex gap-2">
+                  <button class="btn btn-outline border rounded-btn-sm fs-13 fw-medium w-50"
+                    @click="showLogoutModal = false">
+                    Cancel
+                  </button>
+                  <button class="btn btn-danger rounded-btn-sm fs-13 fw-medium w-50" :disabled="logoutLoading"
                     @click="confirmLogout">
-                    <template #icon><n-icon>
-                        <LogOut />
-                      </n-icon></template>
-                    Yes, Sign Out
-                  </n-button>
-                </n-space>
-              </template>
-            </n-card>
+                    <span v-if="logoutLoading" class="spinner-border spinner-border-sm me-2" />
+                    {{ logoutLoading ? "Logging out..." : "Log out" }}
+                  </button>
+                </div>
+              </div>
+            </div>
           </n-modal>
 
         </div>
@@ -83,7 +74,7 @@
           <n-layout-sider collapse-mode="width" :collapsed-width="70" :width="240" :collapsed="collapsed"
             @collapse="collapsed = true" @expand="collapsed = false"
             class="py-2 d-none d-lg-flex position-relative rounded-4">
-            <n-menu v-model:value="activeKey" :collapsed="collapsed" :collapsed-width="64" :collapsed-icon-size="18"
+            <n-menu v-model:value="activeKey" :collapsed="collapsed" :collapsed-width="64" :collapsed-icon-size="20"
               :options="menuOptions" :expanded-keys="expandedKeys" @update:expanded-keys="onUpdateExpandedKeys"
               @update:value="handleMenuClick" />
 
@@ -144,6 +135,7 @@ import {
   UsersRound,
   ChartPie,
   Layers,
+  Users
 } from "lucide-vue-next";
 import { useAuthStore } from "@/stores/auth";
 import { notify } from "@/utils/toast";
@@ -180,12 +172,12 @@ const menuOptions = computed(() => [
   {
     label: "Teams",
     key: "teams",
-    icon: renderIcon(UsersRound),
+    icon: renderIcon(Users),
     children: [
       {
         label: "Teams",
         key: "/admin/teams" || "workspace/:workspace_id/teams/:team_id",
-        icon: renderIcon(UsersRound),
+        icon: renderIcon(Users),
       },
       {
         label: "Tasks",
@@ -377,21 +369,6 @@ button.n-button.n-button--primary-type:not(.n-button--disabled):hover {
   --n-color-hover: #3b82f6 !important;
   --n-border-hover: 1px solid #3b82f6 !important;
   --n-text-color-hover: #ffffff !important;
-}
-
-button.n-button.n-button--default-type:not(.n-button--disabled):hover {
-  --n-color-hover: #000000 !important;
-  --n-border-hover: 1px solid #000000 !important;
-  --n-text-color-hover: #ffffff !important;
-  background-color: #000000 !important;
-}
-
-button.n-button.n-button--default-type:hover .n-button__border {
-  border: 1px solid #000000 !important;
-}
-
-button.n-button.n-button--default-type:hover .n-button__content {
-  color: #ffffff !important;
 }
 
 .n-button .n-button__border,

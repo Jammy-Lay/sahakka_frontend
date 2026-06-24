@@ -9,38 +9,52 @@ export const useTaskStore = defineStore("task", () => {
   let getTaskActivity = ref([]);
   let getSummaryTask = ref({});
   let getMyTask = ref([]);
+  let tasksByTeam = ref({});
   let loading = ref(true);
+  let tabLoading = ref(false);
+  let summaryLoading = ref(true);
+  let myTaskLoading = ref(true);
 
-  const getTaskByTeamStore = async (workspace_id, team_id, status = "") => {
+  const getTaskByTeamStore = async (
+    workspace_id,
+    team_id,
+    status = "",
+    silent = false,
+    isTabChange = false,
+  ) => {
     try {
-      loading.value = true;
+      if (!silent && !isTabChange) loading.value = true;
+      if (isTabChange) tabLoading.value = true;
       const res = await api.get(
         `/workspace/${workspace_id}/team/${team_id}/tasks?status=${status}`,
       );
       const tasks = res.data.data.tasks;
 
       getTaskByTeam.value = tasks;
-
-      // bug + improvement → getTaskByType
       getIssueTask.value = tasks.filter((t) =>
         ["bug", "improvement"].includes(t.type),
       );
-
-      // task + feature → getTaskByFeature
       getTask.value = tasks.filter((t) => ["task", "feature"].includes(t.type));
+
+      if (!status) tasksByTeam.value[team_id] = tasks;
     } catch (err) {
       throw new Error(err.response?.data?.message || "Get task failed");
     } finally {
-      loading.value = false;
+      if (!silent && !isTabChange) loading.value = false;
+      if (isTabChange) tabLoading.value = false;
     }
   };
 
-  // const getApprovedPercentage = (team_id) => {
-  //   const tasks = getTaskByTeam.value[team_id];
-  //   if (!tasks || tasks.length === 0) return 0;
-  //   const approved = tasks.filter((t) => t.status === "approved").length;
-  //   return Math.round((approved / tasks.length) * 100);
-  // };
+  const prefetchTeamTasks = async (workspace_id, team_id) => {
+    try {
+      const res = await api.get(
+        `/workspace/${workspace_id}/team/${team_id}/tasks`,
+      );
+      tasksByTeam.value[team_id] = res.data.data.tasks;
+    } catch {
+      tasksByTeam.value[team_id] = [];
+    }
+  };
 
   const createTask = async (workspace_id, team_id, form) => {
     try {
@@ -84,25 +98,39 @@ export const useTaskStore = defineStore("task", () => {
     }
   };
 
-  const getSummaryTaskStore = async (workspace_id, team_id) => {
+  const getSummaryTaskStore = async (workspace_id, team_id, silent = false) => {
     try {
+      if (!silent) summaryLoading.value = true;
       const res = await api.get(
         `/workspace/${workspace_id}/team/${team_id}/my-tasks/summary`,
       );
       getSummaryTask.value = res.data.data;
     } catch (err) {
       throw new Error(err.response?.data?.message || "Get summary task failed");
+    } finally {
+      if (!silent) summaryLoading.value = false;
     }
   };
 
-  const getMyTaskStore = async (workspace_id, team_id, status = "") => {
+  const getMyTaskStore = async (
+    workspace_id,
+    team_id,
+    status = "",
+    silent = false,
+    isTabChange = false,
+  ) => {
     try {
+      if (!silent && !isTabChange) myTaskLoading.value = true;
+      if (isTabChange) tabLoading.value = true;
       const res = await api.get(
         `/workspace/${workspace_id}/team/${team_id}/my-tasks?status=${status}`,
       );
       getMyTask.value = res.data.data;
     } catch (err) {
       throw new Error(err.response?.data?.message || "Get my task failed");
+    } finally {
+      if (!silent && !isTabChange) myTaskLoading.value = false;
+      if (isTabChange) tabLoading.value = false;
     }
   };
 
@@ -113,7 +141,6 @@ export const useTaskStore = defineStore("task", () => {
     getTaskActivity,
     getSummaryTask,
     getMyTask,
-    // getApprovedPercentage,
     getTaskByTeamStore,
     createTask,
     getTaskActivityStore,
@@ -121,6 +148,11 @@ export const useTaskStore = defineStore("task", () => {
     getSummaryTaskStore,
     getMyTaskStore,
     loading,
-    deleteTask
+    summaryLoading,
+    myTaskLoading,
+    deleteTask,
+    tasksByTeam,
+    prefetchTeamTasks,
+    tabLoading
   };
 });

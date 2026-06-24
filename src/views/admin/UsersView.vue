@@ -112,7 +112,7 @@ const options = (row) => {
         return [
             {
                 label: () =>
-                    h("div", { class: "d-flex align-items-center gap-2 text-danger" }, [
+                    h("div", { class: "d-flex align-items-center gap-2 text-danger " }, [
                         h(CircleX, { size: 16 }),
                         "Block",
                     ]),
@@ -242,6 +242,7 @@ const columnsAllUsers = [
                                     border: "none",
                                     outline: "none",
                                     background: "transparent",
+                                    borderRadius: "12px",
                                 },
                             },
                         ),

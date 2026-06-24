@@ -294,11 +294,11 @@ body .n-popover.n-tooltip {
 }
 
 .cursor-pointer {
-  cursor: pointer;
+  cursor: pointer !important;
 }
 
 .cursor-default {
-  cursor: not-allowed;
+  cursor: not-allowed !important;
 }
 
 .card-width {
@@ -609,7 +609,12 @@ body .n-popover.n-tooltip {
   color: #0088ff;
 }
 
-.act-tag-update {
+.act-tag-submit {
+  background: #cfccfc;
+  color: #6155f5;
+}
+
+.act-tag-review {
   background: #ffddbe;
   color: #ff8d28;
 }

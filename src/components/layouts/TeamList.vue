@@ -43,11 +43,14 @@
               input-class="py-1 fs-13 rounded-btn-sm mb-4"
             />
             <!-- Create team -->
-            <BaseButton
-              btnName="Create team"
-              class="w-100 fs-13 rounded-btn py-2"
+            <button
+              class="btn bg-btn w-100 fs-13 rounded-btn py-2"
+              :disabled="isLoading"
               @click="handleCreateTeam"
-            />
+            >
+              <span v-if="isLoading" class="spinner-border spinner-border-sm me-2" />
+              {{ isLoading ? "Creating..." : "Create Team" }}
+            </button>
           </div>
         </div>
       </n-modal>
@@ -58,7 +61,7 @@
         <router-link
           v-for="t in teamList"
           :key="t.team_id"
-          :to="`/workspace/${currentRouteWorkspaceId}/team/${t.team_id}/${currentSection}`"
+          :to="`/workspace/${currentRouteWorkspaceId}/team/${t.team_id}/tasks`"
           class="text-decoration-none"
         >
           <div
@@ -95,6 +98,7 @@
                     style="width: 25px; height: 25px; cursor: pointer"
                     class="btn-option d-flex justify-content-center align-items-center rounded-circle"
                     :class="{ 'btn-option-active': showPopover[t.team_id] }"
+                    @click.prevent
                   >
                     <ellipsis size="16" />
                   </div>
@@ -105,7 +109,7 @@
                     class="d-flex align-items-center rounded gap-2 px-2 py-1 fw-bold workspace-item"
                     @click.prevent="openRename(t)"
                   >
-                    <Pencil size="15" /> Rename
+                    <Brush size="15" /> Rename
                   </div>
                   <div
                     class="d-flex align-items-center rounded gap-2 px-2 py-1 fw-bold workspace-item"
@@ -123,17 +127,17 @@
               </n-popover>
             </div>
             <div class="d-flex align-items-center gap-2 mb-1">
-              <p class="mb-0 fs-12">60%</p>
+              <p class="mb-0 fs-12">{{ getTeamPercent(t.team_id) }}%</p>
               <n-progress
                 type="line"
-                :percentage="60"
+                :percentage="getTeamPercent(t.team_id)"
                 color="#34C759"
                 :height="5"
                 processing
                 :show-indicator="false"
               />
             </div>
-            <n-avatar-group :options="mapMembers(t.members)" :size="25" :max="4">
+            <n-avatar-group :options="mapMembers(t.members)" :size="25" :max="6">
               <template #avatar="{ option: { name, src } }">
                 <n-tooltip
                   :style="{
@@ -190,11 +194,14 @@
             input-placeholder="Description"
             input-class="py-1 fs-13 rounded-btn-sm mb-4"
           />
-          <BaseButton
-            btnName="Save"
-            class="w-100 fs-13 rounded-btn py-2"
+          <button
+            class="btn bg-btn w-100 fs-13 rounded-btn py-2"
+            :disabled="isLoading"
             @click="handleRename"
-          />
+          >
+            <span v-if="isLoading" class="spinner-border spinner-border-sm me-2" />
+            {{ isLoading ? "Saving..." : "Save" }}
+          </button>
         </div>
       </div>
     </n-modal>
@@ -251,6 +258,7 @@ import BaseInput from "../BaseInput.vue";
 import BaseButton from "../BaseButton.vue";
 import { useTaskStore } from "@/stores/user/task.js";
 import TeamListSkeleton from "../team/TeamListSkeleton.vue";
+import { useSubmissionStore } from "@/stores/user/submission.js";
 
 const route = useRoute();
 const router = useRouter();
@@ -279,22 +287,45 @@ const workspaceStore = UseWorkspaceStore();
 const { getAllWorkspace } = storeToRefs(workspaceStore);
 
 const taskStore = useTaskStore();
+const { tasksByTeam } = storeToRefs(taskStore);
+const submissionStore = useSubmissionStore();
+
+const getTeamPercent = (teamId) => {
+  const tasks = taskStore.tasksByTeam[teamId];
+
+  if (!tasks || tasks.length === 0) return 0;
+
+  const approved = tasks.filter((t) => t.status === "approved").length;
+
+  return Math.round((approved / tasks.length) * 100);
+};
 
 watch(
   () => route.params.team_id,
   async (teamId) => {
     if (!teamId) return;
-    await teamStore.getTeamByIdStore(currentRouteWorkspaceId.value, teamId);
-    await taskStore.getTaskByTeamStore(currentRouteWorkspaceId.value, teamId);
-    await taskStore.getSummaryTaskStore(currentRouteWorkspaceId.value, teamId);
-    await taskStore.getMyTaskStore(currentRouteWorkspaceId.value, teamId);
+    await Promise.all([
+      teamStore.getTeamByIdStore(currentRouteWorkspaceId.value, teamId),
+      taskStore.getTaskByTeamStore(currentRouteWorkspaceId.value, teamId),
+      taskStore.getSummaryTaskStore(currentRouteWorkspaceId.value, teamId),
+      taskStore.getMyTaskStore(currentRouteWorkspaceId.value, teamId),
+      submissionStore.getAllSubmissionByTeamStore(currentRouteWorkspaceId.value, teamId),
+    ]);
   },
   { immediate: true }
 );
 
 onMounted(async () => {
-  await teamStore.getTeamByWorkspaceStore(currentRouteWorkspaceId.value);
-  // await teamStore.getTeamByIdStore(currentRouteWorkspaceId.value, currentRouteTeamId.value);
+  await Promise.all([
+    workspaceStore.getMyWorkspaceStore(), // if needed here
+    teamStore.getTeamByWorkspaceStore(currentRouteWorkspaceId.value),
+  ]);
+
+  teamList.value
+    .filter((t) => String(t.team_id) !== String(currentRouteTeamId.value))
+    .forEach((t) =>
+      taskStore.prefetchTeamTasks(currentRouteWorkspaceId.value, t.team_id)
+    );
 });
 
 const goSubmissionView = (teamId) => {
@@ -329,6 +360,7 @@ const teamName = ref("");
 const description = ref("");
 
 const handleCreateTeam = async () => {
+  isLoading.value = true;
   if (!teamName.value.trim()) {
     toast.error("Name is required");
     return;
@@ -358,6 +390,8 @@ const handleCreateTeam = async () => {
   } catch (error) {
     console.error("Failed to create team:", error);
     toast.error(error.message);
+  } finally {
+    isLoading.value = false;
   }
 };
 
@@ -375,6 +409,7 @@ const openRename = (t) => {
 };
 
 const handleRename = async () => {
+  isLoading.value = true;
   if (!renameName.value.trim()) {
     toast.error("Name is required");
     return;
@@ -399,6 +434,8 @@ const handleRename = async () => {
   } catch (error) {
     console.error("Failed to rename team:", error);
     toast.error(error.message);
+  } finally {
+    isLoading.value = false;
   }
 };
 
@@ -414,10 +451,24 @@ const openDelete = (t) => {
 const handleDelete = async () => {
   isLoading.value = true;
   try {
-    await teamStore.deleteTeam(currentRouteWorkspaceId.value, selectedTeam.value.team_id);
+    const deletedTeamId = selectedTeam.value.team_id;
+
+    await teamStore.deleteTeam(currentRouteWorkspaceId.value, deletedTeamId);
     toast.success("Team deleted successfully");
     showDeleteModal.value = false;
+
     await teamStore.getTeamByWorkspaceStore(currentRouteWorkspaceId.value);
+
+    if (String(currentRouteTeamId.value) === String(deletedTeamId)) {
+      const remaining = teamList.value;
+      if (remaining.length > 0) {
+        router.push(
+          `/workspace/${currentRouteWorkspaceId.value}/team/${remaining[0].team_id}/${currentSection.value}`
+        );
+      } else {
+        router.push(`/workspace/${currentRouteWorkspaceId.value}`);
+      }
+    }
   } catch (error) {
     console.error("Failed to delete team:", error);
     console.log(error.toast);

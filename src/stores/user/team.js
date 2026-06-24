@@ -9,6 +9,7 @@ export const useTeamStore = defineStore("team", () => {
   let getMember = ref({});
   let getActivityTeam = ref([]);
   let loading = ref(true);
+  let teamDetailLoading  = ref(true);
   let activityLoading = ref(true);
 
   const getTeamSectionStore = async (team_id) => {
@@ -36,7 +37,7 @@ export const useTeamStore = defineStore("team", () => {
 
   const getTeamByIdStore = async (workspace_id, team_id) => {
     try {
-      loading.value = true;
+      teamDetailLoading .value = true;
       const res = await api.get(`/workspace/${workspace_id}/team/${team_id}`);
       getTeamById.value = res.data.data;
       getMember.value = res.data.data.members.filter(
@@ -45,7 +46,7 @@ export const useTeamStore = defineStore("team", () => {
     } catch (err) {
       throw new Error(err.response?.data?.message || "Get team failed");
     } finally {
-      loading.value = false;
+      teamDetailLoading .value = false;
     }
   };
 

@@ -86,17 +86,19 @@
 import { reactive, ref, watch } from "vue";
 import { jwtDecode } from "jwt-decode";
 import { useAuthStore } from "@/stores/auth";
-import { useRouter } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import { isEmail, require, validates } from "@/utils/validate";
 import { notify } from "@/utils/toast";
 import { UseWorkspaceStore } from "@/stores/user/workspace";
 import { useTeamStore } from "@/stores/user/team";
 import BaseInput from "@/components/BaseInput.vue";
 import Logo from "@/assets/image/image.png";
+import { useInviteStore } from "@/stores/user/invite";
 
 const email = ref("");
 const password = ref("");
 const router = useRouter();
+const route = useRoute();
 const toast = notify(router);
 const isLoading = ref(false);
 const showPassword = ref(false);
@@ -104,6 +106,7 @@ const showPassword = ref(false);
 const auth = useAuthStore();
 const workspaceStore = UseWorkspaceStore();
 const teamStore = useTeamStore();
+const inviteStore = useInviteStore();
 
 const err = reactive({
   email: "",
@@ -137,11 +140,19 @@ async function handleLogin() {
 
   try {
     await auth.login(email.value, password.value);
+
     const decoded = jwtDecode(auth.token);
     // console.log("decoded token:", decoded);
 
     if (decoded.role === "admin") {
       toast.success("Signin Successfully", "/admin/dashboard");
+      return;
+    }
+    
+    const inviteToken = route.query.invite;
+
+    if (inviteToken) {
+      router.push(`/invite?token=${inviteToken}`);
       return;
     }
 
@@ -180,6 +191,9 @@ async function handleLogin() {
       `/workspace/${workspace.workspace_id}/team/${team.team_id}/tasks`
     );
   } catch (error) {
+    if(error.message === "Email not verify"){
+      router.push("/not-verify");
+    }
     toast.error(error.message);
   } finally {
     isLoading.value = false;

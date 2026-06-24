@@ -9,18 +9,18 @@
                 <div class="row bg-body position-sticky pt-5" style="top: 10px; z-index: 10">
                     <div class="col-4">
                         <div class="d-flex align-items-center gap-2">
-                            <Layers  class="text-prime" :size="30" />
+                            <Layers class="text-prime" :size="30" />
                             <BaseTitle title="Workspace" class="mb-0" />
                         </div>
                     </div>
 
                     <div class="col-8">
                         <div class="d-flex justify-content-end mb-3">
-                            <div class="search-wrapper border-0 shadow-sm">
-                                <Search size="18" class="search-icon" />
-
-                                <input v-model="searchQuery" type="text" class="search-input"
-                                    placeholder="Search workspace..." @input="currentPage = 1" />
+                            <div class="form-control rounded-btn d-flex align-items-center py-1" style="width: 300px;">
+                                <input v-model="searchQuery" type="text"
+                                    class="search-input shadow-none outline-none border-0 w-100"
+                                    placeholder="Search workspace..." />
+                                <Search color="var(--bs-gray)" size="18" />
                             </div>
                         </div>
                     </div>
@@ -53,7 +53,7 @@
             <!-- ── Right: Activities ── -->
             <div class="col-lg-12 col-xl-4 sticky-top" style="top: 40px">
                 <div class="d-flex align-items-center gap-2">
-                    <Target  class="text-prime" :size="30" />
+                    <Target class="text-prime" :size="30" />
                     <BaseTitle title="Overview" class="mb-0" />
                 </div>
 
@@ -158,10 +158,19 @@ const getWorkspaces = async () => {
             const teamIds = workspaceTeams.map((t) => t.team_id);
 
             // tasks
-            const workspaceTasks = tasksData.filter((task) => teamIds.includes(task.team_id));
+            const workspaceTasks = tasksData.filter(
+                (task) => teamIds.includes(task.team?.id)
+            );
+
             const totalTasks = workspaceTasks.length;
-            const doneTasks = workspaceTasks.filter((task) => task.status === "done").length;
-            const progress = totalTasks === 0 ? 0 : Math.round((doneTasks / totalTasks) * 100);
+
+            const approvedTasks = workspaceTasks.filter(
+                (task) => task.status === "approved"
+            ).length;
+
+            const progress = totalTasks === 0
+                ? 0
+                : Math.round((approvedTasks / totalTasks) * 100);
 
             return {
                 id: workspace.workspace_id,
@@ -255,13 +264,13 @@ const stats = computed(() => [
     },
 ]);
 const recentUsersList = computed(() => {
-    return [...useWorkspace.workspaces]
-        .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+    return [...projects.value]
+        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
         .slice(0, 3)
-        .map((w) => ({
-            workspace: w.workspace_name,
-            owner: w.creator?.user_name || "Unknown",
-            date: formatDate(w.created_at),
+        .map((p) => ({
+            workspace: p.name,
+            owner: p.owner,
+            date: formatDate(p.createdAt),
         }));
 });
 
@@ -294,10 +303,10 @@ const reportColumns = [
     {
         title: "DATE",
         key: "date",
-        render(row) {                                         
+        render(row) {
             return h(
                 "span",
-                { style: "white-space: nowrap;" },            
+                { style: "white-space: nowrap;" },
                 row.date
             );
         },
@@ -321,42 +330,12 @@ onMounted(async () => {
     gap: 24px;
 }
 
-.search-wrapper {
-    width: 100%;
-    max-width: 420px;
-    height: 46px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    background: #ffffff;
-    border-radius: 14px;
-    padding: 0 14px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-    transition: all 0.25s ease;
-}
-
-.search-wrapper:focus-within {
-    border-color: #6366f1;
-
-    box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15), 0 8px 20px rgba(99, 102, 241, 0.15);
-}
-
-.search-icon {
-    color: #9ca3af;
-}
-
-.search-input {
-    flex: 1;
-    border: none;
+.search-input:focus {
     outline: none;
-
-    font-size: 14px;
-    background: transparent;
-    color: #111827;
 }
 
-.search-input::placeholder {
-    color: #9ca3af;
+.form-control:has(.search-input:focus) {
+    outline: 1px solid #171717;
 }
 
 .clear-btn {
@@ -368,24 +347,25 @@ onMounted(async () => {
 .clear-btn:hover {
     color: #ef4444;
 }
+
 .text-truncate-1 {
-  display: -webkit-box;
-  -webkit-line-clamp: 1;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
 }
 
 .text-truncate-2 {
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
 }
 
 .text-truncate-3 {
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
 }
 </style>

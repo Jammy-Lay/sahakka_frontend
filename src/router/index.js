@@ -82,14 +82,46 @@ const router = createRouter({
       component: () => import("@/views/VerifyEmail.vue"),
     },
     {
+      path: "/invite",
+      name: "invite",
+      component: () => import("../views/InviteView.vue"),
+    },
+    {
       path: "/about",
       name: "about",
       component: () => import("../views/AboutView.vue"),
     },
     {
+      path: "/not-verify",
+      name: "not-verify",
+      component: () => import("../views/NotVerifyEmailView.vue"),
+    },
+    {
       path: "/no-workspace",
       name: "no-workspace",
       component: () => import("../views/NoWorkspaceView.vue"),
+    },
+    {
+      path: "/settings",
+     component: () => import("../layouts/ProfileLyout.vue"),
+      children: [
+        {
+          path: "",
+          redirect: "/settings/profile",
+        },
+        {
+          path: "profile",
+           component: () => import("../views/profile/profileView.vue"),
+        },
+        {
+          path: "password",
+           component: () => import("../views/profile/ChangePassword.vue"),
+        },
+        // {
+        //   path: "support",
+        //   component: SupportView,
+        // },
+      ],
     },
     {
       path: "/admin/",

@@ -3,10 +3,10 @@
         <SkeletonTeamDetail />
     </div>
     <div v-else class="page-bg p-4">
-        <router-link to="/admin/teams" class="btn btn-outline-dark mb-3 d-flex align-items-center gap-2 w-fit">
+        <button @click="goBack" class="btn btn-outline-dark mb-3 d-flex align-items-center gap-2 w-fit">
             <ArrowLeft size="16" />
             Back to Teams
-        </router-link>
+        </button>
 
         <div class="row">
             <div class="col-6">
@@ -149,7 +149,7 @@
 
 <script setup>
 import { computed, onMounted, ref, h } from "vue";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import { NAvatar, NButton, NTag } from "naive-ui";
 import { CircleCheckBig, CircleDashed, Send, CircleCheck, CircleX } from "lucide-vue-next";
 import { useTeamstore } from "@/stores/admin/teams";
@@ -160,13 +160,17 @@ import SkeletonTeamDetail from "@/components/Skeleton/SkeletonTeamDetail.vue";
 
 const toast = useToast();
 const loading = ref(false);
-
+const router = useRouter();
 const route = useRoute();
+
 const useTeam = useTeamstore();
 const team_id = Number(route.params.id);
 
 const team = computed(() => useTeam.currentTeam);
 
+const goBack = () => {
+    router.go(-1);
+};
 const memberColumns = [
     {
         title: "Member",

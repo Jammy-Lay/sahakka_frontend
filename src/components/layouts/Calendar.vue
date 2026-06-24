@@ -24,289 +24,301 @@
     </div>
 
     <div class="">
-      <h5
-        class="text-dark fw-semibold position-sticky bg-body top-0 pt-4 pb-3 z-3"
-        style="font-size: 18px"
-      >
-        My Task completion
-      </h5>
-      <div class="d-flex flex-column gap-3">
-        <div
-          class="d-flex justify-content-between align-items-center bg-white p-3 rounded-card"
+      <template v-if="taskStore.summaryLoading">
+        <CompletionSkeleton />
+      </template>
+      <template v-else>
+        <h5
+          class="text-dark fw-semibold position-sticky bg-body top-0 pt-4 pb-3 z-3"
+          style="font-size: 18px"
         >
-          <div>
-            <h6 class="mb-2 fw-semibold fs-15">Task completed</h6>
-            <h6 class="mb-0 fs-14 text-mute">
-              {{ getSummaryTask.status?.approved + getSummaryTask.status?.rejected }} /
-              {{ getSummaryTask.total_tasks }}
-            </h6>
-          </div>
-          <div>
-            <n-progress
-              type="circle"
-              :percentage="completedPercentage"
-              :stroke-width="13"
-              style="width: 75px"
-              class="my-progress"
-              color="#34C759"
-            />
-          </div>
-        </div>
-        <div
-          class="d-flex justify-content-between align-items-center bg-white p-3 rounded-card"
-        >
-          <div>
-            <h6 class="mb-2 fw-semibold fs-15">Task submitted</h6>
-            <h6 class="mb-0 fs-14 text-mute">
-              {{ getSummaryTask.status?.submitted }} /
-              {{ getSummaryTask.total_tasks }}
-            </h6>
-          </div>
-          <div>
-            <n-progress
-              type="circle"
-              :percentage="submittedPercentage"
-              :stroke-width="13"
-              style="width: 75px"
-              class="my-progress"
-              color="#6155F5"
-            />
-          </div>
-        </div>
-        <div class="rounded-card d-flex justify-content-between gap-3">
-          <div class="bg-white p-2 rounded-card gap-3 w-50">
-            <div
-              class="d-flex justify-content-between align-items-center bg-accent w-100 p-2 rounded-btn mb-2"
-            >
-              <p class="mb-0 fs-14 text-dark">Approved</p>
-              <p class="mb-0 fs-13 text-mute">
-                {{ getSummaryTask.status?.approved }} / {{ getSummaryTask.total_tasks }}
-              </p>
+          My Task completion
+        </h5>
+        <div class="d-flex flex-column gap-3">
+          <div
+            class="d-flex justify-content-between align-items-center bg-white p-3 rounded-card"
+          >
+            <div>
+              <h6 class="mb-2 fw-semibold fs-15">Task completed</h6>
+              <h6 class="mb-0 fs-14 text-mute">
+                {{ getSummaryTask.status?.approved + getSummaryTask.status?.rejected }} /
+                {{ getSummaryTask.total_tasks }}
+              </h6>
             </div>
-            <div class="d-flex align-items-center gap-2 px-1">
+            <div>
               <n-progress
-                type="line"
-                :percentage="approvedPercentage"
+                type="circle"
+                :percentage="completedPercentage"
+                :stroke-width="13"
+                style="width: 75px"
+                class="my-progress"
                 color="#34C759"
-                :height="5"
-                :show-indicator="false"
-                processing
               />
-              <span class="fs-13 text-green">{{ approvedPercentage }}%</span>
             </div>
           </div>
-          <div class="bg-white p-2 rounded-card gap-3 w-50">
-            <div
-              class="d-flex justify-content-between align-items-center bg-accent w-100 p-2 rounded-btn mb-2"
-            >
-              <p class="mb-0 fs-14 text-dark">Rejected</p>
-              <p class="mb-0 fs-13 text-mute">
-                {{ getSummaryTask.status?.rejected }} / {{ getSummaryTask.total_tasks }}
-              </p>
+          <div
+            class="d-flex justify-content-between align-items-center bg-white p-3 rounded-card"
+          >
+            <div>
+              <h6 class="mb-2 fw-semibold fs-15">Task submitted</h6>
+              <h6 class="mb-0 fs-14 text-mute">
+                {{ getSummaryTask.status?.submitted }} /
+                {{ getSummaryTask.total_tasks }}
+              </h6>
             </div>
-            <div class="d-flex align-items-center gap-2 px-1">
+            <div>
               <n-progress
-                type="line"
-                :percentage="rejectedPercentage"
-                color="#FF383C"
-                :height="5"
-                :show-indicator="false"
-                processing
+                type="circle"
+                :percentage="submittedPercentage"
+                :stroke-width="13"
+                style="width: 75px"
+                class="my-progress"
+                color="#6155F5"
               />
-              <span class="fs-13 text-danger">{{ rejectedPercentage }}%</span>
+            </div>
+          </div>
+          <div class="rounded-card d-flex justify-content-between gap-3">
+            <div class="bg-white p-2 rounded-card gap-3 w-50">
+              <div
+                class="d-flex justify-content-between align-items-center bg-accent w-100 p-2 rounded-btn mb-2"
+              >
+                <p class="mb-0 fs-14 text-dark">Approved</p>
+                <p class="mb-0 fs-13 text-mute">
+                  {{ getSummaryTask.status?.approved }} / {{ getSummaryTask.total_tasks }}
+                </p>
+              </div>
+              <div class="d-flex align-items-center gap-2 px-1">
+                <n-progress
+                  type="line"
+                  :percentage="approvedPercentage"
+                  color="#34C759"
+                  :height="5"
+                  :show-indicator="false"
+                  processing
+                />
+                <span class="fs-13 text-green">{{ approvedPercentage }}%</span>
+              </div>
+            </div>
+            <div class="bg-white p-2 rounded-card gap-3 w-50">
+              <div
+                class="d-flex justify-content-between align-items-center bg-accent w-100 p-2 rounded-btn mb-2"
+              >
+                <p class="mb-0 fs-14 text-dark">Rejected</p>
+                <p class="mb-0 fs-13 text-mute">
+                  {{ getSummaryTask.status?.rejected }} / {{ getSummaryTask.total_tasks }}
+                </p>
+              </div>
+              <div class="d-flex align-items-center gap-2 px-1">
+                <n-progress
+                  type="line"
+                  :percentage="rejectedPercentage"
+                  color="#FF383C"
+                  :height="5"
+                  :show-indicator="false"
+                  processing
+                />
+                <span class="fs-13 text-danger">{{ rejectedPercentage }}%</span>
+              </div>
+            </div>
+          </div>
+          <div class="bg-white p-3 rounded-card">
+            <h6 class="mb-3 fs-15 fw-semibold">Priority's tasks</h6>
+            <div class="d-flex flex-column gap-3">
+              <div class="d-flex justify-content-between">
+                <p class="mb-0 fs-13">
+                  <Circle size="10" fill="#6155F5" stroke-width="0" class="me-1" /> Urgent
+                </p>
+                <p class="mb-0 fs-13 text-mute">
+                  {{ getSummaryTask.priority?.urgent }} / {{ getSummaryTask.total_tasks }}
+                </p>
+              </div>
+              <div class="d-flex justify-content-between">
+                <p class="mb-0 fs-13">
+                  <Circle size="10" fill="#FF383C" stroke-width="0" class="me-1" /> High
+                </p>
+                <p class="mb-0 fs-13 text-mute">
+                  {{ getSummaryTask.priority?.high }} / {{ getSummaryTask.total_tasks }}
+                </p>
+              </div>
+              <div class="d-flex justify-content-between">
+                <p class="mb-0 fs-13">
+                  <Circle size="10" fill="#FF8D28" stroke-width="0" class="me-1" /> Medium
+                </p>
+                <p class="mb-0 fs-13 text-mute">
+                  {{ getSummaryTask.priority?.medium }} / {{ getSummaryTask.total_tasks }}
+                </p>
+              </div>
+              <div class="d-flex justify-content-between">
+                <p class="mb-0 fs-13">
+                  <Circle size="10" fill="#171717" stroke-width="0" class="me-1" /> Low
+                </p>
+                <p class="mb-0 fs-13 text-mute">
+                  {{ getSummaryTask.priority?.low }} / {{ getSummaryTask.total_tasks }}
+                </p>
+              </div>
             </div>
           </div>
         </div>
-        <div class="bg-white p-3 rounded-card">
-          <h6 class="mb-3 fs-15 fw-semibold">Priority's tasks</h6>
-          <div class="d-flex flex-column gap-3">
-            <div class="d-flex justify-content-between">
-              <p class="mb-0 fs-13">
-                <Circle size="10" fill="#6155F5" stroke-width="0" class="me-1" /> Urgent
-              </p>
-              <p class="mb-0 fs-13 text-mute">
-                {{ getSummaryTask.priority?.urgent }} / {{ getSummaryTask.total_tasks }}
-              </p>
-            </div>
-            <div class="d-flex justify-content-between">
-              <p class="mb-0 fs-13">
-                <Circle size="10" fill="#FF383C" stroke-width="0" class="me-1" /> High
-              </p>
-              <p class="mb-0 fs-13 text-mute">
-                {{ getSummaryTask.priority?.high }} / {{ getSummaryTask.total_tasks }}
-              </p>
-            </div>
-            <div class="d-flex justify-content-between">
-              <p class="mb-0 fs-13">
-                <Circle size="10" fill="#FF8D28" stroke-width="0" class="me-1" /> Medium
-              </p>
-              <p class="mb-0 fs-13 text-mute">
-                {{ getSummaryTask.priority?.medium }} / {{ getSummaryTask.total_tasks }}
-              </p>
-            </div>
-            <div class="d-flex justify-content-between">
-              <p class="mb-0 fs-13">
-                <Circle size="10" fill="#171717" stroke-width="0" class="me-1" /> Low
-              </p>
-              <p class="mb-0 fs-13 text-mute">
-                {{ getSummaryTask.priority?.low }} / {{ getSummaryTask.total_tasks }}
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
+      </template>
 
       <!-- My Tasks -->
-      <h5 class="text-dark fw-semibold my-3" style="font-size: 18px">My Task</h5>
-      <div class="d-flex flex-column gap-3 pb-2">
-        <n-empty
-          v-if="getMyTask.length === 0"
-          description="No Data"
-          class="mt-3"
-          style="--n-icon-size: 40px; font-size: 13px"
-        />
-        <div
-          v-else
-          v-for="task in getMyTask"
-          :key="task.id"
-          class="task-card"
-          @click="openTaskModal(task)"
-        >
-          <div class="d-flex align-items-center gap-2 mb-2">
-            <template v-if="!task.assigned_to?.user_id">
-              <img
-                src="../../assets/image/default-avatar.png"
-                class="rounded-circle object-fit-cover"
-                style="width: 30px; height: 30px"
-              />
-              <span class="fw-medium text-mute fs-13">No assignee</span>
-            </template>
-            <template v-else-if="task.created_by?.user_id === task.assigned_to?.user_id">
-              <img
-                :src="task.created_by?.avatar"
-                class="rounded-circle object-fit-cover"
-                style="width: 30px; height: 30px"
-              />
-              <span class="fw-semibold fs-13">{{ task.created_by?.name }}</span>
-              <span class="fw-bold text-mute fs-12">·</span>
-              <span class="text-mute fs-13">Self-assigned the task</span>
-            </template>
-            <template v-else>
-              <img
-                :src="task.assigned_by?.avatar"
-                class="rounded-circle object-fit-cover"
-                style="width: 30px; height: 30px"
-              />
-              <span class="fw-semibold fs-13">{{ task.assigned_by?.name }}</span>
-              <span class="fw-bold text-mute fs-12">·</span>
-              <span
-                v-if="task.assigned_to?.user_id === getMe.user_id"
-                class="text-mute fs-13"
-                >Assigned to you</span
+      <template v-if="taskStore.myTaskLoading">
+        <MyTaskSkeleton />
+      </template>
+      <template v-else>
+        <h5 class="text-dark fw-semibold my-3" style="font-size: 18px">My Task</h5>
+        <div class="d-flex flex-column gap-3 pb-2">
+          <n-empty
+            v-if="getMyTask.length === 0"
+            description="No Data"
+            class="mt-3"
+            style="--n-icon-size: 40px; font-size: 13px"
+          />
+          <div
+            v-else
+            v-for="task in getMyTask"
+            :key="task.id"
+            class="task-card"
+            @click="openTaskModal(task)"
+          >
+            <div class="d-flex align-items-center gap-2 mb-2">
+              <template v-if="!task.assigned_to?.user_id">
+                <img
+                  src="../../assets/image/default-avatar.png"
+                  class="rounded-circle object-fit-cover"
+                  style="width: 30px; height: 30px"
+                />
+                <span class="fw-medium text-mute fs-13">No assignee</span>
+              </template>
+              <template
+                v-else-if="task.created_by?.user_id === task.assigned_to?.user_id"
               >
-              <span v-else class="text-mute fs-13"
-                >Assigned to {{ task.assigned_to?.name }}</span
-              >
-            </template>
-          </div>
-
-          <div class="d-flex flex-column gap-1">
-            <div class="task-meta-row">
-              <span class="d-flex align-items-center gap-1 fs-14 text-mute"
-                ><Ghost size="15" /> Priority</span
-              >
-              <n-popover
-                :show="isPopOpen(task.id, 'priority')"
-                trigger="click"
-                placement="bottom-start"
-                :show-arrow="false"
-                style="border-radius: 12px; padding: 6px; width: 120px"
-                @update:show="(val) => (openPop[`${task.id}_priority`] = val)"
-              >
-                <template #trigger>
-                  <span
-                    class="priority-badge"
-                    :class="[
-                      priorityConfig[task.priority]?.bg,
-                      priorityConfig[task.priority]?.text,
-                    ]"
-                    @click.stop
-                  >
-                    <Circle
-                      size="9"
-                      :fill="priorityConfig[task.priority]?.fill"
-                      stroke-width="0"
-                    />
-                    {{ task.priority }}
-                  </span>
-                </template>
-                <div>
-                  <div
-                    v-for="(cfg, key) in priorityConfig"
-                    :key="key"
-                    class="d-flex align-items-center gap-2 px-2 py-1 rounded workspace-item fs-13 fw-medium cursor-pointer text-capitalize"
-                    @click="
-                      task.priority = key;
-                      closePop(task.id, 'priority');
-                      handleUpdateTask(task, true);
-                    "
-                  >
-                    <Circle size="10" :fill="cfg.fill" stroke-width="0" />
-                    {{ key }}
-                  </div>
-                </div>
-              </n-popover>
+                <img
+                  :src="task.created_by?.avatar"
+                  class="rounded-circle object-fit-cover"
+                  style="width: 30px; height: 30px"
+                />
+                <span class="fw-semibold fs-13">{{ task.created_by?.name }}</span>
+                <span class="fw-bold text-mute fs-12">·</span>
+                <span class="text-mute fs-13">Self-assigned the task</span>
+              </template>
+              <template v-else>
+                <img
+                  :src="task.assigned_by?.avatar"
+                  class="rounded-circle object-fit-cover"
+                  style="width: 30px; height: 30px"
+                />
+                <span class="fw-semibold fs-13">{{ task.assigned_by?.name }}</span>
+                <span class="fw-bold text-mute fs-12">·</span>
+                <span
+                  v-if="task.assigned_to?.user_id === getMe.user_id"
+                  class="text-mute fs-13"
+                  >Assigned to you</span
+                >
+                <span v-else class="text-mute fs-13"
+                  >Assigned to {{ task.assigned_to?.name }}</span
+                >
+              </template>
             </div>
 
-            <div class="task-meta-row">
-              <span class="d-flex align-items-center gap-1 fs-14 text-mute"
-                ><Calendar size="15" /> Deadline</span
-              >
-              <n-popover
-                :show="isPopOpen(task.id, 'end_date')"
-                trigger="click"
-                placement="bottom-start"
-                :show-arrow="false"
-                style="border-radius: 12px; padding: 0; overflow: hidden"
-                @update:show="(val) => (openPop[`${task.id}_end_date`] = val)"
-              >
-                <template #trigger>
-                  <span
-                    class="fs-13 cursor-pointer date-trigger"
-                    @click.stop
-                    :class="[
-                      task.end_date ? 'text-dark fw-medium' : 'text-mute',
-                      isPopOpen(task.id, 'end_date') ? 'bg-active' : '',
-                    ]"
-                  >
-                    {{ task.end_date ? formatDate(task.end_date) : "Set date" }}
-                  </span>
-                </template>
-                <div class="custom-picker">
-                  <n-date-picker
-                    :value="dateToTs(task.end_date)"
-                    type="date"
-                    :to="false"
-                    panel
-                    @update:value="
-                      (val) => {
-                        task.end_date = formatToYMD(val);
-                        closePop(task.id, 'end_date');
+            <div class="d-flex flex-column gap-1">
+              <div class="task-meta-row">
+                <span class="d-flex align-items-center gap-1 fs-14 text-mute"
+                  ><Ghost size="15" /> Priority</span
+                >
+                <n-popover
+                  :show="isPopOpen(task.id, 'priority')"
+                  trigger="click"
+                  placement="bottom-start"
+                  :show-arrow="false"
+                  style="border-radius: 12px; padding: 6px; width: 120px"
+                  @update:show="(val) => (openPop[`${task.id}_priority`] = val)"
+                >
+                  <template #trigger>
+                    <span
+                      class="priority-badge"
+                      :class="[
+                        priorityConfig[task.priority]?.bg,
+                        priorityConfig[task.priority]?.text,
+                      ]"
+                      @click.stop
+                    >
+                      <Circle
+                        size="9"
+                        :fill="priorityConfig[task.priority]?.fill"
+                        stroke-width="0"
+                      />
+                      {{ task.priority }}
+                    </span>
+                  </template>
+                  <div>
+                    <div
+                      v-for="(cfg, key) in priorityConfig"
+                      :key="key"
+                      class="d-flex align-items-center gap-2 px-2 py-1 rounded workspace-item fs-13 fw-medium cursor-pointer text-capitalize"
+                      @click="
+                        task.priority = key;
+                        closePop(task.id, 'priority');
                         handleUpdateTask(task, true);
-                      }
-                    "
-                  />
-                </div>
-              </n-popover>
-            </div>
-          </div>
+                      "
+                    >
+                      <Circle size="10" :fill="cfg.fill" stroke-width="0" />
+                      {{ key }}
+                    </div>
+                  </div>
+                </n-popover>
+              </div>
 
-          <p class="task-title mb-2 mt-2">{{ task.title }}</p>
-          <p class="task-desc mb-0">
-            {{ task.description || "No description provided" }}
-          </p>
+              <div class="task-meta-row">
+                <span class="d-flex align-items-center gap-1 fs-14 text-mute"
+                  ><Calendar size="15" /> Deadline</span
+                >
+                <n-popover
+                  :show="isPopOpen(task.id, 'end_date')"
+                  trigger="click"
+                  placement="bottom-start"
+                  :show-arrow="false"
+                  style="border-radius: 12px; padding: 0; overflow: hidden"
+                  @update:show="(val) => (openPop[`${task.id}_end_date`] = val)"
+                >
+                  <template #trigger>
+                    <span
+                      class="fs-13 cursor-pointer date-trigger"
+                      @click.stop
+                      :class="[
+                        task.end_date ? 'text-dark fw-medium' : 'text-mute',
+                        isPopOpen(task.id, 'end_date') ? 'bg-active' : '',
+                      ]"
+                    >
+                      {{ task.end_date ? formatDate(task.end_date) : "Set date" }}
+                    </span>
+                  </template>
+                  <div class="custom-picker">
+                    <n-date-picker
+                      :value="dateToTs(task.end_date)"
+                      type="date"
+                      :to="false"
+                      panel
+                      @update:value="
+                        (val) => {
+                          task.end_date = formatToYMD(val);
+                          closePop(task.id, 'end_date');
+                          handleUpdateTask(task, true);
+                        }
+                      "
+                    />
+                  </div>
+                </n-popover>
+              </div>
+            </div>
+
+            <p class="task-title mb-2 mt-2">{{ task.title }}</p>
+            <p class="task-desc mb-0">
+              {{ task.description || "No description provided" }}
+            </p>
+          </div>
         </div>
-      </div>
+      </template>
     </div>
 
     <n-modal v-model:show="showTaskModal" :mask-closable="true">
@@ -453,7 +465,10 @@
                         ]"
                         @click.stop
                       >
-                        <component :is="statusConfigFull[selectedTask.status]?.icon" size="16" />
+                        <component
+                          :is="statusConfigFull[selectedTask.status]?.icon"
+                          size="16"
+                        />
                         {{ statusConfigFull[selectedTask.status]?.label }}
                       </span>
                     </template>
@@ -879,6 +894,7 @@ import {
   UserCheck,
   Link,
   MessageCircle,
+  Eye,
 } from "lucide-vue-next";
 import { useTaskStore } from "@/stores/user/task";
 import { storeToRefs } from "pinia";
@@ -886,6 +902,8 @@ import { useRoute, useRouter } from "vue-router";
 import { useTeamStore } from "@/stores/user/team";
 import { notify } from "@/utils/toast";
 import { useAuthStore } from "@/stores/auth";
+import CompletionSkeleton from "../Skeleton/CompletionSkeleton.vue";
+import MyTaskSkeleton from "../Skeleton/MyTaskSkeleton.vue";
 
 const route = useRoute();
 const router = useRouter();
@@ -905,11 +923,10 @@ const { getMe } = storeToRefs(authStore);
 onMounted(async () => {
   updateTime();
   timer = setInterval(updateTime, 1000);
-  // await teamStore.getTeamByWorkspaceStore(workspace_id);
-  // await teamStore.getTeamByIdStore(workspace_id, team_id);
-  // await taskStore.getTaskByTeamStore(workspace_id, team_id);
-  await taskStore.getSummaryTaskStore(workspace_id, team_id);
-  await taskStore.getMyTaskStore(workspace_id, team_id);
+  await Promise.all([
+    await taskStore.getSummaryTaskStore(workspace_id, team_id),
+    await taskStore.getMyTaskStore(workspace_id, team_id),
+  ]);
 });
 
 // Access your data source
@@ -1156,13 +1173,20 @@ const groupedActivities = computed(() => {
   return Object.values(groups);
 });
 
-const actTagClass = (action) =>
-  ({ create: "act-tag-create", assign: "act-tag-assign", update: "act-tag-update" }[
-    action?.toLowerCase()
-  ] || "act-tag-update");
+const actTagClass = (action) => {
+  const map = {
+    create: "act-tag-create",
+    assign: "act-tag-assign",
+    submit: "act-tag-submit",
+    review: "act-tag-review",
+  };
+  return map[action?.toLowerCase()];
+};
 
-const actTagIcon = (action) =>
-  ({ create: Plus, assign: UserCheck, update: Send }[action?.toLowerCase()] || Send);
+const actTagIcon = (action) => {
+  const map = { create: Plus, assign: UserCheck, submit: Send, review: Eye };
+  return map[action?.toLowerCase()];
+};
 
 const lockedStatuses = ["submitted", "approved", "rejected"];
 const isStatusLocked = (status) => lockedStatuses.includes(status);

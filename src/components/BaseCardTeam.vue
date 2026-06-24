@@ -27,7 +27,7 @@
             </div>
             <div class="mb-3">
                 <n-progress type="line" :percentage="Number(progress)" :show-indicator="false" processing :height="8"
-                    color="#f97316" />
+                    color="#34C759" />
             </div>
 
             <!-- Owner & Members -->
