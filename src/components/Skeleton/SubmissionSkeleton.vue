@@ -9,7 +9,7 @@
 
     <!-- cards -->
     <div class="row g-4">
-      <div class="col-lg-6" v-for="i in 4" :key="i">
+      <div class="col-md-6 col-lg-4" v-for="i in 9" :key="i">
         <div class="bg-white rounded-card p-3">
           <!-- header -->
           <div class="d-flex justify-content-between align-items-center mb-3">

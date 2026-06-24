@@ -109,7 +109,7 @@
                     class="d-flex align-items-center rounded gap-2 px-2 py-1 fw-bold workspace-item"
                     @click.prevent="openRename(t)"
                   >
-                    <Pencil size="15" /> Rename
+                    <Brush size="15" /> Rename
                   </div>
                   <div
                     class="d-flex align-items-center rounded gap-2 px-2 py-1 fw-bold workspace-item"

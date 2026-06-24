@@ -143,7 +143,7 @@
                   showRenameModal = true;
                 "
               >
-                <Pencil size="13" /> Rename
+                <Brush size="13" /> Rename
               </div>
               <div
                 class="d-flex align-items-center rounded gap-2 px-2 py-1 text-danger fw-bold workspace-item"
