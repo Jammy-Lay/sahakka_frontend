@@ -43,18 +43,21 @@
 
       <div class="rounded-btn mt-3 bg-accent" style="padding: 10px">
         <p class="fs-13 fw-semibold mb-2 ps-1">Passcode</p>
-        <div class="row my-2 pe-4 g-0 gx-2">
-          <div class="col-10">
+        <div class="d-flex align-items-center my-2 gap-2">
+          <div class="w-100">
             <BaseInput v-model="passcode" input-placeholder="XXXXXXXX" isDisabled
-              input-class="fs-14 bg-white rounded-btn-sm" />
+              input-class="fs-14 bg-white rounded-btn-sm w-100" />
           </div>
-          <div class="col-1">
             <button
               class="btn btn-outline border rounded-btn py-2 h-100 fs-13 fw-semibold text-nowrap d-flex align-items-center gap-1"
               @click="handleCopy">
-              <copy size="13" /> Copy
+              <div v-if="isCopy">
+                <Check size="13" /> Copied
+              </div>
+              <div v-else>
+                <copy size="13" /> Copy
+              </div>
             </button>
-          </div>
         </div>
         <!-- Generate token -->
         <BaseButton
@@ -73,7 +76,7 @@ import { computed, h, onMounted, watch, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { storeToRefs } from "pinia";
 import { useTeamStore } from "@/stores/user/team";
-import { Mail, X, Copy } from "lucide-vue-next";
+import { Mail, X, Copy, Check } from "lucide-vue-next";
 import { useInviteStore } from "@/stores/user/invite";
 import BaseInput from "@/components/BaseInput.vue";
 import BaseButton from "@/components/BaseButton.vue";
@@ -178,8 +181,15 @@ const handleGenerate = async () => {
   }
 };
 
+const isCopy = ref(false);
+
 const handleCopy = async () => {
+  if(!passcode.value) return;
+  isCopy.value = true;
   await navigator.clipboard.writeText(passcode.value);
+  setTimeout(() => {
+    isCopy.value = false;
+  }, 2000);
 };
 </script>
 
