@@ -14,7 +14,7 @@
                 <div class="mb-4 col-12 col-sm-6 col-md-4 col-lg-3 px-0">
                     <div class="form-control rounded-btn d-flex align-items-center py-1" style="width: 300px;">
                         <input v-model="search" type="text" class="search-input shadow-none outline-none border-0 w-100"
-                            placeholder="Search by team name..." />
+                            placeholder="Search by team name" />
                         <Search color="var(--bs-gray)" size="18" />
                     </div>
                 </div>
@@ -84,7 +84,10 @@
                             </div>
                         </n-scrollbar>
 
-                        <div v-if="tasksByStatus(col.key).length === 0" class="empty-col">No tasks</div>
+                        <div v-if="tasksByStatus(col.key).length === 0" 
+                            class="d-flex justify-content-center align-items-center py-4">
+                            <n-empty description="No Data" />
+                        </div>
                     </div>
                 </div>
             </div>

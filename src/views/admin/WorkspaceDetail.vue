@@ -35,7 +35,7 @@
 
             <!-- Right Panel -->
             <div class="col-xl-4">
-                <div class="row g-4 pt-4">
+                <div class="row g-4">
 
                     <!-- Title -->
                     <div class="col-12">
