@@ -19,7 +19,7 @@
                             <div class="form-control rounded-btn d-flex align-items-center py-1" style="width: 300px;">
                                 <input v-model="searchQuery" type="text"
                                     class="search-input shadow-none outline-none border-0 w-100"
-                                    placeholder="Search workspace..." />
+                                    placeholder="Search Workspace" />
                                 <Search color="var(--bs-gray)" size="18" />
                             </div>
                         </div>
@@ -29,20 +29,27 @@
                 <!-- Cards -->
                 <n-scrollbar style="max-height: 70vh">
                     <div class="row g-3">
-                        <div class="col-12 col-md-6" v-for="project in paginatedProjects" :key="project.id">
-                            <BaseCard :project="project" :stats="project.stats" :members="project.membersList"
-                                @click="goDetail(project.id)" />
+                        <template v-if="paginatedProjects.length > 0">
+                            <div class="col-12 col-md-6" v-for="project in paginatedProjects" :key="project.id">
+                                <BaseCard :project="project" :stats="project.stats" :members="project.membersList"
+                                    @click="goDetail(project.id)" />
+                            </div>
+                        </template>
+
+                        <!-- Empty state -->
+                        <div v-else class="d-flex justify-content-center align-items-center" style="height: 300px;">
+                            <n-empty description="No Data" />
                         </div>
                     </div>
                 </n-scrollbar>
 
                 <!-- Pagination -->
                 <div class="mt-3 d-flex justify-content-end">
-                    <n-pagination v-model:page="currentPage" :page-count="totalPages" @update:page="changePage">
+                    <n-pagination v-if="totalPages > 1" v-model:page="currentPage" :page-count="totalPages"
+                        @update:page="changePage">
                         <template #prev>
                             <ChevronLeft />
                         </template>
-
                         <template #next>
                             <ChevronRight />
                         </template>
@@ -211,7 +218,7 @@ const getWorkspaces = async () => {
                 ],
             };
         });
-        
+
     } catch (error) {
         toast.error("Failed to load");
     } finally {

@@ -26,7 +26,7 @@
 
             <!-- ── Right Panel ── -->
             <div class="col-xl-4">
-                <div class="row g-4 pt-4">
+                <div class="row g-4">
                     <!-- title -->
                     <div class="col-12">
                         <div class="d-flex align-items-center gap-2">
