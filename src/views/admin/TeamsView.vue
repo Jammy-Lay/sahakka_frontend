@@ -15,7 +15,7 @@
                     <div class="form-control rounded-btn d-flex align-items-center py-1" style="width: 300px;">
                         <input v-model="searchQuery" type="text"
                             class="search-input shadow-none outline-none border-0 w-100"
-                            placeholder="Search document" />
+                            placeholder="Search Team" />
                         <Search color="var(--bs-gray)" size="18" />
                     </div>
                 </div>
@@ -23,16 +23,24 @@
         </div>
 
         <div class="row g-3">
-            <div class="col-12 col-md-6 col-lg-4 col-xl-3" v-for="project in paginatedProjects" :key="project.team_id">
-                <BaseCardTeam :workspace="project.workspace_name" :title="project.name"
-                    :description="project.description" :progress="project.progress" :owner="project.owner"
-                    :members="project.membersList" @view="goDetail(project.workspace_id, project.team_id)" />
+            <template v-if="paginatedProjects.length > 0">
+                <div class="col-12 col-md-6 col-lg-4 col-xl-3" v-for="project in paginatedProjects"
+                    :key="project.team_id">
+                    <BaseCardTeam :workspace="project.workspace_name" :title="project.name"
+                        :description="project.description" :progress="project.progress" :owner="project.owner"
+                        :members="project.membersList" @view="goDetail(project.workspace_id, project.team_id)" />
+                </div>
+            </template>
+
+            <!-- Empty state -->
+            <div v-else class="d-flex justify-content-center align-items-center" style="height: 300px;">
+                <n-empty description="No Data" />
             </div>
         </div>
 
         <!-- Pagination -->
         <div class="mt-2 d-flex justify-content-end">
-            <n-pagination v-model:page="currentPage" :page-count="totalPages">
+            <n-pagination v-if="totalPages > 1" v-model:page="currentPage" :page-count="totalPages">
                 <template #prev>
                     <ChevronLeft />
                 </template>
@@ -112,7 +120,7 @@ watch(searchQuery, () => {
 });
 const recentTeamsList = computed(() =>
     [...projects.value]
-        .sort((a, b) => b.team_id - a.team_id) 
+        .sort((a, b) => b.team_id - a.team_id)
         .slice(0, 5)
         .map((p) => ({
             team: p.name,
@@ -126,7 +134,7 @@ const filteredProjects = computed(() =>
         .filter((p) =>
             p.name?.toLowerCase().includes(searchQuery.value.toLowerCase())
         )
-        .sort((a, b) => b.team_id - a.team_id) 
+        .sort((a, b) => b.team_id - a.team_id)
 );
 
 const totalPages = computed(() =>

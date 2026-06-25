@@ -586,6 +586,22 @@ const handleSave = async () => {
     isLoading.value = false;
   }
 };
+
+const handleDelete = async () => {
+  isLoading.value = true;
+  const formData = new FormData();
+  formData.append("avatar", "postman-cloud:///1f153fd6-3412-4100-9d9d-82784da3d989");
+  try {
+    const res = await profileStore.DeleteAvatar(formData);
+    toast.success(res)
+  } catch (error) {
+    toast.error(error.message);
+  } finally {
+    await profileStore.getProfile();
+    showDeleteModal.value = false;
+    isLoading.value = false;
+  }
+}
 </script>
 
 <style scoped>
