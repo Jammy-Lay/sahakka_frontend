@@ -93,6 +93,7 @@ import {
     EllipsisVertical,
     CircleCheck,
     Target,
+    CircleX
 } from "lucide-vue-next";
 import BaseTitle from "@/components/BaseTitle.vue";
 import { computed } from "vue";
@@ -364,6 +365,10 @@ const columnsUserActive = [
                     options: options(row),
                     trigger: "click",
                     onSelect: (key) => handleAction(key, row),
+                    themeOverrides: {
+                    borderRadius: "12px",
+                    width: "180px" // Optional
+                }
                 },
                 {
                     default: () =>
@@ -606,6 +611,10 @@ onMounted(async () => {
 
 :deep(.task-table .n-data-table-td) {
     border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+/* Target Naive UI's dropdown popover menu container */
+.n-dropdown-menu {
+    border-radius: 12px !important;
 }
 .search-input:focus {
     outline: none;

@@ -55,7 +55,6 @@
                 <!-- actions -->
                 <div class="d-flex gap-2 ms-auto">
                     <div class="skeleton" style="width: 30px; height: 30px; border-radius: 8px;"></div>
-                    <div class="skeleton" style="width: 30px; height: 30px; border-radius: 8px;"></div>
                 </div>
 
             </div>
