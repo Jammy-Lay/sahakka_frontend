@@ -41,7 +41,7 @@
       </aside>
 
       <main class="main-content pb-3 px-4">
-        <n-config-provider>
+        <n-config-provider class="h-100">
           <router-view />
         </n-config-provider>
       </main>
