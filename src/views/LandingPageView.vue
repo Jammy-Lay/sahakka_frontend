@@ -221,38 +221,43 @@
   import HowItWorkCard from '@/components/HowItWorkCard.vue';
   import { ArrowRight, Mail, Menu, Pause, Play, ShieldCheck, X } from 'lucide-vue-next';
   import { ref } from 'vue';
+  import createWorkspace from '@/assets/image/how-it-work/create-workspace.png'
+  import createTask from '@/assets/image/how-it-work/create-task.png'
+  import detail from '@/assets/image/how-it-work/detail.png'
+  import taskTracking from '@/assets/image/how-it-work/task-tracking.png'
 
   let playVdo = ref(null);
   let pause = ref(true);
 
-  function imageUrl(name) {
-    return new URL('../assets/image/how-it-work/' + name + '.png', import.meta.url).href
-  }
+  // function imageUrl(name) {
+  //   return new URL('../assets/image/how-it-work/' + name + '.png', import.meta.url).href
+  // }
+  
 
   const cardContent = [
     {
       t1: '1. Create your workspace',
       t2: 'Set up in under a minute. Invite members, set roles, and start from a template or a blank slate.',
       color: '#008bfc',
-      src: imageUrl('create-workspace')
+      src: createWorkspace,
     },
     {
       t1: '2. Add tasks and deadline',
       t2: 'Break down goals into tasks, assign owners, and set due dates. Drag onto the timeline to build a visual roadmap.',
       color: '#fe8d31',
-      src: imageUrl('create-task')
+      src: createTask,
     },
     {
       t1: '3. Collaborate in context',
       t2: 'Comment, attach files, and link related tasks directly in-line — no more chasing updates with that messy messages.',
       color: '#3bc65e',
-      src: imageUrl('detail')
+      src: detail,
     },
     {
       t1: '4. Submit and review',
       t2: 'Track progress with live dashboards, review, and carry learnings into the next cycle.',
       color: '#5d5af2',
-      src: imageUrl('task-tracking')
+      src: taskTracking,
     }
   ];
 
