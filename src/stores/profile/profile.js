@@ -100,6 +100,16 @@ export const useProfileStore = defineStore("profile", () => {
     }
   };
 
+  const DeleteAvatar = async (formData) => {
+    try {
+      const response = await api.delete("/delete-avatar", formData);
+      return response.data.message;
+    } catch (err) {
+      console.log(err);
+      throw new Error(err.response?.data?.message || "Failed to delete avatar");
+    }
+  }
+
   return {
     user,
     myWorkspaces,
@@ -112,6 +122,7 @@ export const useProfileStore = defineStore("profile", () => {
     GetWorkspaceMember,
     ChangePassword,
     UpdateAvatar,
+    DeleteAvatar,
     loading,
   };
 });
