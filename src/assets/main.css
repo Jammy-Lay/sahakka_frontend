@@ -255,6 +255,12 @@ body .n-popover.n-tooltip {
   background-color: #D4D4D7 !important;
 }
 
+.btn-danger {
+  background-color: #FF383C !important;
+  color: white !important;
+  border: none !important;
+}
+
 .workspace-trigger {
   cursor: pointer;
   user-select: none;

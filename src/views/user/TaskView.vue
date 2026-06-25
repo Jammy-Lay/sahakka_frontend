@@ -393,7 +393,7 @@
                         class="d-flex align-items-center gap-2 px-2 py-1 rounded workspace-item fs-13 cursor-pointer"
                         @click="
                           closePop(task.id, 'assignee');
-                          handleUpdateTask(task);
+                          handleUpdateTask(task, true);
                         "
                       >
                         <img
@@ -1418,7 +1418,7 @@
               Cancel
             </button>
             <button
-              class="btn btn-danger rounded-btn-sm fs-13 fw-medium w-50"
+              class="btn btn-danger rounded-btn-sm fs-13 fw-medium w-50 py-2"
               @click="handleDeleteTask(taskToDelete)"
               :disabled="isLoading"
             >
@@ -1633,7 +1633,10 @@ const dateToTs = (dateString) => {
 };
 
 const handleCreateTask = async () => {
-  if (!form.value.title.trim()) return;
+  if (!form.value.title.trim()) {
+    toast.error("Title is required");
+    return;
+  }
   const payload = {
     title: form.value.title,
     description: form.value.description,

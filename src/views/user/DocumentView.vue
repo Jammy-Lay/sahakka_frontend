@@ -2,7 +2,7 @@
   <n-modal v-model:show="deleteModal" :mask-closable="true">
     <div class="bg-white rounded-card" style="width: 380px">
       <div class="d-flex align-items-center justify-content-between px-4 py-3 pb-2">
-        <span class="fw-medium fs-15">Delete Team</span>
+        <span class="fw-medium fs-15">Delete Document</span>
         <n-button
           text
           size="small"
@@ -23,7 +23,7 @@
             Cancel
           </button>
           <button
-            class="btn btn-danger rounded-btn-sm fs-13 fw-medium w-50"
+            class="btn btn-danger rounded-btn-sm fs-13 fw-medium w-50 py-2"
             @click="deleteDocHandling"
             :disabled="loading"
           >

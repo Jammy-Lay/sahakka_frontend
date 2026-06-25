@@ -233,7 +233,7 @@
               Cancel
             </button>
             <button
-              class="btn btn-danger rounded-btn-sm fs-13 fw-medium w-50"
+              class="btn btn-danger rounded-btn-sm fs-13 fw-medium w-50 py-2"
               @click="handleDelete"
               :disabled="isLoading"
             >

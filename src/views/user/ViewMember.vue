@@ -56,23 +56,18 @@
             class="search-input shadow-none outline-none border-0 w-100 fs-13"
             placeholder="Search member"
           />
-          <Search color="var(--bs-gray)" size="18" />
+          <Search size="18" />
         </div>
-        <BaseButton
-          @click="showModal = true"
-          class="btn rounded-btn pe-3 ps-3 fs-13 py-2"
-          icon="PlusIcon"
-          btn-name="New Member"
-        />
       </div>
 
       <div class="mt-4">
+        <TableViewMemberSkeleton v-if="memberStore.loading" />
         <n-data-table
+          v-else
           class="my-custom-table"
           :columns="columns"
           :data="filteredData"
           :row-props="rowProps"
-          :loading="loading"
         />
       </div>
     </div>
@@ -105,7 +100,7 @@
               Cancel
             </button>
             <button
-              class="btn btn-danger rounded-btn-sm fs-13 fw-medium w-50"
+              class="btn btn-danger rounded-btn-sm fs-13 fw-medium w-50 py-2"
               @click="confirmKick"
               :disabled="isKicking"
             >
@@ -120,7 +115,6 @@
 </template>
 
 <script setup>
-import BaseButton from "@/components/BaseButton.vue";
 import { ref, computed, h, onMounted, render } from "vue";
 import { NPopover } from "naive-ui";
 import { Ban } from "lucide-vue-next";
@@ -130,6 +124,7 @@ import { useMemberStore } from "@/stores/user/member";
 import { useTeamStore } from "@/stores/user/team";
 import { useAuthStore } from "@/stores/auth";
 import { storeToRefs } from "pinia";
+import TableViewMemberSkeleton from "@/components/Skeleton/TableViewMemberSkeleton.vue";
 
 const route = useRoute();
 const router = useRouter();
@@ -152,24 +147,17 @@ const isOwner = computed(
       ?.role === "owner"
 );
 
-// Loading
 const loading = ref(false);
 
 onMounted(async () => {
-  loading.value = true;
-  try {
-    await Promise.all([
-      memberStore.getAllMemberInWorkspaceStore(workspace_id.value),
-      teamStore.getTeamByWorkspaceStore(workspace_id.value),
-    ]);
-  } finally {
-    loading.value = false;
-  }
+  await Promise.all([
+    memberStore.getAllMemberInWorkspaceStore(workspace_id.value),
+    teamStore.getTeamByWorkspaceStore(workspace_id.value),
+  ]);
 });
 
 // UI State
 const showFilterPop = ref(false);
-const showModal = ref(false);
 const searchMember = ref("");
 const selectedTeamId = ref(null);
 const openPop = ref({});
@@ -204,16 +192,16 @@ function closePop(id, type) {
 async function handleFilterChange(teamId) {
   selectedTeamId.value = teamId;
   showFilterPop.value = false;
+  openPop.value = {};
 
-  loading.value = true;
   try {
     if (teamId !== null) {
       await memberStore.getAllMemberInTeamStore(workspace_id.value, teamId);
     } else {
       await memberStore.getAllMemberInWorkspaceStore(workspace_id.value);
     }
-  } finally {
-    loading.value = false;
+  } catch (err) {
+    toast.error(err.message);
   }
 }
 
@@ -282,8 +270,7 @@ const filteredData = computed(() =>
   )
 );
 
-const date = (date) =>
-  new Date(date).toLocaleDateString("en-GB", { dateStyle: "long" });
+const date = (date) => new Date(date).toLocaleDateString("en-GB", { dateStyle: "long" });
 // Table columns
 const columns = [
   {
@@ -311,8 +298,8 @@ const columns = [
     title: "Join",
     key: "joined_at",
     render(row) {
-      return h("div", date(row.joined_at))
-    }
+      return h("div", date(row.joined_at));
+    },
   },
   {
     title: "Role",
@@ -324,16 +311,28 @@ const columns = [
           class: `tab-info w-fit fw-medium d-inline-block ${roleConfig[row.role]?.bg} ${
             roleConfig[row.role]?.text
           }`,
+          style: "cursor: not-allowed !important;",
         },
         row.role.charAt(0).toUpperCase() + row.role.slice(1)
       );
 
-      // Not owner or viewing owner row → static badge only
       if (!isOwner.value || row.role === "owner") {
         return badge;
       }
 
-      // Owner viewing non-owner rows → popover with member/moderator only
+      if (selectedTeamId.value === null) {
+        return h(
+          "span",
+          {
+            class: `tab-info w-fit fw-medium d-inline-block ${roleConfig[row.role]?.bg} ${
+              roleConfig[row.role]?.text
+            }`,
+            style: "cursor: not-allowed !important;",
+          },
+          row.role.charAt(0).toUpperCase() + row.role.slice(1)
+        );
+      }
+
       return h(
         NPopover,
         {
@@ -341,7 +340,7 @@ const columns = [
           trigger: "click",
           placement: "bottom-start",
           showArrow: false,
-          style: "border-radius: 12px; padding: 6px; width: 140px;",
+          style: "border-radius: 12px; padding: 6px; width: 120px;",
           "onUpdate:show": (val) => {
             openPop.value[`${row.user_id}_role`] = val;
           },
@@ -412,7 +411,7 @@ const columns = [
 }
 
 .form-control:has(.search-input:focus) {
-  outline: 1px solid #171717;
+  border: 1.5px solid #171717;
 }
 
 .my-custom-table :deep(.n-data-table-wrapper) {
@@ -431,5 +430,9 @@ const columns = [
 
 .my-custom-table :deep(.n-data-table-td) {
   padding: 14px 24px !important;
+}
+
+.cursor-not-allowed {
+  cursor: not-allowed !important;
 }
 </style>
