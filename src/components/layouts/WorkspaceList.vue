@@ -381,17 +381,13 @@
                     input-class="fs-14 bg-white rounded-btn-sm"
                   />
                 </div>
-                  <button
-                    class="btn btn-outline border rounded-btn py-2 h-100 fs-13 fw-semibold text-nowrap d-flex align-items-center gap-1"
-                    @click="handleCopy"
-                  >
-                    <div v-if="isCopy">
-                      <Check size="13" /> Copied
-                    </div>
-                    <div v-else>
-                      <copy size="13" /> Copy
-                    </div>
-                  </button>
+                <button
+                  class="btn btn-outline border rounded-btn py-2 h-100 fs-13 fw-semibold text-nowrap d-flex align-items-center gap-1"
+                  @click="handleCopy"
+                >
+                  <div v-if="isCopy"><Check size="13" /> Copied</div>
+                  <div v-else><copy size="13" /> Copy</div>
+                </button>
               </div>
               <button
                 class="btn bg-btn w-100 fs-14 rounded-btn-sm py-2"
@@ -798,7 +794,7 @@ const handleGenerate = async () => {
 
 const isCopy = ref(false);
 const handleCopy = async () => {
-  if(!passcode.value) return;
+  if (!passcode.value) return;
   isCopy.value = true;
   await navigator.clipboard.writeText(passcode.value);
   setTimeout(() => {
