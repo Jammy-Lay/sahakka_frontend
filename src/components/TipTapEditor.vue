@@ -92,7 +92,6 @@
   onMounted(async () => {
     const res = await useDocument.getDocumentById(workspace_id, team_id, document_id);
     title.value = res.title
-    // editor.value.commands.setContent(res.content, false);
     editor.value.chain().setMeta('addToHistory', false).setContent(res.content, false).run();
     editor.value.chain().focus().run();
   })
