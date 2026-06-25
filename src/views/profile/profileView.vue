@@ -54,30 +54,12 @@
                   </div>
                 </div>
               </div>
-              <n-tooltip
-                placement="bottom"
-                trigger="hover"
-                :show-arrow="false"
-                keepAliveOnHover: false,
-                :style="{
-                  fontSize: '11px !important',
-                  padding: '4px 8px !important',
-                  borderRadius: '8px !important',
-                  marginTop: '3px !important',
-                  marginLeft: '0px !important',
-                  pointerEvents: 'none',
-                }"
-              >
-                <template #trigger>
-                  <button
-                    class="icon-action-btn-trash w-fit h-fit"
+                <button
+                    class="btn bg-danger text-white h-fit w-fit rounded-btn fs-14 d-flex align-items-center justify-content-center gap-2"
                     @click="showDeleteModal = true"
                   >
-                    <Trash2 size="18" />
+                    <Image-off size="15" /> Delete Avatar
                   </button>
-                </template>
-                Delete Avatar
-              </n-tooltip>
             </div>
           </div>
 
@@ -93,7 +75,7 @@
               placeholder="Your name"
             />
             <button
-              class="btn bg-btn rounded-btn fs-14 fw-semibold py-2 mt-2"
+              class="btn bg-btn rounded-btn fs-14 fw-medium py-2 mt-3"
               :disabled="isLoading"
               @click="handleSave"
             >
@@ -298,12 +280,13 @@
               class="my-2"
               style="--n-icon-size: 25px"
             />
-
-            <div
-              v-else
-              class="ws-item d-flex align-items-center justify-content-between mt-2"
+            <router-link v-else 
+              :to="`/workspace/${ws.workspace_id}/team/${ws.team_id}/tasks`"
+              class="text-decoration-none"
               v-for="ws in myWorkspaces"
-              :key="ws.workspace_id"
+              :key="ws.workspace_id">
+            <div
+              class="ws-item d-flex align-items-center justify-content-between mt-2"
             >
               <img :src="ws.creator?.avatar" alt="" class="img-w me-2" />
 
@@ -321,6 +304,7 @@
                 <ArrowUpRight :size="24" />
               </button>
             </div>
+            </router-link>
 
             <div class="ws-divider" />
 
