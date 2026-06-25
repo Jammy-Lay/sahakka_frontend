@@ -1,25 +1,51 @@
 <template>
-  <router-link v-for="(section, index) in getTeamSection" :key="section.id"
-    :to="`/workspace/${currentRouteWorkspaceId}/team/${currentRouteTeamId}/${section.name.toLowerCase()}`" :class="[
+  <router-link
+    v-for="(section, index) in getTeamSection"
+    :key="section.id"
+    :to="`/workspace/${currentRouteWorkspaceId}/team/${currentRouteTeamId}/${section.name.toLowerCase()}`"
+    :class="[
       'team-section text-decoration-none text-mute fs-15 d-flex justify-content-center align-items-center bg-white',
       getSectionClass(section.name),
-    ]" :style="{ borderRightColor: getBorderColor(index) }" active-class="active-section">
+    ]"
+    :style="{ borderRightColor: getBorderColor(index) }"
+    active-class="active-section"
+  >
     {{ section.name }}
   </router-link>
 
-  <n-popover trigger="click" placement="bottom" :show-arrow="false" v-model:show="showInvitePopover"
-    style="border-radius: 12px; width: 400px; padding: 0; margin-right: 12px; margin-top: 12px;">
+  <n-popover
+    trigger="click"
+    placement="bottom"
+    :show-arrow="false"
+    v-model:show="showInvitePopover"
+    style="
+      border-radius: 12px;
+      width: 400px;
+      padding: 0;
+      margin-right: 12px;
+      margin-top: 12px;
+    "
+  >
     <template #trigger>
       <div
-        class="team-section d-flex justify-content-center align-items-center gap-2 cursor-pointer fw-medium invite-hover">
+        class="team-section d-flex justify-content-center align-items-center gap-2 cursor-pointer fw-medium invite-hover"
+      >
         <Mail size="14" />
         <span class="fs-14">Invite</span>
       </div>
     </template>
 
-    <div class="d-flex align-items-center justify-content-between" style="padding: 0 10px; padding-top: 10px">
+    <div
+      class="d-flex align-items-center justify-content-between"
+      style="padding: 0 10px; padding-top: 10px"
+    >
       <span class="fw-bold fs-15 ps-1 m-0">Invite people</span>
-      <n-button text size="small" @click="showInvitePopover = false" class="text-dark hover-circle p-2 rounded-circle">
+      <n-button
+        text
+        size="small"
+        @click="showInvitePopover = false"
+        class="text-dark hover-circle p-2 rounded-circle"
+      >
         <x size="16" />
       </n-button>
     </div>
@@ -28,7 +54,11 @@
     <div style="padding: 10px">
       <div class="d-flex gap-2">
         <div class="w-100">
-          <BaseInput v-model="inviteEmail" input-placeholder="Email" input-class="fs-14 w-100 rounded-btn-sm" />
+          <BaseInput
+            v-model="inviteEmail"
+            input-placeholder="Email"
+            input-class="fs-14 w-100 rounded-btn-sm"
+          />
         </div>
         <div>
           <!-- Invite by email -->
@@ -45,24 +75,31 @@
         <p class="fs-13 fw-semibold mb-2 ps-1">Passcode</p>
         <div class="row my-2 pe-4 g-0 gx-2">
           <div class="col-10">
-            <BaseInput v-model="passcode" input-placeholder="XXXXXXXX" isDisabled
-              input-class="fs-14 bg-white rounded-btn-sm" />
+            <BaseInput
+              v-model="passcode"
+              input-placeholder="XXXXXXXX"
+              isDisabled
+              input-class="fs-14 bg-white rounded-btn-sm"
+            />
           </div>
           <div class="col-1">
             <button
               class="btn btn-outline border rounded-btn py-2 h-100 fs-13 fw-semibold text-nowrap d-flex align-items-center gap-1"
-              @click="handleCopy">
+              @click="handleCopy"
+            >
               <copy size="13" /> Copy
             </button>
           </div>
         </div>
         <!-- Generate token -->
-        <BaseButton
-          :btnName="isGenerateLoading ? 'Generating...' : 'Generate passcode'"
-          class="w-100 fs-14 rounded-btn-sm py-2"
+        <button
+          class="btn bg-btn w-100 fs-14 rounded-btn-sm py-2"
           :disabled="isGenerateLoading"
           @click="handleGenerate"
-        />
+        >
+          <span v-if="isGenerateLoading" class="spinner-border spinner-border-sm me-2" />
+          {{ isGenerateLoading ? "Generating..." : "Generate passcode" }}
+        </button>
       </div>
     </div>
   </n-popover>
@@ -170,7 +207,6 @@ const handleGenerate = async () => {
 
     passcode.value = res.data.token;
     toast.success("Generate Code Successfully");
-    
   } catch (error) {
     console.error(error);
   } finally {

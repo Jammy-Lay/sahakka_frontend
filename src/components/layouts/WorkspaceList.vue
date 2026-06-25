@@ -20,12 +20,18 @@
             style="width: 25px; height: 25px"
             class="rounded-circle object-fit-cover"
           />
-          <span class="fs-13 fw-bold">
-            <n-ellipsis style="max-width: 150px" :tooltip="false">
-              {{ currentWorkspace?.workspace_name }}
-            </n-ellipsis>
-          </span>
-          <chevron-down size="16" />
+          <div class="d-flex gap-1 align-items-center">
+            <span class="fs-13 fw-bold">
+              <n-ellipsis style="max-width: 150px" :tooltip="false">
+                {{ currentWorkspace?.workspace_name }}
+              </n-ellipsis>
+            </span>
+            <chevron-down
+              size="15"
+              class="chevron-icon"
+              :class="{ 'chevron-icon--rotated': showPopover }"
+            />
+          </div>
         </div>
       </template>
 
@@ -431,13 +437,13 @@
             input-class="py-1 fs-13 rounded-btn-sm mb-4"
           />
           <button
-              class="btn bg-btn w-100 fs-13 rounded-btn py-2"
-              :disabled="isLoading"
-              @click="handleRename"
-            >
-              <span v-if="isLoading" class="spinner-border spinner-border-sm me-2" />
-              {{ isLoading ? "Saving..." : "Save" }}
-            </button>
+            class="btn bg-btn w-100 fs-13 rounded-btn py-2"
+            :disabled="isLoading"
+            @click="handleRename"
+          >
+            <span v-if="isLoading" class="spinner-border spinner-border-sm me-2" />
+            {{ isLoading ? "Saving..." : "Save" }}
+          </button>
         </div>
       </div>
     </n-modal>
@@ -469,7 +475,7 @@
               Cancel
             </button>
             <button
-              class="btn btn-danger rounded-btn-sm fs-13 fw-medium w-50"
+              class="btn btn-danger rounded-btn-sm fs-13 fw-medium w-50 py-2"
               @click="handleDelete"
               :disabled="isLoading"
             >
@@ -545,7 +551,7 @@
               Cancel
             </button>
             <button
-              class="btn btn-danger rounded-btn-sm fs-13 fw-medium w-50"
+              class="btn btn-danger rounded-btn-sm fs-13 fw-medium w-50 py-2"
               @click="handleLeave(selectedWs)"
               :disabled="isLoading"
             >
@@ -840,5 +846,13 @@ const goViewMember = () => {
 
 :deep(.n-scrollbar-rail.n-scrollbar-rail--vertical .n-scrollbar-rail__scrollbar) {
   width: 4px !important;
+}
+
+.chevron-icon {
+  transition: transform 0.2s ease;
+}
+
+.chevron-icon--rotated {
+  transform: rotate(180deg);
 }
 </style>

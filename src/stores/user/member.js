@@ -5,13 +5,17 @@ import { ref } from "vue";
 export const useMemberStore = defineStore("members", () => {
   let getAllMemberInWorkspace = ref([]);
   let getAllMemberInTeam = ref([]);
+  let loading = ref(true);
 
   const getAllMemberInWorkspaceStore = async (workspace_id) => {
     try {
+      loading.value = true;
       const res = await api.get(`/workspace/${workspace_id}/members`);
       getAllMemberInWorkspace.value = res.data.data;
     } catch (err) {
       throw new Error(err.response?.data?.message || "Get members failed");
+    } finally {
+      loading.value = false;
     }
   };
 
@@ -36,12 +40,15 @@ export const useMemberStore = defineStore("members", () => {
 
   const getAllMemberInTeamStore = async (workspace_id, team_id) => {
     try {
+      loading.value = true;
       const res = await api.get(
         `/workspace/${workspace_id}/team/${team_id}/members`,
       );
       getAllMemberInTeam.value = res.data.data;
     } catch (err) {
       throw new Error(err.response?.data?.message || "Get members failed");
+    } finally {
+      loading.value = false;
     }
   };
 
@@ -63,5 +70,6 @@ export const useMemberStore = defineStore("members", () => {
     removeFromWorkspace,
     getAllMemberInTeamStore,
     removeFromTeam,
+    loading
   };
 });
