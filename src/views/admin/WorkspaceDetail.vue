@@ -128,9 +128,11 @@ const loadData = async () => {
 };
 
 /* TOTALS */
-const totalMembers = computed(() =>
-    teams.value.reduce((sum, t) => sum + (t.members?.length || 0), 0)
-);
+const totalMembers = computed(() => {
+    const allMembers = teams.value.flatMap((t) => t.members || []);
+    const uniqueMembers = [...new Map(allMembers.map((m) => [m.user_id, m])).values()];
+    return uniqueMembers.length;
+});
 
 const teamIds = computed(() =>
     teams.value.map((team) => team.team_id)
@@ -153,17 +155,22 @@ const progress = computed(() => {
         : Math.round((approved / totalTasks.value) * 100);
 });
 
-const workspaceCard = computed(() => ({
-    name: workspace.value?.workspace_name,
-    owner: workspace.value?.creator?.user_name || "Unknown",
-    progress: progress.value,
-    membersList: teams.value.flatMap((t) => t.members || []),
-}));
+const workspaceCard = computed(() => {
+    const allMembers = teams.value.flatMap((t) => t.members || []);
+    const uniqueMembers = [...new Map(allMembers.map((m) => [m.user_id, m])).values()];
+
+    return {
+        name: workspace.value?.workspace_name,
+        owner: workspace.value?.creator?.user_name || "Unknown",
+        progress: progress.value,
+        membersList: uniqueMembers, // deduplicated
+    };
+});
 
 /* WORKSPACE STATS */
 const workspaceStats = computed(() => [
     { label: "Teams", value: teams.value.length, icon: Users, color: "#3b82f6" },
-    { label: "Members", value: totalMembers.value, icon: Users, color: "#a855f7" },
+    { label: "Members", value: totalMembers.value, icon: Users, color: "#a855f7" }, // already uses totalMembers
     { label: "Tasks", value: totalTasks.value, icon: ChartPie, color: "#10b981" },
 ]);
 

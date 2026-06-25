@@ -2,9 +2,16 @@
     <div>
 
         <!-- header -->
-        <div class="d-flex align-items-center gap-2 mb-1 pt-3">
-            <div class="skeleton" style="width: 30px; height: 30px; border-radius: 6px;"></div>
-            <div class="skeleton" style="width: 120px; height: 28px;"></div>
+        <div class="row bg-body pt-3 mb-3">
+          <div class="col-4">
+            <div class="d-flex align-items-center gap-2">
+              <div class="skeleton" style="width:30px; height:30px; border-radius:6px;"></div>
+              <div class="skeleton" style="width:110px; height:35px;"></div>
+            </div>
+          </div>
+          <div class="col-8 d-flex justify-content-end">
+            <div class="skeleton" style="width:100%; max-width:320px; height:36px; border-radius:14px;"></div>
+          </div>
         </div>
 
         <!-- tabs -->

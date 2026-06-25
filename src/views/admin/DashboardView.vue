@@ -194,6 +194,7 @@ const fetchDashboard = async () => {
     try {
         const res = await api.get('/sahakka-admin/dashboard');
         dashboard.value = res.data.data;
+        console.log("Dashboard API response:", res.data.data);
     } catch (error) {
         toast.error("Failed to load");
     } finally {

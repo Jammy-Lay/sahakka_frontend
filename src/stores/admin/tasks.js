@@ -3,7 +3,7 @@ import { defineStore } from "pinia";
 import { ref } from "vue";
 
 let loading = ref(true); 
-export const useTaskstore = defineStore ('task', () =>{
+export const useTaskstore = defineStore ('tasks', () =>{
     const tasks = ref([]);
     loading.value = true;
     async function fetchTasks() {

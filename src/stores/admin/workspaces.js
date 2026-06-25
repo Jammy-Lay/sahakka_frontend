@@ -2,7 +2,7 @@ import api from "@/api/https";
 import { defineStore } from "pinia";
 import { ref } from "vue";
 
-export const useWorkspaceStore = defineStore("workspace", () => {
+export const useWorkspaceStore = defineStore("workspaces", () => {
   const workspaces = ref([]);
   async function fetchWorkspaces() {
     try {

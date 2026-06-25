@@ -421,11 +421,14 @@
             input-placeholder="New name"
             input-class="py-1 fs-13 rounded-btn-sm mb-4"
           />
-          <BaseBtn
-            btnName="Save"
-            class="w-100 fs-13 rounded-btn py-2"
-            @click="handleRename"
-          />
+          <button
+              class="btn bg-btn w-100 fs-13 rounded-btn py-2"
+              :disabled="isLoading"
+              @click="handleRename"
+            >
+              <span v-if="isLoading" class="spinner-border spinner-border-sm me-2" />
+              {{ isLoading ? "Saving..." : "Save" }}
+            </button>
         </div>
       </div>
     </n-modal>
@@ -718,9 +721,9 @@ const handleLeave = async (ws) => {
 };
 
 const handleJoin = async () => {
-  isLoading.value = true;
   const token = joinCode.value.trim();
   if (!token) return toast.error("Token is required");
+  isLoading.value = true;
 
   try {
     await crudWorkspaceStore.joinByToken(token);

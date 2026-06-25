@@ -3,7 +3,7 @@ import { defineStore } from "pinia";
 import { ref } from "vue";
 
 let loading = ref(true);
-export const useTeamstore = defineStore ('team', () =>{
+export const useTeamstore = defineStore ('teams', () =>{
     const teams = ref([]);
     const currentTeam = ref(null);
     loading = true;

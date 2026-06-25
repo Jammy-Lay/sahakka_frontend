@@ -2,52 +2,87 @@
     <div v-if="loading">
         <SkeletonUser></SkeletonUser>
     </div>
-    <div v-else>
-        <div class="d-flex align-items-center mb-1">
-            <div class="d-flex align-items-center gap-2">
-                <Users  class="text-prime" :size="30" />
-                <BaseTitle title="View Users" class="mb-0" />
-            </div>
-        </div>
+    <div v-else class="container-fluid px-4">
+        <div class="row g-4 align-items-start">
 
-        <n-tabs type="line" animated default-value="allUsers">
-            <n-tab-pane name="allUsers" tab="Users">
-                <div class="row pt-3 g-4">
-                    <div class="col-lg-12">
-                        <n-data-table :columns="columnsAllUsers" :data="dataAllUsers"
-                            :pagination="dataAllUsers.length >= 9 ? { pageSize: 9, } : false" :bordered="false"
-                            class="task-table" />
+            <!-- ── Left: Users Table ── -->
+            <div class="col-12">
+                <div class="row bg-body position-sticky pt-2" style="top: 10px; z-index: 10">
+                    <div class="col-4">
+                        <div class="d-flex align-items-center gap-2">
+                            <Users class="text-prime" :size="30" />
+                            <BaseTitle title="View Users" class="mb-0" />
+                        </div>
+                    </div>
+                    <div class="col-8">
+                        <div class="d-flex justify-content-end mb-3">
+                            <div class="form-control rounded-btn d-flex align-items-center py-1" style="width: 300px;">
+                                <input v-model="searchEmail" type="text"
+                                    class="search-input shadow-none outline-none border-0 w-100"
+                                    placeholder="Search by email..." />
+                                <Search color="var(--bs-gray)" size="18" />
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </n-tab-pane>
-            <n-tab-pane name="userActive" tab="Users Active">
-                <div class="row pt-3 g-4">
-                    <div class="col-lg-12">
-                        <n-data-table :columns="columnsUserActive" :data="dataUsersActive"
-                            :pagination="dataUsersActive.length >= 9 ? { pageSize: 9 } : false" :bordered="false"
-                            class="task-table" />
-                    </div>
-                </div>
-            </n-tab-pane>
-            <n-tab-pane name="newRegister" tab="User Register">
-                <div class="row pt-3 g-4">
-                    <div class="col-lg-12">
-                        <n-data-table :columns="columnsNewRegister" :data="dataNewRegister"
-                            :pagination="dataNewRegister.length >= 9 ? { pageSize: 9 } : false" :bordered="false"
-                            class="task-table" />
-                    </div>
-                </div>
-            </n-tab-pane>
-            <n-tab-pane name="userBlock" tab="User Blocked">
-                <div class="row pt-3 g-4">
-                    <div class="col-lg-12">
-                        <n-data-table :columns="columnsUserBlock" :data="dataUserBlock"
-                            :pagination="dataUserBlock.length >= 9 ? { pageSize: 9 } : false" :bordered="false"
-                            class="task-table" />
-                    </div>
-                </div>
-            </n-tab-pane>
-        </n-tabs>
+
+                <!-- Tabs -->
+                <n-tabs type="line" animated default-value="allUsers">
+                    <n-tab-pane name="allUsers" tab="Users">
+                        <div class="row pt-3 g-4">
+                            <div class="col-lg-12">
+                                <n-data-table
+                                    :columns="columnsAllUsers"
+                                    :data="dataAllUsers"
+                                    :pagination="dataAllUsers.length >= 9 ? { pageSize: 9 } : false"
+                                    :bordered="false"
+                                    class="task-table" />
+                            </div>
+                        </div>
+                    </n-tab-pane>
+
+                    <n-tab-pane name="userActive" tab="Users Active">
+                        <div class="row pt-3 g-4">
+                            <div class="col-lg-12">
+                                <n-data-table
+                                    :columns="columnsUserActive"
+                                    :data="dataUsersActive"
+                                    :pagination="dataUsersActive.length >= 9 ? { pageSize: 9 } : false"
+                                    :bordered="false"
+                                    class="task-table" />
+                            </div>
+                        </div>
+                    </n-tab-pane>
+
+                    <n-tab-pane name="newRegister" tab="User Register">
+                        <div class="row pt-3 g-4">
+                            <div class="col-lg-12">
+                                <n-data-table
+                                    :columns="columnsNewRegister"
+                                    :data="dataNewRegister"
+                                    :pagination="dataNewRegister.length >= 9 ? { pageSize: 9 } : false"
+                                    :bordered="false"
+                                    class="task-table" />
+                            </div>
+                        </div>
+                    </n-tab-pane>
+
+                    <n-tab-pane name="userBlock" tab="User Blocked">
+                        <div class="row pt-3 g-4">
+                            <div class="col-lg-12">
+                                <n-data-table
+                                    :columns="columnsUserBlock"
+                                    :data="dataUserBlock"
+                                    :pagination="dataUserBlock.length >= 9 ? { pageSize: 9 } : false"
+                                    :bordered="false"
+                                    class="task-table" />
+                            </div>
+                        </div>
+                    </n-tab-pane>
+                </n-tabs>
+            </div>
+
+        </div>
     </div>
 </template>
 
@@ -57,7 +92,7 @@ import { NTag, NAvatar, NProgress, NDropdown } from "naive-ui";
 import {
     EllipsisVertical,
     CircleCheck,
-    CircleX,
+    Target,
 } from "lucide-vue-next";
 import BaseTitle from "@/components/BaseTitle.vue";
 import { computed } from "vue";
@@ -69,6 +104,7 @@ import SkeletonUser from "@/components/Skeleton/SkeletonUser.vue";
 const toast = useToast();
 const usersStore = useUserStore();
 const loading = ref(true);
+const searchEmail = ref("");
 
 const formatDate = (date) => {
     if (!date) return "N/A";
@@ -93,7 +129,10 @@ const getAllUsers = async () => {
 
 const dataAllUsers = computed(() => {
     return [...(usersStore.users || [])]
-        .sort((a, b) => a.id - b.id);
+        .filter(user =>
+            user.email?.toLowerCase().includes(searchEmail.value.toLowerCase())
+        )
+        .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 });
 const options = (row) => {
 
@@ -255,8 +294,12 @@ const columnsAllUsers = [
 
 const dataUsersActive = computed(() => {
     return [...(usersStore.users || [])]
-        .filter(user => user.is_active === 1 && user.is_verified === 1)
-        .sort((a, b) => a.id - b.id);
+        .filter(user =>
+            user.is_active === 1 &&
+            user.is_verified === 1 &&
+            user.email?.toLowerCase().includes(searchEmail.value.toLowerCase())
+        )
+        .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 });
 
 const columnsUserActive = [
@@ -344,10 +387,13 @@ const columnsUserActive = [
 
 const dataNewRegister = computed(() => {
     return [...(usersStore.users || [])]
-        .filter(user => user.is_active === 1 && user.is_verified === 0)
-        .sort((a, b) => a.id - b.id);
+        .filter(user =>
+            user.is_active === 1 &&
+            user.is_verified === 0 &&
+            user.email?.toLowerCase().includes(searchEmail.value.toLowerCase())
+        )
+        .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 });
-
 const columnsNewRegister = [
     {
         title: "ID",
@@ -405,8 +451,11 @@ const columnsNewRegister = [
 
 const dataUserBlock = computed(() => {
     return [...(usersStore.users || [])]
-        .filter(user => user.is_active === 0)
-        .sort((a, b) => a.id - b.id);
+        .filter(user =>
+            user.is_active === 0 &&
+            user.email?.toLowerCase().includes(searchEmail.value.toLowerCase())
+        )
+        .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 });
 
 const columnsUserBlock = [
@@ -557,5 +606,8 @@ onMounted(async () => {
 
 :deep(.task-table .n-data-table-td) {
     border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+.search-input:focus {
+    outline: none;
 }
 </style>

@@ -3,8 +3,10 @@
 
         <!-- header -->
         <div class="d-flex align-items-center justify-content-between mb-3 pb-3">
-            <div class="skeleton" style="width: 120px; height: 28px;"></div>
-            <div class="skeleton" style="width: 80px; height: 26px; border-radius: 20px;"></div>
+            <div class="d-flex align-items-center gap-2">
+                <div class="skeleton" style="width:30px; height:30px; border-radius:6px;"></div>
+                <div class="skeleton" style="width:110px; height:35px;"></div>
+            </div>
         </div>
 
         <!-- stat cards row -->
