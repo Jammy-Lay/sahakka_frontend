@@ -39,7 +39,7 @@
       <img src="../assets/image/m.svg" class="position-absolute m-path top-0 start-0 z-0" alt="" style="scale: 1.6 1;">
       <div class="container-fluid h-100">
         <div class="row h-100 align-items-center">
-          <div class="col-6 z-2">
+          <div class="col-xxl-6 z-2">
             <div class="d-flex flex-column gap-4 justify-content-center">
               <div class="w-fit bg-white rounded-pill d-flex align-items-center gap-2 px-3 py-2">
                 <div class="bg-black rounded-circle" style="width: 8px; height: 8px;"></div>
@@ -47,7 +47,8 @@
               </div>
               <div class="hero-title text-white position-relative w-100">
                 <h1>Create, assign, complete and</h1>
-                <div class="decorate-hero-btn rounded-pill w-fit px-6 py-3 position-absolute">
+                <h1 class="d-block d-xxl-none">Submit</h1>
+                <div class="decorate-hero-btn d-none d-xxl-block  rounded-pill w-fit px-6 py-3 position-absolute">
                   <img class="position-absolute star star1" src="../assets/image/star.svg" alt="">
                   <img class="position-absolute star star2" src="../assets/image/star.svg" alt="">
                   <p class="display-5 m-0">Submit</p>
@@ -65,7 +66,7 @@
               </router-link>
             </div>
           </div>
-          <div class="col-6 z-1 h-100">
+          <div class="d-none d-xxl-block col-lg-6 z-1 h-100">
             <div class="position-relative h-100">
               <img src="../assets/image/workspace.png" alt="" class="w-100 workspace-img position-absolute">
               <img src="../assets/image/task-card.png" alt="" class="w-75 task-card-img position-absolute">
@@ -312,12 +313,12 @@
   .hero-section {
     height: 92vh;
     background: #171717;
-    padding: 110px 50px;
+    padding: 110px 10px;
   }
 
   .hero-title h1 {
     /* font-size: 6.25rem; */
-    font-size: 5rem;
+    font-size: clamp(2rem, 10vw, 5rem);
   }
 
   .decorate-hero-btn {
