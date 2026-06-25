@@ -8,17 +8,21 @@ export const useProfileStore = defineStore("profile", () => {
   let WorkspaceMember = ref({});
   let joinedWorkspaces = ref([]);
   let getAllWorkspace = ref({});
+  let loading = ref(true);
   // let count_team = ref({});
   // let count_member = ref({});
   let token = ref(localStorage.getItem("token"));
   // let isLoggedIn = computed(() => !!token.value);
   const getProfile = async () => {
     try {
+      loading.value = true;
       const res = await api.get("/getMe", { token });
       user.value = res.data.data;
       // console.log(res.data);
     } catch (err) {
       throw new Error(err.response?.data?.message || "failed");
+    } finally {
+      loading.value = false;
     }
   };
 
@@ -29,20 +33,6 @@ export const useProfileStore = defineStore("profile", () => {
       return res.data;
     } catch (err) {
       throw new Error(err.response?.data?.message || "failed");
-    }
-  };
-
-  const GetTaskSummary = async (workspace_id, team_id) => {
-    try {
-      const res = await api.get(
-        `/workspace/${workspace_id}/team/${team_id}/my-tasks/summary`,
-      );
-
-      console.log("Task API:", res.data);
-      return res.data.data;
-    } catch (err) {
-      console.error(err);
-      throw err;
     }
   };
 
@@ -118,10 +108,10 @@ export const useProfileStore = defineStore("profile", () => {
     getAllWorkspace,
     getProfile,
     UpdateName,
-    GetTaskSummary,
     GetMyWorkspace,
     GetWorkspaceMember,
     ChangePassword,
     UpdateAvatar,
+    loading,
   };
 });

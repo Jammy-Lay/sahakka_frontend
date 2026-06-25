@@ -5,7 +5,7 @@
             <div style="flex: 1">
                 <!-- LOGO / HOME / BRAND -->
                 <div class="sidebar-top">
-                    <div class="sidebar-home d-flex items-center gap-2 me-10"
+                    <div class="sidebar-home d-flex items-center gap-2 me-10 mb-3"
                          @click="goHome">
                         <House size="16" />
                         Home
