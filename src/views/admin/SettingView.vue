@@ -40,8 +40,9 @@
                                 " :size="150" round object-fit="cover" />
                             <!-- Pencil trigger button with dropdown -->
                             <n-dropdown :options="avatarDropdownOptions" placement="bottom-start" trigger="click"
+                                :theme-overrides="{ borderRadius: '12px', width: '180px' }"
                                 @select="handleAvatarDropdown">
-                                <button class="avatar-edit-btn" type="button">
+                                <button class="avatar-edit-btn" style="background-color: #171717; border: 2px solid #fff;" type="button">
                                     <Pencil :size="16" />
                                 </button>
                             </n-dropdown>
@@ -634,5 +635,9 @@ function formatDate(dateString) {
 
 .pw-n-input :deep(.n-input__eye:hover) {
     color: #3b82f6;
+}
+
+:deep(.n-dropdown-menu) {
+    border-radius: 12px !important;
 }
 </style>
