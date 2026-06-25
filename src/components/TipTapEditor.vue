@@ -2,8 +2,8 @@
 
   <div class="main overflow-hidden h-100 m-auto pt-4">
     <div class="h-100 d-flex flex-column border rounded-3 overflow-hidden">
-      <TipTapToolbar :editor="editor" v-if="editor" :title="title"/>
-      <editor-content :editor="editor" class="h-100 overflow-y-auto"/>
+      <TipTapToolbar :editor="editor" v-if="editor" :title="title" />
+      <editor-content :editor="editor" class="h-100 overflow-y-auto" />
     </div>
   </div>
 
@@ -12,8 +12,8 @@
 <script setup>
   import { onBeforeUnmount, onMounted, ref } from 'vue';
 
-  import { useEditor, EditorContent, Extension } from '@tiptap/vue-3'
-  import { Placeholder } from '@tiptap/extensions';
+  import { useEditor, EditorContent, Extension, Editor } from '@tiptap/vue-3'
+  import { Placeholder, UndoRedo } from '@tiptap/extensions';
   import StarterKit from '@tiptap/starter-kit';
   import TipTapToolbar from './TipTapToolbar.vue';
   import { useDocumentStore } from '@/stores/user/document.js';
@@ -50,6 +50,7 @@
       StarterKit.configure({
         blockquote: {},
         hardBreak: {},
+        history: {}
       }),
       Placeholder.configure({
         placeholder: 'Write something…',
@@ -91,7 +92,7 @@
   onMounted(async () => {
     const res = await useDocument.getDocumentById(workspace_id, team_id, document_id);
     title.value = res.title
-    editor.value.commands.setContent(res.content);
+    editor.value.chain().setMeta('addToHistory', false).setContent(res.content, false).run();
     editor.value.chain().focus().run();
   })
 
@@ -118,10 +119,10 @@
     }
 
     h1,
-    h2, 
-    h3, 
-    h4, 
-    h5, 
+    h2,
+    h3,
+    h4,
+    h5,
     h6 {
       margin-block: 5px 15px;
       font-weight: 600;
