@@ -115,7 +115,7 @@
 
       <template v-else>
         <n-empty
-          v-if="(taskFilter === 'all' ? getTask : getMyTask).length === 0"
+          v-if="(taskFilter === 'all' ? getTask : getMyDailyTask).length === 0"
           description="No Data"
           class="mt-8"
           style="--n-icon-size: 45px; font-size: 14px"
@@ -126,7 +126,7 @@
             <div
               class="bg-white rounded-card border border-0 showTrash"
               style="padding: 20px; min-height: 220px; cursor: pointer"
-              v-for="task in taskFilter === 'all' ? getTask : getMyTask"
+              v-for="task in taskFilter === 'all' ? getTask : getMyDailyTask"
               :key="task.id"
               @click="openTaskModal(task)"
             >
@@ -210,16 +210,34 @@
                   </div>
                 </n-popover>
 
-                <button
-                  class="icon-action-btn-trash ms-3"
-                  @click.stop="
-                    taskToDelete = task;
-                    showDeleteModal = true;
-                  "
+                <n-tooltip
                   v-if="isOwner"
+                  placement="bottom"
+                  trigger="hover"
+                  :show-arrow="false"
+                  :keep-alive-on-hover="false"
+                  :style="{
+                    fontSize: '11px !important',
+                    padding: '4px 8px !important',
+                    borderRadius: '8px !important',
+                    marginTop: '3px !important',
+                    marginLeft: '0px !important',
+                    pointerEvents: 'none',
+                  }"
                 >
-                  <Trash2 size="18" />
-                </button>
+                  <template #trigger>
+                    <button
+                      class="icon-action-btn-trash ms-3"
+                      @click.stop="
+                        taskToDelete = task;
+                        showDeleteModal = true;
+                      "
+                    >
+                      <Trash2 size="18" />
+                    </button>
+                  </template>
+                  Delete Task
+                </n-tooltip>
               </div>
 
               <div class="meta-grid mb-3">
@@ -1455,7 +1473,7 @@ const workspaceStore = UseWorkspaceStore();
 const { getAllWorkspace } = storeToRefs(workspaceStore);
 
 const taskStore = useTaskStore();
-const { getTask, getTaskActivity, getMyTask } = storeToRefs(taskStore);
+const { getTask, getTaskActivity, getMyTask, getMyDailyTask } = storeToRefs(taskStore);
 
 const teamStore = useTeamStore();
 const { getTeamById, getTeamByWorkspace, getMember } = storeToRefs(teamStore);
@@ -1670,6 +1688,7 @@ const handleUpdateTask = async (task, forceField = null) => {
     );
     await taskStore.getSummaryTaskStore(workspace_id.value, team_id.value, true);
     await taskStore.getMyTaskStore(workspace_id.value, team_id.value, "", true);
+    await taskStore.getTaskActivityStore(workspace_id.value, team_id.value, task.id);
   } catch (error) {
     toast.error(error.message);
     await taskStore.getTaskByTeamStore(

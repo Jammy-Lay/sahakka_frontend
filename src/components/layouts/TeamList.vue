@@ -299,21 +299,44 @@ const getTeamPercent = (teamId) => {
 
   return Math.round((approved / tasks.length) * 100);
 };
+const currentWorkspace = computed(() => {
+  return (
+    getAllWorkspace.value.find((w) => w.workspace_id == currentRouteWorkspaceId.value) ??
+    null
+  );
+});
+
+const isOwner = computed(() => currentWorkspace.value?.my_role === "owner");
 
 watch(
   () => route.params.team_id,
   async (teamId) => {
     if (!teamId) return;
-    await Promise.all([
+    const calls = [
       teamStore.getTeamByIdStore(currentRouteWorkspaceId.value, teamId),
       taskStore.getTaskByTeamStore(currentRouteWorkspaceId.value, teamId),
       taskStore.getSummaryTaskStore(currentRouteWorkspaceId.value, teamId),
       taskStore.getMyTaskStore(currentRouteWorkspaceId.value, teamId),
-      submissionStore.getAllSubmissionByTeamStore(currentRouteWorkspaceId.value, teamId),
-    ]);
+    ];
+    if (isOwner.value) {
+      calls.push(
+        submissionStore.getAllSubmissionByTeamStore(currentRouteWorkspaceId.value, teamId)
+      );
+    }
+
+    await Promise.all(calls);
   },
   { immediate: true }
 );
+
+watch(isOwner, (val) => {
+  if (val && route.params.team_id) {
+    submissionStore.getAllSubmissionByTeamStore(
+      currentRouteWorkspaceId.value,
+      route.params.team_id
+    );
+  }
+});
 
 onMounted(async () => {
   await Promise.all([
@@ -344,15 +367,6 @@ function createDropdownOptions(options) {
     props: { style: "font-size: 11px;" },
   }));
 }
-
-const currentWorkspace = computed(() => {
-  return (
-    getAllWorkspace.value.find((w) => w.workspace_id == currentRouteWorkspaceId.value) ??
-    null
-  );
-});
-
-const isOwner = computed(() => currentWorkspace.value?.my_role === "owner");
 
 // Create team
 const showCreateTeam = ref(false);

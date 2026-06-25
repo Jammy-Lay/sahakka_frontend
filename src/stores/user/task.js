@@ -9,6 +9,8 @@ export const useTaskStore = defineStore("task", () => {
   let getTaskActivity = ref([]);
   let getSummaryTask = ref({});
   let getMyTask = ref([]);
+  let getMyIssueTask = ref([]);
+  let getMyDailyTask = ref([]);
   let tasksByTeam = ref({});
   let loading = ref(true);
   let tabLoading = ref(false);
@@ -125,7 +127,14 @@ export const useTaskStore = defineStore("task", () => {
       const res = await api.get(
         `/workspace/${workspace_id}/team/${team_id}/my-tasks?status=${status}`,
       );
-      getMyTask.value = res.data.data;
+      const tasks = res.data.data;
+      getMyTask.value = tasks;
+      getMyIssueTask.value = tasks.filter((t) =>
+        ["bug", "improvement"].includes(t.type),
+      );
+      getMyDailyTask.value = tasks.filter((t) =>
+        ["task", "feature"].includes(t.type),
+      );
     } catch (err) {
       throw new Error(err.response?.data?.message || "Get my task failed");
     } finally {
@@ -153,6 +162,8 @@ export const useTaskStore = defineStore("task", () => {
     deleteTask,
     tasksByTeam,
     prefetchTeamTasks,
-    tabLoading
+    tabLoading,
+    getMyDailyTask,
+    getMyIssueTask
   };
 });

@@ -103,7 +103,7 @@ const router = createRouter({
     },
     {
       path: "/settings",
-     component: () => import("../layouts/ProfileLyout.vue"),
+     component: () => import("../layouts/ProfileLayout.vue"),
       children: [
         {
           path: "",

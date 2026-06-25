@@ -5,7 +5,7 @@
         <img
           src="../../assets/image/style 1.png"
           alt=""
-          class="object-fit-cover w-100 vh-100"
+          class="object-fit-cover w-100 vh-100 d-none d-lg-block"
         />
       </div>
       <div class="col-lg-6">

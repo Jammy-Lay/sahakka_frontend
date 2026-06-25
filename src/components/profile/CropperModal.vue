@@ -1,6 +1,6 @@
 <template>
     <Teleport to="body">
-        <div class="modal-overlay" @click.self="handleClose"> <!-- ✅ changed from $emit('closeModal') -->
+        <div class="modal-overlay" @click.self="handleClose">
             <div class="modal-box">
                 <h3 class="modal-title">Update Profile Photo</h3>
                 <div v-if="!imageUrl" class="upload-area" @click="triggerFileInput">
@@ -19,7 +19,7 @@
                 </div>
 
                 <div class="modal-actions">
-                    <button class="btn-cancel" @click="handleClose"> <!-- ✅ changed from $emit('closeModal') -->
+                    <button class="btn-cancel" @click="handleClose">
                         Cancel
                     </button>
                     <button v-if="imageUrl" class="btn-save" :disabled="props.disable" @click="crop">

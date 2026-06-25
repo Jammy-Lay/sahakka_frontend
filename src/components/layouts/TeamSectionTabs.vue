@@ -70,15 +70,18 @@
 
 <script setup>
 import { computed, h, onMounted, watch, ref } from "vue";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import { storeToRefs } from "pinia";
 import { useTeamStore } from "@/stores/user/team";
 import { Mail, X, Copy } from "lucide-vue-next";
 import { useInviteStore } from "@/stores/user/invite";
 import BaseInput from "@/components/BaseInput.vue";
 import BaseButton from "@/components/BaseButton.vue";
+import { notify } from "@/utils/toast";
 
 const route = useRoute();
+const router = useRouter();
+const toast = notify(router);
 const currentRouteWorkspaceId = computed(() => route.params.workspace_id);
 const currentRouteTeamId = computed(() => route.params.team_id);
 const currentSection = computed(() => route.path.split("/").pop()?.toLowerCase());
@@ -148,6 +151,7 @@ const handleInvite = async () => {
     );
 
     inviteEmail.value = "";
+    toast.success("INvite Successfully");
     showInvitePopover.value = false;
   } catch (error) {
     console.error(error);
@@ -165,6 +169,8 @@ const handleGenerate = async () => {
     );
 
     passcode.value = res.data.token;
+    toast.success("Generate Code Successfully");
+    
   } catch (error) {
     console.error(error);
   } finally {

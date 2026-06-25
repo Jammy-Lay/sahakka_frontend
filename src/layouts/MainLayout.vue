@@ -41,15 +41,20 @@
       </aside>
 
       <main class="main-content pb-3 px-4">
-        <router-view />
+        <n-config-provider>
+          <router-view />
+        </n-config-provider>
       </main>
-      <aside class="sidebar-right d-none d-lg-block" v-if="showCalendar"><Calendar /></aside>
+      <aside class="sidebar-right d-none d-lg-block" v-if="showCalendar">
+        <Calendar />
+      </aside>
     </div>
   </div>
 </template>
 
 <script setup>
 import { ref, computed, watch, onMounted } from "vue";
+import { NConfigProvider } from "naive-ui";
 import { useRoute } from "vue-router";
 import { storeToRefs } from "pinia";
 import { useAuthStore } from "@/stores/auth";

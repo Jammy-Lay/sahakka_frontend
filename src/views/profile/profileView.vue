@@ -3,47 +3,88 @@
     <div class="container-fluid px-0">
       <div class="page-header">
         <h1 class="page-title">Profile setting</h1>
-        <p class="page-sub">Manage your profile and preferences</p>
+        <p class="page-sub text-mute">Manage your profile and preferences</p>
       </div>
 
       <div class="row g-3">
         <!-- LEFT COLUMN -->
         <div class="col-lg-6 col-12">
           <!-- Profile card -->
-          <div class="card">
-            <div class="profile-row d-flex align-items-center gap-3 flex-wrap">
-              <div class="profile-avatar-wrap">
-                <img :src="profileStore.user.avatar" class="profile-avatar" alt="" />
-                <button class="avatar-edit-btn" @click="showCropper = true">
-                  <Camera size="12" />
-                </button>
-              </div>
+          <ProfileSkeleton class="w-100 mb-3" v-if="profileStore.loading" />
+          <div v-else class="card">
+            <div class="d-flex justify-content-between">
+              <div class="profile-row d-flex align-items-center gap-3 flex-wrap">
+                <div class="profile-avatar-wrap">
+                  <img :src="profileStore.user.avatar" class="profile-avatar" alt="" />
+                  <n-tooltip
+                    placement="bottom"
+                    trigger="hover"
+                    :show-arrow="false"
+                    keepAliveOnHover: false,
+                    :style="{
+                      fontSize: '11px !important',
+                      padding: '4px 8px !important',
+                      borderRadius: '8px !important',
+                      marginTop: '1px !important',
+                      marginLeft: '0px !important',
+                      pointerEvents: 'none',
+                    }"
+                  >
+                <template #trigger>
+                  <button class="avatar-edit-btn" @click="showCropper = true">
+                    <Camera size="12" />
+                  </button>
+                </template>
+                   Change Avatar
+                  </n-tooltip>
+                </div>
 
-              <CropperModal
-                v-if="showCropper"
-                @closeModal="showCropper = false"
-                @save="handleCroppedImage"
-                :disable="isLoading"
-              />
-              <div class="profile-info">
-                <div class="profile-name">{{ profileStore.user.name }}</div>
-                <div class="profile-email">{{ profileStore.user.email }}</div>
-                <div class="profile-joined">
-                  <Calendar size="12" /> Joined
-                  {{
-                    new Date(profileStore.user.created_at).toLocaleDateString("en-GB", {
-                      day: "numeric",
-                      month: "short",
-                      year: "numeric",
-                    })
-                  }}
+                <div class="profile-info">
+                  <div class="profile-name">{{ profileStore.user.name }}</div>
+                  <div class="profile-email">{{ profileStore.user.email }}</div>
+                  <div class="profile-joined">
+                    <Calendar size="12" /> Joined
+                    {{
+                      new Date(profileStore.user.created_at).toLocaleDateString("en-GB", {
+                        day: "numeric",
+                        month: "short",
+                        year: "numeric",
+                      })
+                    }}
+                  </div>
                 </div>
               </div>
+              <n-tooltip
+                placement="bottom"
+                trigger="hover"
+                :show-arrow="false"
+                keepAliveOnHover: false,
+                :style="{
+                  fontSize: '11px !important',
+                  padding: '4px 8px !important',
+                  borderRadius: '8px !important',
+                  marginTop: '3px !important',
+                  marginLeft: '0px !important',
+                  pointerEvents: 'none',
+                }"
+              >
+                <template #trigger>
+                  <button
+                    class="icon-action-btn-trash w-fit h-fit"
+                    @click="showDeleteModal = true"
+                  >
+                    <Trash2 size="18" />
+                  </button>
+                </template>
+                Delete Avatar
+              </n-tooltip>
             </div>
           </div>
 
+          <PersonalSkeleton class="w-100 mb-3" v-if="profileStore.loading" />
+          
           <!-- Personal information card -->
-          <div class="card">
+          <div v-else class="card">
             <div class="card-title">Personal information</div>
             <div class="card-sub">Update your display name</div>
             <input
@@ -62,12 +103,47 @@
           </div>
 
           <!-- Tasks overview card -->
-          <div class="card">
+          <TaskOverviewSkeleton class="w-100" v-if="taskStore.summaryLoading" />
+          <div v-else class="card">
             <div
-              class="card-header-row d-flex align-items-center justify-content-between"
+              class="card-header-row d-flex align-items-center justify-content-between mb-2"
             >
               <span class="card-title">My tasks overview</span>
-              <button class="icon-btn"><arrow-up-right size="14" /></button>
+              <n-popover
+                trigger="click"
+                placement="bottom-end"
+                :show-arrow="false"
+                v-model:show="showFilterPop"
+                style="
+                  border-radius: 12px;
+                  padding: 6px;
+                  width: 150px;
+                  margin-right: -30px;
+                "
+              >
+                <template #trigger>
+                  <button
+                    class="btn btn-white bg-accent rounded-btn border-1 border-white fs-13 d-flex align-items-center gap-1 ms-auto"
+                  >
+                    <Filter size="16" /> Filter
+                  </button>
+                </template>
+                <div class="d-flex flex-column gap-1">
+                  <div
+                    v-for="team in teamsInCurrentWorkspace"
+                    :key="team.team_id"
+                    class="d-flex align-items-center gap-2 px-2 py-1 rounded workspace-item fs-13 cursor-pointer"
+                    :class="
+                      String(selectedTeamId) === String(team.team_id)
+                        ? 'fw-semibold bg-accent'
+                        : ''
+                    "
+                    @click="handleFilterChange(team.team_id)"
+                  >
+                    <Users size="15"/> {{ team.title }}
+                  </div>
+                </div>
+              </n-popover>
             </div>
 
             <!-- Ring + count -->
@@ -77,58 +153,133 @@
               <div>
                 <div class="tasks-label">Total tasks</div>
                 <div class="tasks-count">
-                  {{ tasks.done
-                  }}<span class="tasks-total"> / {{ taskSummary.total_tasks }}</span>
+                  {{ summary.status?.approved || 0 }}
+                  <span class="tasks-total"> / {{ total }}</span>
                 </div>
-                <div class="tasks-pct-label">{{ tasks.pct }}% overall completion</div>
+                <div class="tasks-pct-label">
+                  {{ completedPercentage }}% overall completion
+                </div>
               </div>
               <div>
                 <n-progress
                   type="circle"
-                  :percentage="completionPercentage"
+                  :percentage="completedPercentage"
                   :stroke-width="13"
-                  style="width: 75px"
+                  style="width: 105px"
                   color="#34C759"
+                  class="all-progress"
                 />
               </div>
             </div>
 
             <!-- Priority bars -->
             <div
-              class="priority-header d-flex align-items-center justify-content-between"
+              class="priority-header mb-3 d-flex align-items-center justify-content-between"
             >
               <span class="priority-title">By priority</span>
-              <span class="priority-count">{{ tasks.total }} tasks</span>
+              <span class="priority-count fs-13">{{ total }} tasks</span>
             </div>
-            <div
-              class="bar-row d-flex align-items-center justify-content-between"
-              v-for="p in priorities"
-              :key="p.label"
-            >
-              <span class="bar-label">{{ p.label }}</span>
-              <n-progress
-                type="line"
-                :percentage="p.percentage"
-                :color="p.color"
-                :height="5"
-                :show-indicator="false"
-              />
-              <span class="bar-count">{{ String(p.count).padStart(2, "0") }} tasks</span>
+            <div>
+              <div class="bar-row d-flex align-items-center justify-content-between">
+                <span class="bar-label">Urgent</span>
+                <n-progress
+                  type="line"
+                  :percentage="urgentPercentage"
+                  :height="7"
+                  :show-indicator="false"
+                  processing
+                  color="#6155F5"
+                />
+                <span class="bar-count fs-13"
+                  >{{
+                    String(summary.priority?.urgent || 0).padStart(2, "0")
+                  }}
+                  tasks</span
+                >
+              </div>
+              <div class="bar-row d-flex align-items-center justify-content-between">
+                <span class="bar-label">High</span>
+                <n-progress
+                  type="line"
+                  :percentage="highPercentage"
+                  :height="7"
+                  :show-indicator="false"
+                  processing
+                  color="#FF383C"
+                />
+                <span class="bar-count fs-13"
+                  >{{ String(summary.priority?.high || 0).padStart(2, "0") }} tasks</span
+                >
+              </div>
+              <div class="bar-row d-flex align-items-center justify-content-between">
+                <span class="bar-label">Medium</span>
+                <n-progress
+                  type="line"
+                  :percentage="mediumPercentage"
+                  :height="7"
+                  :show-indicator="false"
+                  processing
+                  color="#FF8D28"
+                />
+                <span class="bar-count fs-13"
+                  >{{
+                    String(summary.priority?.medium || 0).padStart(2, "0")
+                  }}
+                  tasks</span
+                >
+              </div>
+              <div class="bar-row d-flex align-items-center justify-content-between">
+                <span class="bar-label">Low</span>
+                <n-progress
+                  type="line"
+                  :percentage="lowPercentage"
+                  :height="7"
+                  :show-indicator="false"
+                  processing
+                  color="#171717"
+                />
+                <span class="bar-count fs-13"
+                  >{{ String(summary.priority?.low || 0).padStart(2, "0") }} tasks</span
+                >
+              </div>
             </div>
 
             <!-- Approved / Rejected -->
-            <div class="row g-2 status-row">
-              <div class="col-6" v-for="s in statuses" :key="s.label">
-                <div class="status-card">
-                  <div class="status-label">{{ s.label }}</div>
-                  <n-progress
-                    type="circle"
-                    :percentage="s.pct"
-                    :stroke-width="13"
-                    style="width: 75px"
-                    class="my-progress"
-                    :color="s.color"
-                  />
+            <div class="row g-2 status-row mt-0">
+              <div class="col-6">
+                <div class="status-card bg-accent">
+                  <div class="status-label">Approved</div>
+                  <div class="d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                      {{ summary.status?.approved || 0 }} / {{ total }}
+                    </h5>
+                    <n-progress
+                      type="circle"
+                      :percentage="approvedPercentage"
+                      :stroke-width="13"
+                      style="width: 85px"
+                      class="my-progress"
+                      color="#34C759"
+                    />
+                  </div>
+                </div>
+              </div>
+              <div class="col-6">
+                <div class="status-card bg-accent">
+                  <div class="status-label">Rejected</div>
+                  <div class="d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                      {{ summary.status?.rejected || 0 }} / {{ total }}
+                    </h5>
+                    <n-progress
+                      type="circle"
+                      :percentage="rejectedPercentage"
+                      :stroke-width="13"
+                      style="width: 85px"
+                      class="my-progress"
+                      color="#FF383C"
+                    />
+                  </div>
                 </div>
               </div>
             </div>
@@ -137,11 +288,12 @@
 
         <!-- RIGHT COLUMN -->
         <div class="col-lg-6 col-12">
-          <div class="card">
+          <WorkspaceSkeleton class="w-100" v-if="workspaceStore.loading" />
+          <div v-else class="card">
             <!-- My workspace -->
             <div class="ws-section-title fw-medium">My workspace</div>
             <n-empty
-              v-if="!MyWorkspaces || MyWorkspaces.length === 0"
+              v-if="myWorkspaces.length === 0"
               description="No Data"
               class="my-2"
               style="--n-icon-size: 25px"
@@ -150,7 +302,7 @@
             <div
               v-else
               class="ws-item d-flex align-items-center justify-content-between mt-2"
-              v-for="ws in MyWorkspaces.slice(0, 3)"
+              v-for="ws in myWorkspaces"
               :key="ws.workspace_id"
             >
               <img :src="ws.creator?.avatar" alt="" class="img-w me-2" />
@@ -175,7 +327,7 @@
             <!-- Invited workspace -->
             <div class="ws-section-title fw-medium">Invited workspace</div>
             <n-empty
-              v-if="!WorkSpaceInvite || WorkSpaceInvite.length === 0"
+              v-if="joinedWorkspaces.length === 0"
               description="No Data"
               class="my-2"
               style="--n-icon-size: 25px"
@@ -184,7 +336,7 @@
             <div
               v-else
               class="ws-item d-flex align-items-center justify-content-between mt-2"
-              v-for="ws in WorkSpaceInvite.slice(0, 3)"
+              v-for="ws in joinedWorkspaces"
               :key="ws.workspace_id"
             >
               <img :src="ws.creator?.avatar" alt="" class="img-w me-2" />
@@ -208,6 +360,47 @@
       </div>
     </div>
   </main>
+  <CropperModal
+    v-if="showCropper"
+    @closeModal="showCropper = false"
+    @save="handleCroppedImage"
+    :disable="isLoading"
+  />
+  <n-modal v-model:show="showDeleteModal" :mask-closable="true">
+    <div class="bg-white rounded-card" style="width: 380px">
+      <div class="d-flex align-items-center justify-content-between px-4 py-3 pb-2">
+        <span class="fw-medium fs-15">Delete Avatar</span>
+        <n-button
+          text
+          size="small"
+          @click="showDeleteModal = false"
+          class="hover-circle p-1 rounded-circle"
+        >
+          <X size="18" />
+        </n-button>
+      </div>
+      <n-divider style="margin: 5px 0; --n-color: #e4e4e7" />
+      <div class="px-4 pt-3 pb-3">
+        <p class="fs-13 text-mute mb-4 text-center">Are you sure you want to delete ?</p>
+        <div class="d-flex gap-2">
+          <button
+            class="btn btn-outline border rounded-btn-sm fs-13 fw-medium w-50"
+            @click="showDeleteModal = false"
+          >
+            Cancel
+          </button>
+          <button
+            class="btn btn-danger rounded-btn-sm fs-13 fw-medium w-50"
+            @click="handleDelete"
+            :disabled="isLoading"
+          >
+            <span v-if="isLoading" class="spinner-border spinner-border-sm me-2"></span>
+            {{ isLoading ? "Deleting..." : "Delete" }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </n-modal>
 </template>
 
 <script setup>
@@ -220,17 +413,86 @@ import { storeToRefs } from "pinia";
 import AvatarCropModal from "@/components/profile/AvatarCropModal.vue";
 import CropperModal from "@/components/profile/CropperModal.vue";
 import BaseButton from "@/components/BaseButton.vue";
-import { useWorkspaceStore } from "@/stores/admin/workspaces";
+import { useTaskStore } from "@/stores/user/task";
+import { useTeamStore } from "@/stores/user/team";
+import { UseWorkspaceStore } from "@/stores/user/workspace";
+import ProfileSkeleton from "@/components/Skeleton/ProfileSkeleton.vue";
+import PersonalSkeleton from "@/components/Skeleton/PersonalSkeleton.vue";
+import TaskOverviewSkeleton from "@/components/Skeleton/TaskOverviewSkeleton.vue";
+import WorkspaceSkeleton from "@/components/Skeleton/WorkspaceSkeleton.vue";
 
 const router = useRouter();
-const route = useRoute();
-const profileStore = useProfileStore();
 const toast = notify(router);
 const displayName = ref("");
-const currentRouteWorkspaceId = computed(() => route.params.workspace_id);
-const currentRouteTeamId = computed(() => route.params.team_id);
 
-const workspaceStore = useWorkspaceStore();
+const workspaceStore = UseWorkspaceStore();
+const { myWorkspaces, joinedWorkspaces } = storeToRefs(workspaceStore);
+
+const teamStore = useTeamStore();
+const { getTeamByWorkspace } = storeToRefs(teamStore);
+
+const profileStore = useProfileStore();
+const { joinedWorkspaces: WorkSpaceInvite } = storeToRefs(profileStore);
+
+const taskStore = useTaskStore();
+const { getTask, getSummaryTask } = storeToRefs(taskStore);
+
+const selectedTeamId = ref(null);
+const showFilterPop = ref(false);
+const showDeleteModal = ref(false);
+const teamsInCurrentWorkspace = ref([]);
+
+const handleFilterChange = async (team_id) => {
+  selectedTeamId.value = team_id;
+  showFilterPop.value = false;
+
+  const userId = profileStore.user?.user_id;
+  const raw = localStorage.getItem(`lastVisited_${userId}`);
+  if (raw) {
+    const parsed = JSON.parse(raw);
+    await taskStore.getSummaryTaskStore(parsed.workspace_id, team_id);
+  }
+};
+
+const summary = computed(() => getSummaryTask.value || {});
+const total = computed(() => summary.value.total_tasks || 0);
+
+const completedPercentage = computed(() => {
+  if (total.value === 0) return 0;
+  const done =
+    (summary.value.status?.approved || 0) + (summary.value.status?.rejected || 0);
+  return Math.round((done / total.value) * 100);
+});
+
+const approvedPercentage = computed(() => {
+  if (total.value === 0) return 0;
+  return Math.round(((summary.value.status?.approved || 0) / total.value) * 100);
+});
+
+const rejectedPercentage = computed(() => {
+  if (total.value === 0) return 0;
+  return Math.round(((summary.value.status?.rejected || 0) / total.value) * 100);
+});
+
+const urgentPercentage = computed(() => {
+  if (total.value === 0) return 0;
+  return Math.round(((summary.value.priority?.urgent || 0) / total.value) * 100);
+});
+
+const highPercentage = computed(() => {
+  if (total.value === 0) return 0;
+  return Math.round(((summary.value.priority?.high || 0) / total.value) * 100);
+});
+
+const mediumPercentage = computed(() => {
+  if (total.value === 0) return 0;
+  return Math.round(((summary.value.priority?.medium || 0) / total.value) * 100);
+});
+
+const lowPercentage = computed(() => {
+  if (total.value === 0) return 0;
+  return Math.round(((summary.value.priority?.low || 0) / total.value) * 100);
+});
 
 const MyWorkspaces = ref([]);
 const WorkspaceStats = ref({});
@@ -238,49 +500,71 @@ const WorkspaceStats = ref({});
 const showCropper = ref(false);
 const isLoading = ref(false);
 
-const { joinedWorkspaces: WorkSpaceInvite } = storeToRefs(profileStore);
-
 onMounted(async () => {
   await profileStore.getProfile();
-  await profileStore.GetMyWorkspace();
-
   displayName.value = profileStore.user.name;
+
+  const userId = profileStore.user?.user_id;
+  let currentWorkspaceId = null;
+
+  if (userId) {
+    const raw = localStorage.getItem(`lastVisited_${userId}`);
+    if (raw) {
+      try {
+        const parsed = JSON.parse(raw);
+        currentWorkspaceId = parsed.workspace_id;
+        selectedTeamId.value = parsed.team_id ?? null;
+      } catch (err) {
+        console.error("Failed to parse lastVisited:", err);
+      }
+    }
+  }
+
+  if (currentWorkspaceId) {
+    try {
+      await teamStore.getTeamByWorkspaceStore(currentWorkspaceId);
+      teamsInCurrentWorkspace.value = getTeamByWorkspace.value || [];
+    } catch (err) {
+      console.error("Failed to fetch teams:", err);
+    }
+
+    if (selectedTeamId.value) {
+      await taskStore.getSummaryTaskStore(currentWorkspaceId, selectedTeamId.value);
+    }
+  }
+
+  
+  await workspaceStore.getMyWorkspaceStore();
+  await profileStore.GetMyWorkspace();
   MyWorkspaces.value = profileStore.myWorkspaces;
+  
 
   for (const ws of MyWorkspaces.value) {
     try {
       const data = await profileStore.GetWorkspaceMember(ws.workspace_id);
-
       const teamCount = data?.team?.length || 0;
       const memberIds = new Set();
       data?.team?.forEach((team) => {
         team.members?.forEach((m) => memberIds.add(m.user_id));
       });
-      const memberCount = memberIds.size;
-
       WorkspaceStats.value[ws.workspace_id] = {
         teams: teamCount,
-        members: memberCount,
+        members: memberIds.size,
       };
-    } catch (err) {
-      // console.error('ERROR for workspace', ws.workspace_id, err);
-    }
+    } catch (err) {}
   }
+
   for (const ws of WorkSpaceInvite.value) {
     try {
       const data = await profileStore.GetWorkspaceMember(ws.workspace_id);
-
       const teamCount = data?.team?.length || 0;
-
       const memberIds = new Set();
       data?.team?.forEach((team) => {
         team.members?.forEach((m) => memberIds.add(m.user_id));
       });
-      const memberCount = memberIds.size;
-
       WorkspaceStats.value[ws.workspace_id] = {
         teams: teamCount,
-        members: memberCount,
+        members: memberIds.size,
       };
     } catch (err) {
       WorkspaceStats.value[ws.workspace_id] = { teams: 0, members: 0 };
@@ -296,6 +580,7 @@ const handleCroppedImage = async (blob) => {
     await profileStore.UpdateAvatar(formData);
     await profileStore.getProfile();
     await profileStore.GetMyWorkspace();
+    await workspaceStore.getMyWorkspaceStore();
     showCropper.value = false;
     toast.success("Avatar updated");
   } catch (err) {
@@ -304,84 +589,6 @@ const handleCroppedImage = async (blob) => {
     isLoading.value = false;
   }
 };
-
-const taskSummary = ref({
-  total_tasks: 0,
-  priority: { urgent: 0, high: 0, medium: 0, low: 0 },
-  status: { approved: 0, rejected: 0 },
-});
-
-onMounted(async () => {
-  try {
-    if (!currentRouteWorkspaceId.value || !currentRouteTeamId.value) {
-      console.warn("Workspace ID or Team ID is missing");
-      return;
-    }
-
-    const res = await profileStore.GetTaskSummary(
-      currentRouteWorkspaceId.value,
-      currentRouteTeamId.value
-    );
-
-    taskSummary.value = res;
-  } catch (err) {
-    console.error(err);
-  }
-});
-
-const priorities = computed(() => {
-  const total = taskSummary.value.total_tasks || 1;
-  return [
-    {
-      label: "Urgent",
-      count: taskSummary.value.priority.urgent,
-      percentage: (taskSummary.value.priority.urgent / total) * 100,
-      color: "#EF4444",
-    },
-    {
-      label: "High",
-      count: taskSummary.value.priority.high,
-      percentage: (taskSummary.value.priority.high / total) * 100,
-      color: "#F97316",
-    },
-    {
-      label: "Medium",
-      count: taskSummary.value.priority.medium,
-      percentage: (taskSummary.value.priority.medium / total) * 100,
-      color: "#EAB308",
-    },
-    {
-      label: "Low",
-      count: taskSummary.value.priority.low,
-      percentage: (taskSummary.value.priority.low / total) * 100,
-      color: "#22C55E",
-    },
-  ];
-});
-
-const statuses = computed(() => {
-  const total = taskSummary.value.total_tasks || 1;
-  return [
-    {
-      label: "Approved",
-      pct: (taskSummary.value.status.approved / total) * 100,
-      color: "#22C55E",
-    },
-    {
-      label: "Rejected",
-      pct: (taskSummary.value.status.rejected / total) * 100,
-      color: "#EF4444",
-    },
-  ];
-});
-
-const completionPercentage = computed(() => {
-  const total = taskSummary.value.total_tasks;
-  if (!total) return 0;
-  return Math.round((taskSummary.value.status.approved / total) * 100);
-});
-
-const tasks = ref({ done: 17, total: 20, pct: 85 });
 
 const handleSave = async () => {
   isLoading.value = true;
@@ -611,6 +818,11 @@ const handleSave = async () => {
   letter-spacing: -0.75%;
 }
 
+.all-progress :deep(.n-progress-text) {
+  font-size: 18px !important;
+  font-weight: bold;
+}
+
 .my-progress :deep(.n-progress-text) {
   font-size: 14px !important;
   font-weight: bold;
@@ -658,7 +870,7 @@ const handleSave = async () => {
 .bar-count {
   font-size: 10px;
   color: #aab0c4;
-  width: 42px;
+  width: 60px;
   text-align: right;
   flex-shrink: 0;
 }

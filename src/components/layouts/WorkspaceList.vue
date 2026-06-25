@@ -45,7 +45,11 @@
               <div class="text-mute fs-11">{{ getMe.email }}</div>
             </div>
           </div>
-          <BaseButton class="fs-11 rounded-btn-sm" btnName="View Profile" @click="router.push('/settings/profile')"/>
+          <BaseButton
+            class="fs-11 rounded-btn-sm"
+            btnName="View Profile"
+            @click="router.push('/settings/profile')"
+          />
         </div>
 
         <!-- MY WORKSPACE -->
@@ -87,7 +91,10 @@
           @click="switchWorkspace(ws.workspace_id)"
           :class="[
             'd-flex align-items-center justify-content-between text-dark px-2 py-1 mb-1 rounded workspace-item',
-            { 'workspace-item--active': openOptionId === ws.workspace_id || isCurrentWorkspace(ws.workspace_id) },
+            {
+              'workspace-item--active':
+                openOptionId === ws.workspace_id || isCurrentWorkspace(ws.workspace_id),
+            },
           ]"
         >
           <div class="d-flex align-items-center gap-2">
@@ -151,7 +158,6 @@
                   selectedWs = ws;
                   showPopover = false;
                   showDeleteModal = true;
-
                 "
               >
                 <Trash2 size="13" /> Delete
@@ -206,13 +212,13 @@
                   input-class="fs-14 bg-white mb-2 py-2 rounded-btn-sm"
                 />
                 <button
-  class="btn bg-btn w-100 fs-14 py-2 rounded-btn-sm"
-  :disabled="isLoading"
-  @click="handleJoin"
->
-  <span v-if="isLoading" class="spinner-border spinner-border-sm me-2" />
-  {{ isLoading ? "Joining..." : "Join" }}
-</button>
+                  class="btn bg-btn w-100 fs-14 py-2 rounded-btn-sm"
+                  :disabled="isLoading"
+                  @click="handleJoin"
+                >
+                  <span v-if="isLoading" class="spinner-border spinner-border-sm me-2" />
+                  {{ isLoading ? "Joining..." : "Join" }}
+                </button>
               </div>
             </div>
           </n-popover>
@@ -232,7 +238,10 @@
             @click="switchWorkspace(ws.workspace_id)"
             :class="[
               'd-flex align-items-center justify-content-between text-dark px-2 py-1 mb-1 rounded workspace-item',
-              { 'workspace-item--active': openOptionId === ws.workspace_id || isCurrentWorkspace(ws.workspace_id) },
+              {
+                'workspace-item--active':
+                  openOptionId === ws.workspace_id || isCurrentWorkspace(ws.workspace_id),
+              },
             ]"
           >
             <div class="d-flex align-items-center gap-2">
@@ -376,13 +385,13 @@
                 </div>
               </div>
               <button
-  class="btn bg-btn w-100 fs-14 rounded-btn-sm py-2"
-  :disabled="isLoading"
-  @click="handleGenerate"
->
-  <span v-if="isLoading" class="spinner-border spinner-border-sm me-2" />
-  {{ isLoading ? "Generating..." : "Generate passcode" }}
-</button>
+                class="btn bg-btn w-100 fs-14 rounded-btn-sm py-2"
+                :disabled="isLoading"
+                @click="handleGenerate"
+              >
+                <span v-if="isLoading" class="spinner-border spinner-border-sm me-2" />
+                {{ isLoading ? "Generating..." : "Generate passcode" }}
+              </button>
             </div>
           </div>
         </n-popover>
@@ -496,10 +505,12 @@
               Cancel
             </button>
             <button
-              class="btn btn-danger rounded-btn-sm fs-13 fw-medium w-50"
+              class="btn btn-danger text-white w-50 fs-13 rounded-btn-sm py-2"
+              :disabled="isLoading"
               @click="handleLogout"
             >
-              Log out
+              <span v-if="isLoading" class="spinner-border spinner-border-sm me-2" />
+              {{ isLoading ? "logging out..." : "Logout" }}
             </button>
           </div>
         </div>
@@ -569,7 +580,6 @@ const emit = defineEmits(["close-sidebar"]);
 const currentRouteWorkspaceId = computed(() => route.params.workspace_id);
 const currentRouteTeamId = computed(() => route.params.team_id);
 const isCurrentWorkspace = (id) => String(id) === String(currentWorkspaceId.value);
-
 
 const showPopover = ref(false);
 const showRenameModal = ref(false);
@@ -684,7 +694,7 @@ const handleDelete = async () => {
     toast.success("Workspace deleted successfully");
     showDeleteModal.value = false;
     selectedWs.value = null;
-    await refreshWorkspaces(); 
+    await refreshWorkspaces();
   } catch (error) {
     toast.error(error.message);
   } finally {
@@ -731,7 +741,7 @@ const handleJoin = async () => {
     await refreshWorkspaces(); // ← silent refresh, no skeleton
   } catch (error) {
     toast.error(error.message);
-  } finally{
+  } finally {
     isLoading.value = false;
   }
 };
@@ -747,6 +757,7 @@ const handleInvite = async () => {
       inviteEmail.value
     );
     inviteEmail.value = "";
+    toast.success("Invite Successfully");
     showInvitePopover.value = false;
   } catch (error) {
     console.error(error);
@@ -764,6 +775,7 @@ const handleGenerate = async () => {
       currentRouteTeamId.value
     );
     passcode.value = res.data.token;
+    toast.success("Generate Code Successfully");
   } catch (error) {
     console.error(error);
   } finally {
@@ -777,9 +789,16 @@ const handleCopy = async () => {
 };
 
 const handleLogout = async () => {
-  localStorage.removeItem("lastVisitedTeam");
-  await authStore.logout();
-  router.push({ name: "login" });
+  try {
+    isLoading.value = true;
+    localStorage.removeItem("lastVisitedTeam");
+    await authStore.logout();
+    router.push({ name: "login" });
+  } catch (error) {
+    toast.error(error.message);
+  } finally {
+    isLoading.value = false;
+  }
 };
 
 const goViewMember = () => {

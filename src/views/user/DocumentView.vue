@@ -117,8 +117,8 @@
         class="mt-8"
         style="--n-icon-size: 45px; font-size: 14px"
       />
-      <div v-else class="row pt-4">
-        <div v-for="(doc, index) in document" :key="index" class="col-md-6 col-lg-4">
+      <div v-else class="row pt-4 g-3">
+        <div v-for="(doc, index) in document" :key="index" class="col-md-6 col-lg-6">
           <document-card
             :avatar="doc.created_by.avatar"
             :user-name="doc.created_by.name"

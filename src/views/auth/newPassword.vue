@@ -5,11 +5,11 @@
         <img
           src="../../assets/image/style 2.jpg"
           alt=""
-          class="object-fit-cover w-100 vh-100"
+          class="object-fit-cover w-100 vh-100 d-none d-lg-block"
         />
       </div>
       <div class="col-lg-6">
-        <div class="d-flex justify-content-center align-items-center min-vh-100">
+        <div class="d-flex justify-content-center align-items-center min-vh-100 p-5">
           <div style="width: 468px">
             <div class="d-flex align-items-center gap-2 mb-4">
               <n-avatar :src="Logo" :size="60" class="bg-white" />
