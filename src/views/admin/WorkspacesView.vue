@@ -100,7 +100,7 @@
 <script setup>
 import BaseCard from "@/components/BaseCard.vue";
 import BasePagination from "@/components/BasePagination.vue";
-import { onMounted, ref, computed, h } from "vue";
+import { onMounted, ref, computed, h, watch } from "vue";
 import { useWorkspaceStore } from "@/stores/admin/workspaces";
 import { useTeamstore } from "@/stores/admin/teams";
 import { useTaskstore } from "@/stores/admin/tasks";
@@ -110,13 +110,13 @@ import BaseTitle from "@/components/BaseTitle.vue";
 import Loading from "@/components/layouts/Loading.vue";
 import { useToast } from "vue-toastification";
 import SkeletonWorkspace from "@/components/Skeleton/SkeletonWorkspace.vue";
+import api from "@/api/https";
 
 const useWorkspace = useWorkspaceStore();
 const useTeam = useTeamstore();
 const useTask = useTaskstore();
 const loading = ref(false);
 const toast = useToast();
-
 const projects = ref([]);
 
 // search
@@ -128,13 +128,13 @@ const itemPerPage = ref(6);
 
 const formatDate = (date) => {
     if (!date) return "N/A";
-
     return new Intl.DateTimeFormat("en-GB", {
         day: "2-digit",
         month: "short",
         year: "numeric",
     }).format(new Date(date));
 };
+
 const truncateText = (text, length = 20) => {
     if (!text) return "";
     return text.length > length ? text.slice(0, length) + "..." : text;
@@ -146,12 +146,12 @@ const getWorkspaces = async () => {
         await useWorkspace.fetchWorkspaces();
         await useTeam.fetchTeams();
         await useTask.fetchTasks();
+
         const teamsData = useTeam.teams;
         const tasksData = useTask.tasks;
 
         projects.value = useWorkspace.workspaces.map((workspace) => {
             // teams
-
             const workspaceTeams = teamsData.filter(
                 (team) => team.workspace?.workspace_id === workspace.workspace_id
             );
@@ -163,7 +163,6 @@ const getWorkspaces = async () => {
             );
 
             const totalTasks = workspaceTasks.length;
-
             const approvedTasks = workspaceTasks.filter(
                 (task) => task.status === "approved"
             ).length;
@@ -172,12 +171,19 @@ const getWorkspaces = async () => {
                 ? 0
                 : Math.round((approvedTasks / totalTasks) * 100);
 
+            // deduplicate members by user_id across all teams
+            const allMembers = workspaceTeams.flatMap((team) => team.members || []);
+            const uniqueMembers = [
+                ...new Map(allMembers.map((m) => [m.user_id, m])).values()
+            ];
+
             return {
                 id: workspace.workspace_id,
                 name: workspace.workspace_name,
+                createdAt: workspace.created_at, // required for recentUsersList sort
                 owner: workspace.creator?.user_name || "Unknown",
-                membersList: workspaceTeams.flatMap((team) => team.members || []),
-                members: workspaceTeams.reduce((sum, t) => sum + (t.members?.length || 0), 0),
+                membersList: uniqueMembers,
+                members: uniqueMembers.length,
                 teams: workspaceTeams.length,
                 tasks: totalTasks,
                 progress,
@@ -191,7 +197,7 @@ const getWorkspaces = async () => {
                     },
                     {
                         label: "Members",
-                        value: workspaceTeams.reduce((sum, t) => sum + (t.members?.length || 0), 0),
+                        value: uniqueMembers.length, // deduplicated count
                         trendType: "up",
                         icon: Users,
                         color: "#a855f7",
@@ -205,6 +211,7 @@ const getWorkspaces = async () => {
                 ],
             };
         });
+        
     } catch (error) {
         toast.error("Failed to load");
     } finally {
@@ -212,8 +219,12 @@ const getWorkspaces = async () => {
     }
 };
 
-// SEARCH FILTER
+// reset page when search changes
+watch(searchQuery, () => {
+    currentPage.value = 1;
+});
 
+// SEARCH FILTER
 const searchedProjects = computed(() => {
     return projects.value.filter((project) =>
         project.name.toLowerCase().includes(searchQuery.value.toLowerCase())
@@ -221,7 +232,6 @@ const searchedProjects = computed(() => {
 });
 
 // PAGINATION DATA
-
 const totalPages = computed(() => {
     return Math.ceil(searchedProjects.value.length / itemPerPage.value);
 });
@@ -247,25 +257,49 @@ const goDetail = (id) => {
     router.push(`/admin/workspaces/${id}`);
 };
 
+
+const dashboard = ref({
+    workspaces: { total: 0, today: 0, text: "" },
+    teams: { total: 0, today: 0, text: "" },
+    tasks: { total: 0, today: 0, text: "" },
+});
+
+// fetch dashboard
+const fetchDashboard = async () => {
+    try {
+        const res = await api.get('/sahakka-admin/dashboard');
+        dashboard.value = res.data.data;
+    } catch (error) {
+        toast.error("Failed to load overview");
+    }
+};
+// TOP-LEVEL STATS
 const stats = computed(() => [
     {
         label: "Total Workspaces",
-        value: projects.value.length,
-        note: "All workspaces loaded",
+        value: dashboard.value.workspaces.total,
+        note: dashboard.value.workspaces.text,
         trendType: "up",
         icon: Layers,
     },
     {
         label: "Total Teams",
-        value: projects.value.reduce((sum, p) => sum + p.teams, 0),
-        note: "Created teams",
+        value: dashboard.value.teams.total,
+        note: dashboard.value.teams.text,
         trendType: "up",
         icon: Users,
+    },
+    {
+        label: "Total Tasks",
+        value: dashboard.value.tasks.total,
+        note: dashboard.value.tasks.text,
+        trendType: "up",
+        icon: ChartPie,
     },
 ]);
 const recentUsersList = computed(() => {
     return [...projects.value]
-        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)) // b - a = newest first
         .slice(0, 3)
         .map((p) => ({
             workspace: p.name,
@@ -314,10 +348,9 @@ const reportColumns = [
 ];
 
 onMounted(async () => {
-    await getWorkspaces();
+    await Promise.all([getWorkspaces(), fetchDashboard()]);
 });
 </script>
-
 <style scoped>
 .dashboard-card {
     min-height: 135px;

@@ -110,11 +110,23 @@ const getTeams = async () => {
 watch(searchQuery, () => {
     currentPage.value = 1;
 });
-
+const recentTeamsList = computed(() =>
+    [...projects.value]
+        .sort((a, b) => b.team_id - a.team_id) 
+        .slice(0, 5)
+        .map((p) => ({
+            team: p.name,
+            workspace: p.workspace_name,
+            owner: p.owner?.name || "Unknown",
+            date: formatDate(p.createdAt), // will show N/A — see option 2
+        }))
+);
 const filteredProjects = computed(() =>
-    projects.value.filter((p) =>
-        p.name?.toLowerCase().includes(searchQuery.value.toLowerCase())
-    )
+    projects.value
+        .filter((p) =>
+            p.name?.toLowerCase().includes(searchQuery.value.toLowerCase())
+        )
+        .sort((a, b) => b.team_id - a.team_id) 
 );
 
 const totalPages = computed(() =>

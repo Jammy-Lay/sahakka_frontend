@@ -374,7 +374,6 @@ const teamName = ref("");
 const description = ref("");
 
 const handleCreateTeam = async () => {
-  isLoading.value = true;
   if (!teamName.value.trim()) {
     toast.error("Name is required");
     return;
@@ -389,6 +388,7 @@ const handleCreateTeam = async () => {
     toast.error("Maximum 5 teams allowed");
     return;
   }
+  isLoading.value = true;
 
   try {
     await teamStore.createTeam(

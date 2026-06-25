@@ -14,7 +14,7 @@
             </div>
           </div>
           <div class="col-8 d-flex justify-content-end">
-            <div class="skeleton" style="width:100%; max-width:420px; height:46px; border-radius:14px;"></div>
+            <div class="skeleton" style="width:100%; max-width:320px; height:36px; border-radius:14px;"></div>
           </div>
         </div>
 
