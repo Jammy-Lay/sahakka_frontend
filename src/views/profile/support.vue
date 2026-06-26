@@ -3,13 +3,13 @@
     <div class="container-fluid px-0">
       <div class="page-header">
         <h1 class="page-title">Sahhak Support</h1>
-        <p class="page-sub">Get help, report issues</p>
+        <p class="page-sub text-mute">Get help, report issues</p>
       </div>
 
       <div class="mt-5">
         <div class="text-center mb-4">
           <h2 class="page-title">How can we help you?</h2>
-          <p class="page-sub">Send your problem or issue and we'll fix it for you.</p>
+          <p class="page-sub text-mute">Send your problem or issue and we'll fix it for you.</p>
         </div>
         <!-- <p>{{ message }}</p> -->
 
@@ -17,10 +17,10 @@
           <textarea v-model="message" class="form-control support-textarea"
             placeholder="Describe your issue..."></textarea>
 
-          <button class="btn bg-btn w-100" @click="sendReport">
+          <button class="btn bg-btn w-100 rounded-btn py-2 fs-15 mt-2 d-flex justify-content-center align-items-center gap-2" @click="sendReport">
             <Send size="16" /> Send report
           </button>
-
+ 
           <p class="page-sub fs-14 text-center">
             We'll review your message and get back to you as soon as possible.
           </p>
