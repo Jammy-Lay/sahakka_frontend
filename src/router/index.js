@@ -117,10 +117,10 @@ const router = createRouter({
           path: "password",
            component: () => import("../views/profile/ChangePassword.vue"),
         },
-        // {
-        //   path: "support",
-        //   component: SupportView,
-        // },
+         {
+          path: "support",
+           component: () => import("../views/profile/support.vue"),
+        },
       ],
     },
     {
