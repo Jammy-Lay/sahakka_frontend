@@ -602,9 +602,10 @@
                         :key="member.user_id"
                         class="d-flex align-items-center gap-2 px-2 py-1 rounded workspace-item fs-13 cursor-pointer"
                         @click="
-                          task.assigned_to = member;
-                          closePop(task.id, 'assignee');
-                          handleUpdateTask(task);
+                          selectedTask.assigned_to = member;
+                          selectedTask.assigned_by = getMe;
+                          showDetailAssigneePop = false;
+                          handleUpdateTask(selectedTask, true);
                         "
                       >
                         <img
@@ -860,7 +861,7 @@
           <button
             class="btn bg-btn rounded-4 py-2 px-3 d-flex align-items-center gap-2"
             :disabled="isLoading"
-            @click="handleSubmit"
+            @click="handleSubmit(selectedTask)"
           >
             <span v-if="isLoading" class="spinner-border spinner-border-sm me-2" />
             <Send v-else :size="16" />
@@ -904,12 +905,13 @@ import { notify } from "@/utils/toast";
 import { useAuthStore } from "@/stores/auth";
 import CompletionSkeleton from "../Skeleton/CompletionSkeleton.vue";
 import MyTaskSkeleton from "../Skeleton/MyTaskSkeleton.vue";
+import { useSubmissionStore } from "@/stores/user/submission.js";
 
 const route = useRoute();
 const router = useRouter();
 const toast = notify(router);
-const workspace_id = route.params.workspace_id;
-const team_id = route.params.team_id;
+const workspace_id = computed(() => route.params.workspace_id);
+const team_id = computed(() => route.params.team_id);
 
 const taskStore = useTaskStore();
 const { getTask, getTaskActivity, getSummaryTask, getMyTask } = storeToRefs(taskStore);
@@ -920,12 +922,14 @@ const { getMember, getTeamById } = storeToRefs(teamStore);
 const authStore = useAuthStore();
 const { getMe } = storeToRefs(authStore);
 
+const submissionStore = useSubmissionStore();
+
 onMounted(async () => {
   updateTime();
   timer = setInterval(updateTime, 1000);
   await Promise.all([
-    await taskStore.getSummaryTaskStore(workspace_id, team_id),
-    await taskStore.getMyTaskStore(workspace_id, team_id),
+    await taskStore.getSummaryTaskStore(workspace_id.value, team_id.value),
+    await taskStore.getMyTaskStore(workspace_id.value, team_id.value),
   ]);
 });
 
@@ -1014,9 +1018,46 @@ const openFilePreview = () => {
   window.open(url, "_blank");
 };
 
-const handleSubmit = () => {
-  console.log("taskMessage:", taskMessage.value);
-  console.log("selectedFile:", selectedFile.value);
+const handleSubmit = async (task) => {
+  if (!task) return;
+
+  if (!selectedFile.value) {
+    toast.error("Add attach a file before submitting");
+    return;
+  }
+
+  if (!taskMessage.value.trim()) {
+    toast.error("Add a message before submitting");
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append("message", taskMessage.value);
+  if (selectedFile.value) {
+    formData.append("file", selectedFile.value);
+  }
+
+  try {
+    isLoading.value = true;
+    await submissionStore.submitTask(
+      workspace_id.value,
+      team_id.value,
+      task.id,
+      formData
+    );
+
+    taskMessage.value = "";
+    removeFile();
+    await taskStore.getTaskByTeamStore(workspace_id.value, team_id.value);
+    await taskStore.getSummaryTaskStore(workspace_id.value, team_id.value, true);
+    await taskStore.getMyTaskStore(workspace_id.value, team_id.value, "", true);
+    toast.success("Task submitted successfully");
+    showTaskModal.value = false;
+  } catch (err) {
+    toast.error(err.message);
+  } finally {
+    isLoading.value = false;
+  }
 };
 
 // ── Calendar ──
@@ -1091,7 +1132,7 @@ const openTaskModal = async (task) => {
   originalTask.value = { ...task };
   showActivity.value = false;
   showTaskModal.value = true;
-  await taskStore.getTaskActivityStore(workspace_id, team_id, task.id);
+  await taskStore.getTaskActivityStore(workspace_id.value, team_id.value, task.id);
   selectedTask.value.activities = getTaskActivity.value;
 
   await nextTick();
@@ -1109,7 +1150,7 @@ const handleUpdateTask = async (task, forceField = null) => {
       if (!titleChanged && !descChanged) return;
     }
 
-    await taskStore.updateTask(workspace_id, team_id, task.id, {
+    await taskStore.updateTask(workspace_id.value, team_id.value, task.id, {
       title: task.title,
       description: task.description,
       type: task.type,
@@ -1121,11 +1162,12 @@ const handleUpdateTask = async (task, forceField = null) => {
     });
 
     originalTask.value = { ...task };
-    await taskStore.getTaskByTeamStore(workspace_id, team_id);
-    await taskStore.getSummaryTaskStore(workspace_id, team_id);
+    await taskStore.getTaskByTeamStore(workspace_id.value, team_id.value, "", true);
+    await taskStore.getSummaryTaskStore(workspace_id.value, team_id.value, true);
+    await taskStore.getMyTaskStore(workspace_id.value, team_id.value, "", true);
   } catch (error) {
     toast.error(error.message);
-    await taskStore.getTaskByTeamStore(workspace_id, team_id);
+    await taskStore.getTaskByTeamStore(workspace_id.value, team_id.value);
   }
 };
 

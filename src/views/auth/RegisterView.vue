@@ -40,7 +40,7 @@
                 <p v-if="err.email" class="text-danger mt-1 fs-14">{{ err.email }}</p>
               </div>
 
-              <div :class="err.email ? 'mt-3' : 'my-4'">
+              <div :class="err.email ? 'mt-3 mb-4' : 'my-4'">
                 <label class="mb-2 text-dark">Password</label>
                 <div class="position-relative">
                   <BaseInput

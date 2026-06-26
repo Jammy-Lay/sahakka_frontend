@@ -11,14 +11,14 @@ export const useProfileStore = defineStore("profile", () => {
   let loading = ref(true);
   // let count_team = ref({});
   // let count_member = ref({});
-  let token = ref(localStorage.getItem("token"));
-  // let isLoggedIn = computed(() => !!token.value);
   const getProfile = async () => {
     try {
       loading.value = true;
-      const res = await api.get("/getMe", { token });
-      user.value = res.data.data;
-      // console.log(res.data);
+      const [profileRes] = await Promise.all([
+        api.get("/getMe"),
+        GetMyWorkspace(), // run together
+      ]);
+      user.value = profileRes.data.data;
     } catch (err) {
       throw new Error(err.response?.data?.message || "failed");
     } finally {
@@ -52,9 +52,7 @@ export const useProfileStore = defineStore("profile", () => {
 
   const GetWorkspaceMember = async (workspace_id) => {
     try {
-      const res = await api.get(`/workspace/${workspace_id}/teams`, {
-        token,
-      });
+      const res = await api.get(`/workspace/${workspace_id}/teams`);
       WorkspaceMember.value = res.data.data;
       return res.data.data;
     } catch (err) {
@@ -100,15 +98,14 @@ export const useProfileStore = defineStore("profile", () => {
     }
   };
 
-  const DeleteAvatar = async (formData) => {
+  const DeleteAvatar = async () => {
     try {
-      const response = await api.delete("/delete-avatar", formData);
-      return response.data.message;
+      await api.delete("/delete-avatar");
     } catch (err) {
       console.log(err);
       throw new Error(err.response?.data?.message || "Failed to delete avatar");
     }
-  }
+  };
 
   return {
     user,

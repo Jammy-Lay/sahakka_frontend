@@ -3,7 +3,7 @@
     <div class="row g-0">
       <div class="col-lg-6">
         <img
-          src="../assets/image/style 1.png"
+          src="../../assets/image/style 1.png"
           alt=""
           class="object-fit-cover w-100 vh-100 d-none d-lg-block"
         />

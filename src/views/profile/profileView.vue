@@ -55,7 +55,7 @@
                 </div>
               </div>
                 <button
-                    class="btn bg-danger text-white h-fit w-fit rounded-btn fs-14 d-flex align-items-center justify-content-center gap-2"
+                    class="btn bg-danger text-white h-fit w-fit border-0 rounded-btn fs-14 d-flex align-items-center justify-content-center gap-2"
                     @click="showDeleteModal = true"
                   >
                     <Image-off size="15" /> Delete Avatar
@@ -280,13 +280,12 @@
               class="my-2"
               style="--n-icon-size: 25px"
             />
-            <router-link v-else 
-              :to="`/workspace/${ws.workspace_id}/team/${ws.team_id}/tasks`"
-              class="text-decoration-none"
-              v-for="ws in myWorkspaces"
-              :key="ws.workspace_id">
+
             <div
+              v-else
               class="ws-item d-flex align-items-center justify-content-between mt-2"
+              v-for="ws in myWorkspaces"
+              :key="ws.workspace_id"
             >
               <img :src="ws.creator?.avatar" alt="" class="img-w me-2" />
 
@@ -304,7 +303,6 @@
                 <ArrowUpRight :size="24" />
               </button>
             </div>
-            </router-link>
 
             <div class="ws-divider" />
 
@@ -344,12 +342,14 @@
       </div>
     </div>
   </main>
+
   <CropperModal
     v-if="showCropper"
     @closeModal="showCropper = false"
     @save="handleCroppedImage"
     :disable="isLoading"
   />
+
   <n-modal v-model:show="showDeleteModal" :mask-closable="true">
     <div class="bg-white rounded-card" style="width: 380px">
       <div class="d-flex align-items-center justify-content-between px-4 py-3 pb-2">
@@ -374,12 +374,12 @@
             Cancel
           </button>
           <button
-            class="btn btn-danger rounded-btn-sm fs-13 fw-medium w-50"
+            class="btn btn-danger rounded-btn-sm fs-13 fw-medium w-50 py-2"
             @click="handleDelete"
-            :disabled="isLoading"
+            :disabled="isLoadings"
           >
-            <span v-if="isLoading" class="spinner-border spinner-border-sm me-2"></span>
-            {{ isLoading ? "Deleting..." : "Delete" }}
+            <span v-if="isLoadings" class="spinner-border spinner-border-sm me-2"></span>
+            {{ isLoadings ? "Deleting..." : "Delete" }}
           </button>
         </div>
       </div>
@@ -416,7 +416,7 @@ const teamStore = useTeamStore();
 const { getTeamByWorkspace } = storeToRefs(teamStore);
 
 const profileStore = useProfileStore();
-const { joinedWorkspaces: WorkSpaceInvite } = storeToRefs(profileStore);
+const { joinedWorkspaces: WorkSpaceInvite, user } = storeToRefs(profileStore);
 
 const taskStore = useTaskStore();
 const { getTask, getSummaryTask } = storeToRefs(taskStore);
@@ -483,6 +483,7 @@ const WorkspaceStats = ref({});
 
 const showCropper = ref(false);
 const isLoading = ref(false);
+const isLoadings = ref(false);
 
 onMounted(async () => {
   await profileStore.getProfile();
@@ -498,62 +499,43 @@ onMounted(async () => {
         const parsed = JSON.parse(raw);
         currentWorkspaceId = parsed.workspace_id;
         selectedTeamId.value = parsed.team_id ?? null;
-      } catch (err) {
-        console.error("Failed to parse lastVisited:", err);
-      }
+      } catch (err) {}
     }
   }
 
-  if (currentWorkspaceId) {
-    try {
-      await teamStore.getTeamByWorkspaceStore(currentWorkspaceId);
-      teamsInCurrentWorkspace.value = getTeamByWorkspace.value || [];
-    } catch (err) {
-      console.error("Failed to fetch teams:", err);
-    }
+  await Promise.all([
+    workspaceStore.getMyWorkspaceStore(),
+    profileStore.GetMyWorkspace(),
+    currentWorkspaceId && teamStore.getTeamByWorkspaceStore(currentWorkspaceId),
+    currentWorkspaceId && selectedTeamId.value &&
+      taskStore.getSummaryTaskStore(currentWorkspaceId, selectedTeamId.value),
+  ].filter(Boolean));
 
-    if (selectedTeamId.value) {
-      await taskStore.getSummaryTaskStore(currentWorkspaceId, selectedTeamId.value);
-    }
-  }
-
-  
-  await workspaceStore.getMyWorkspaceStore();
-  await profileStore.GetMyWorkspace();
   MyWorkspaces.value = profileStore.myWorkspaces;
-  
+  teamsInCurrentWorkspace.value = getTeamByWorkspace.value || [];
 
-  for (const ws of MyWorkspaces.value) {
-    try {
-      const data = await profileStore.GetWorkspaceMember(ws.workspace_id);
-      const teamCount = data?.team?.length || 0;
-      const memberIds = new Set();
-      data?.team?.forEach((team) => {
-        team.members?.forEach((m) => memberIds.add(m.user_id));
-      });
-      WorkspaceStats.value[ws.workspace_id] = {
-        teams: teamCount,
-        members: memberIds.size,
-      };
-    } catch (err) {}
-  }
+  const allWorkspaces = [
+    ...MyWorkspaces.value,
+    ...WorkSpaceInvite.value,
+  ];
 
-  for (const ws of WorkSpaceInvite.value) {
-    try {
-      const data = await profileStore.GetWorkspaceMember(ws.workspace_id);
-      const teamCount = data?.team?.length || 0;
-      const memberIds = new Set();
-      data?.team?.forEach((team) => {
-        team.members?.forEach((m) => memberIds.add(m.user_id));
-      });
-      WorkspaceStats.value[ws.workspace_id] = {
-        teams: teamCount,
-        members: memberIds.size,
-      };
-    } catch (err) {
-      WorkspaceStats.value[ws.workspace_id] = { teams: 0, members: 0 };
-    }
-  }
+  await Promise.all(
+    allWorkspaces.map(async (ws) => {
+      try {
+        const data = await profileStore.GetWorkspaceMember(ws.workspace_id);
+        const memberIds = new Set();
+        data?.team?.forEach((team) => {
+          team.members?.forEach((m) => memberIds.add(m.user_id));
+        });
+        WorkspaceStats.value[ws.workspace_id] = {
+          teams: data?.team?.length || 0,
+          members: memberIds.size,
+        };
+      } catch {
+        WorkspaceStats.value[ws.workspace_id] = { teams: 0, members: 0 };
+      }
+    })
+  );
 });
 
 const handleCroppedImage = async (blob) => {
@@ -588,20 +570,24 @@ const handleSave = async () => {
 };
 
 const handleDelete = async () => {
-  isLoading.value = true;
-  const formData = new FormData();
-  formData.append("avatar", "postman-cloud:///1f153fd6-3412-4100-9d9d-82784da3d989");
+  if (user.value.avatar.includes("default-avatar.png")) {
+    toast.error("You don't have an avatar to delete");
+    showDeleteModal.value = false;
+    return;
+  }
+
+  isLoadings.value = true;
   try {
-    const res = await profileStore.DeleteAvatar(formData);
-    toast.success(res)
+    await profileStore.DeleteAvatar();
+    toast.success("Delete Avatar Successfully");
   } catch (error) {
     toast.error(error.message);
   } finally {
     await profileStore.getProfile();
     showDeleteModal.value = false;
-    isLoading.value = false;
+    isLoadings.value = false;
   }
-}
+};
 </script>
 
 <style scoped>

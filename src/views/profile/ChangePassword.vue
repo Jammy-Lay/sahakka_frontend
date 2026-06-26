@@ -5,13 +5,11 @@
       <p class="page-sub text-muted">Change password</p>
     </div>
 
-    <!-- Security Tip Banner -->
     <div class="security-tip-banner">
       <alert-circle size="16" class="tip-icon" />
       <span>Security Tip: Use a unique password not used on other sites.</span>
     </div>
 
-    <!-- Password Card Centering Layout Wrapper -->
     <div class="form-container">
       <div class="card password-card">
         <h2 class="card-title-form">Change password</h2>
@@ -20,27 +18,38 @@
           <!-- Old Password -->
           <div class="form-group">
             <label class="form-label">Current password</label>
-            <input
-              type="password"
-              class="text-input"
-              v-model="form.currentPassword"
-              placeholder="current password"
-            />
+            <div class="input-wrap">
+              <input
+                :type="show.current ? 'text' : 'password'"
+                class="text-input"
+                v-model="form.currentPassword"
+                placeholder="Current password"
+              />
+              <button type="button" class="eye-btn" @click="show.current = !show.current">
+                <Eye v-if="!show.current" size="16" />
+                <EyeOff v-else size="16" />
+              </button>
+            </div>
           </div>
 
           <!-- New Password -->
           <div class="form-group">
             <label class="form-label">New password</label>
-            <input
-              type="password"
-              class="text-input"
-              v-model="form.newPassword"
-              placeholder="New password"
-              @input="validatePassword"
-            />
+            <div class="input-wrap">
+              <input
+                :type="show.newPass ? 'text' : 'password'"
+                class="text-input"
+                v-model="form.newPassword"
+                placeholder="New password"
+                @input="validatePassword"
+              />
+              <button type="button" class="eye-btn" @click="show.newPass = !show.newPass">
+                <Eye v-if="!show.newPass" size="16" />
+                <EyeOff v-else size="16" />
+              </button>
+            </div>
           </div>
 
-          <!-- Password Requirements Indicators -->
           <div class="requirements-box">
             <div class="requirement-item" :class="{ met: validation.length }">
               <CircleCheck size="14" class="status-icon" />
@@ -56,27 +65,25 @@
             </div>
           </div>
 
-          <!-- Confirm New Password -->
+          <!-- Confirm Password -->
           <div class="form-group">
             <label class="form-label">Confirm new password</label>
-            <input
-              type="password"
-              class="text-input"
-              v-model="form.confirmPassword"
-              placeholder="Confirm new password"
-            />
+            <div class="input-wrap">
+              <input
+                :type="show.confirm ? 'text' : 'password'"
+                class="text-input"
+                v-model="form.confirmPassword"
+                placeholder="Confirm new password"
+              />
+              <button type="button" class="eye-btn" @click="show.confirm = !show.confirm">
+                <Eye v-if="!show.confirm" size="16" />
+                <EyeOff v-else size="16" />
+              </button>
+            </div>
           </div>
 
-          <!-- Submit Button -->
-          <button
-            type="submit"
-            class="save-btn font-medium"
-            :disabled="isLoading"
-          >
-            <span
-              v-if="isLoading"
-              class="spinner-border spinner-border-sm me-2"
-            />
+          <button type="submit" class="save-btn font-medium" :disabled="isLoading">
+            <span v-if="isLoading" class="spinner-border spinner-border-sm me-2" />
             {{ isLoading ? "Changing..." : "Change password" }}
           </button>
         </form>
@@ -84,28 +91,21 @@
     </div>
   </main>
 </template>
+
 <script setup>
 import { reactive, ref } from "vue";
 import { useProfileStore } from "@/stores/profile/profile";
 import { notify } from "@/utils/toast";
-import { useRouter, useRoute } from "vue-router";
+import { useRouter } from "vue-router";
 
 const router = useRouter();
 const profileStore = useProfileStore();
 const toast = notify(router);
-let isLoading = ref(false);
+const isLoading = ref(false);
 
-const form = reactive({
-  currentPassword: "",
-  newPassword: "",
-  confirmPassword: "",
-});
-
-const validation = reactive({
-  length: false,
-  number: false,
-  special: false,
-});
+const form = reactive({ currentPassword: "", newPassword: "", confirmPassword: "" });
+const validation = reactive({ length: false, number: false, special: false });
+const show = reactive({ current: false, newPass: false, confirm: false });
 
 const validatePassword = () => {
   validation.length = form.newPassword.length >= 8;
@@ -120,22 +120,20 @@ const handleChangePassword = async () => {
       toast.error("Password is required");
       return;
     }
-
     if (form.newPassword !== form.confirmPassword) {
       toast.error("Passwords do not match");
       return;
     }
-
     await profileStore.ChangePassword(
       form.currentPassword,
       form.newPassword,
       form.confirmPassword
     );
     toast.success("Password changed successfully");
-
     form.currentPassword = "";
     form.newPassword = "";
     form.confirmPassword = "";
+    Object.assign(show, { current: false, newPass: false, confirm: false });
   } catch (err) {
     toast.error(err.message);
   } finally {
@@ -143,7 +141,6 @@ const handleChangePassword = async () => {
   }
 };
 </script>
-
 <style scoped>
 *,
 *::before,
@@ -330,5 +327,31 @@ const handleChangePassword = async () => {
 
 .save-btn:hover {
   background: #262626;
+}
+
+.input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input-wrap .text-input {
+  padding-right: 42px;
+}
+
+.eye-btn {
+  position: absolute;
+  right: 12px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #94a3b8;
+  padding: 0;
+  display: flex;
+  align-items: center;
+}
+
+.eye-btn:hover {
+  color: #171717;
 }
 </style>
