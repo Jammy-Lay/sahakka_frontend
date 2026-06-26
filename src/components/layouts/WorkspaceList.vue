@@ -807,7 +807,7 @@ const handleLogout = async () => {
     isLoading.value = true;
     localStorage.removeItem("lastVisitedTeam");
     await authStore.logout();
-    router.push({ name: "login" });
+    router.push({ name: "home" });
   } catch (error) {
     toast.error(error.message);
   } finally {

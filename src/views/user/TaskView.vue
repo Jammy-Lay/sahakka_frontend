@@ -392,6 +392,7 @@
                         v-if="canChangeAssignee"
                         class="d-flex align-items-center gap-2 px-2 py-1 rounded workspace-item fs-13 cursor-pointer"
                         @click="
+                          task.assigned_to = null;
                           closePop(task.id, 'assignee');
                           handleUpdateTask(task, true);
                         "
