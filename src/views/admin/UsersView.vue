@@ -270,6 +270,10 @@ const columnsAllUsers = [
                     options: options(row),
                     trigger: "click",
                     onSelect: (key) => handleAction(key, row),
+                    themeOverrides: {
+                    borderRadius: "12px",
+                    width: "180px" // Optional
+                }
                 },
                 {
                     default: () =>
@@ -381,6 +385,7 @@ const columnsUserActive = [
                                     border: "none",
                                     outline: "none",
                                     background: "transparent",
+                                    borderRadius: "12px",
                                 },
                             },
                         ),
@@ -525,6 +530,10 @@ const columnsUserBlock = [
                     options: options(row),
                     trigger: "click",
                     onSelect: (key) => handleAction(key, row),
+                    themeOverrides: {
+                    borderRadius: "12px",
+                    width: "180px" // Optional
+                }
                 },
                 {
                     default: () =>
@@ -537,6 +546,7 @@ const columnsUserBlock = [
                                     border: "none",
                                     outline: "none",
                                     background: "transparent",
+                                    borderRadius: "12px",
                                 },
                             },
                         ),
