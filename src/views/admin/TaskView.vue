@@ -14,7 +14,7 @@
                 <div class="mb-4 col-12 col-sm-6 col-md-4 col-lg-3 px-0">
                     <div class="form-control rounded-btn d-flex align-items-center py-1" style="width: 300px;">
                         <input v-model="search" type="text" class="search-input shadow-none outline-none border-0 w-100"
-                            placeholder="Search by team name" />
+                            placeholder="Search " />
                         <Search color="var(--bs-gray)" size="18" />
                     </div>
                 </div>
@@ -113,14 +113,27 @@ const columns = [
 ];
 
 const tasksByStatus = (status) =>
-    taskStore.tasks.filter((t) => {
-        const matchStatus = t.status === status;
-        const matchTeam = t.team?.name?.toLowerCase().includes(search.value.toLowerCase());
-        return matchStatus && matchTeam;
-    });
+    taskStore.tasks
+        .filter((t) => {
+            const matchStatus = t.status === status;
+            const matchSearch =
+                t.title?.toLowerCase().includes(search.value.toLowerCase()) ||
+                t.team?.name?.toLowerCase().includes(search.value.toLowerCase());
+            return matchStatus && matchSearch;
+        })
+        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));  
+    
+const loading = ref(false);
 
 onMounted(async () => {
-    await taskStore.fetchTasks();
+    loading.value = true;
+    try {
+        await taskStore.fetchTasks();
+    } catch (error) {
+        console.error(error);
+    } finally {
+        loading.value = false;
+    }
 });
 
 const initials = (name) => {
