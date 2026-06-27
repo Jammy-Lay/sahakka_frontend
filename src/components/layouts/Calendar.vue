@@ -181,7 +181,8 @@
             class="task-card"
             @click="openTaskModal(task)"
           >
-            <div class="d-flex align-items-center gap-2 mb-2">
+            <div class="d-flex align-items-center gap-2">
+              <!-- No assignee -->
               <template v-if="!task.assigned_to?.user_id">
                 <img
                   src="../../assets/image/default-avatar.png"
@@ -190,18 +191,22 @@
                 />
                 <span class="fw-medium text-mute fs-13">No assignee</span>
               </template>
+
+              <!-- Self-assigned: the person who assigned IS the person assigned to -->
               <template
-                v-else-if="task.created_by?.user_id === task.assigned_to?.user_id"
+                v-else-if="task.assigned_by?.user_id === task.assigned_to?.user_id"
               >
                 <img
-                  :src="task.created_by?.avatar"
+                  :src="task.assigned_to?.avatar"
                   class="rounded-circle object-fit-cover"
                   style="width: 30px; height: 30px"
                 />
-                <span class="fw-semibold fs-13">{{ task.created_by?.name }}</span>
+                <span class="fw-semibold fs-13">{{ task.assigned_to?.name }}</span>
                 <span class="fw-bold text-mute fs-12">·</span>
                 <span class="text-mute fs-13">Self-assigned the task</span>
               </template>
+
+              <!-- Someone else assigned to a user -->
               <template v-else>
                 <img
                   :src="task.assigned_by?.avatar"
@@ -352,6 +357,7 @@
               <!-- Assignee row -->
               <div class="d-flex align-items-center justify-content-between mb-3">
                 <div class="d-flex align-items-center gap-2">
+                  <!-- No assignee -->
                   <template v-if="!selectedTask.assigned_to?.user_id">
                     <img
                       src="../../assets/image/default-avatar.png"
@@ -360,23 +366,27 @@
                     />
                     <span class="fw-medium text-mute fs-13">No assignee</span>
                   </template>
+
+                  <!-- Self-assigned: the person who assigned IS the person assigned to -->
                   <template
                     v-else-if="
-                      selectedTask.created_by?.user_id ===
+                      selectedTask.assigned_by?.user_id ===
                       selectedTask.assigned_to?.user_id
                     "
                   >
                     <img
-                      :src="selectedTask.created_by?.avatar"
+                      :src="selectedTask.assigned_to?.avatar"
                       class="rounded-circle object-fit-cover"
                       style="width: 30px; height: 30px"
                     />
                     <span class="fw-semibold fs-13">{{
-                      selectedTask.created_by?.name
+                      selectedTask.assigned_to?.name
                     }}</span>
                     <span class="fw-bold text-mute fs-12">·</span>
                     <span class="text-mute fs-13">Self-assigned the task</span>
                   </template>
+
+                  <!-- Someone else assigned to a user -->
                   <template v-else>
                     <img
                       :src="selectedTask.assigned_by?.avatar"
@@ -586,7 +596,7 @@
                         @click="
                           selectedTask.assigned_to = null;
                           showDetailAssigneePop = false;
-                          handleUpdateTask(selectedTask, true);
+                          handleUpdateTask(selectedTask, true, true);
                         "
                       >
                         <img
@@ -605,7 +615,7 @@
                           selectedTask.assigned_to = member;
                           selectedTask.assigned_by = getMe;
                           showDetailAssigneePop = false;
-                          handleUpdateTask(selectedTask, true);
+                          handleUpdateTask(selectedTask, true, true);
                         "
                       >
                         <img
@@ -1142,7 +1152,7 @@ const openTaskModal = async (task) => {
   });
 };
 
-const handleUpdateTask = async (task, forceField = null) => {
+const handleUpdateTask = async (task, forceField = null, assigneeChanged = false) => {
   try {
     if (!forceField) {
       const titleChanged = task.title !== originalTask.value?.title;
@@ -1150,24 +1160,39 @@ const handleUpdateTask = async (task, forceField = null) => {
       if (!titleChanged && !descChanged) return;
     }
 
-    await taskStore.updateTask(workspace_id.value, team_id.value, task.id, {
+    const payload = {
       title: task.title,
       description: task.description,
       type: task.type,
       status: task.status,
       priority: task.priority,
-      assigned_to: task.assigned_to?.user_id ?? null,
       start_date: task.start_date,
       end_date: task.end_date,
-    });
+    };
 
+    if (assigneeChanged) {
+      payload.assigned_to = task.assigned_to?.user_id ?? null;
+    } else if (originalTask.value?.id === task.id) {
+      if (
+        (task.assigned_to?.user_id ?? null) !==
+        (originalTask.value?.assigned_to?.user_id ?? null)
+      ) {
+        payload.assigned_to = task.assigned_to?.user_id ?? null;
+      }
+    }
+
+    await taskStore.updateTask(workspace_id.value, team_id.value, task.id, payload);
     originalTask.value = { ...task };
-    await taskStore.getTaskByTeamStore(workspace_id.value, team_id.value, "", true);
+
     await taskStore.getSummaryTaskStore(workspace_id.value, team_id.value, true);
     await taskStore.getMyTaskStore(workspace_id.value, team_id.value, "", true);
+    await taskStore.getTaskActivityStore(workspace_id.value, team_id.value, task.id);
+    if (selectedTask.value?.id === task.id) {
+      selectedTask.value.activities = getTaskActivity.value;
+    }
   } catch (error) {
     toast.error(error.message);
-    await taskStore.getTaskByTeamStore(workspace_id.value, team_id.value);
+    await taskStore.getTaskByTeamStore(workspace_id.value, team_id.value, "", true);
   }
 };
 

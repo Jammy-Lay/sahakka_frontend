@@ -1,12 +1,13 @@
 import api from "@/api/https";
 import { defineStore } from "pinia";
 import { ref } from "vue";
+import router from "@/router";
 
 export const useTaskStore = defineStore("task", () => {
   let getTaskByTeam = ref([]);
-  let getIssueTask = ref([]); // bug, improvement
-  let getTask = ref([]); // task, feature
-  let getTaskActivity = ref([]);
+  let getIssueTask = ref([]);
+  let getTask = ref([]);
+  let getTaskActivity = ref({});
   let getSummaryTask = ref({});
   let getMyTask = ref([]);
   let getMyIssueTask = ref([]);
@@ -16,6 +17,15 @@ export const useTaskStore = defineStore("task", () => {
   let tabLoading = ref(false);
   let summaryLoading = ref(true);
   let myTaskLoading = ref(true);
+
+  // Refetch summary and my tasks using current route params
+  const refetchOnSocket = () => {
+    const workspace_id = router.currentRoute.value.params.workspace_id;
+    const team_id = router.currentRoute.value.params.team_id;
+    if (!workspace_id || !team_id) return;
+    getSummaryTaskStore(workspace_id, team_id, true);
+    getMyTaskStore(workspace_id, team_id, "", true);
+  };
 
   const getTaskByTeamStore = async (
     workspace_id,
@@ -31,13 +41,11 @@ export const useTaskStore = defineStore("task", () => {
         `/workspace/${workspace_id}/team/${team_id}/tasks?status=${status}`,
       );
       const tasks = res.data.data.tasks;
-
       getTaskByTeam.value = tasks;
       getIssueTask.value = tasks.filter((t) =>
         ["bug", "improvement"].includes(t.type),
       );
       getTask.value = tasks.filter((t) => ["task", "feature"].includes(t.type));
-
       if (!status) tasksByTeam.value[team_id] = tasks;
     } catch (err) {
       throw new Error(err.response?.data?.message || "Get task failed");
@@ -143,6 +151,41 @@ export const useTaskStore = defineStore("task", () => {
     }
   };
 
+  const handleTaskCreated = (newTask) => {
+    getTaskByTeam.value.unshift(newTask);
+    if (["bug", "improvement"].includes(newTask.type))
+      getIssueTask.value.unshift(newTask);
+    if (["task", "feature"].includes(newTask.type))
+      getTask.value.unshift(newTask);
+    refetchOnSocket();
+  };
+
+  const handleTaskUpdated = (updatedTask) => {
+    const updateList = (list) => {
+      const i = list.value.findIndex((t) => t.id === updatedTask.id);
+      if (i !== -1) list.value[i] = updatedTask;
+    };
+    updateList(getTaskByTeam);
+    updateList(getIssueTask);
+    updateList(getTask);
+    updateList(getMyTask);
+    updateList(getMyIssueTask);
+    updateList(getMyDailyTask);
+    refetchOnSocket();
+  };
+
+  const handleTaskDeleted = ({ task_id }) => {
+    const filterOut = (list) =>
+      (list.value = list.value.filter((t) => t.id !== task_id));
+    filterOut(getTaskByTeam);
+    filterOut(getIssueTask);
+    filterOut(getTask);
+    filterOut(getMyTask);
+    filterOut(getMyIssueTask);
+    filterOut(getMyDailyTask);
+    refetchOnSocket();
+  };
+
   return {
     getTaskByTeam,
     getIssueTask,
@@ -150,20 +193,23 @@ export const useTaskStore = defineStore("task", () => {
     getTaskActivity,
     getSummaryTask,
     getMyTask,
+    getMyIssueTask,
+    getMyDailyTask,
+    tasksByTeam,
+    loading,
+    tabLoading,
+    summaryLoading,
+    myTaskLoading,
     getTaskByTeamStore,
+    prefetchTeamTasks,
     createTask,
+    deleteTask,
     getTaskActivityStore,
     updateTask,
     getSummaryTaskStore,
     getMyTaskStore,
-    loading,
-    summaryLoading,
-    myTaskLoading,
-    deleteTask,
-    tasksByTeam,
-    prefetchTeamTasks,
-    tabLoading,
-    getMyDailyTask,
-    getMyIssueTask
+    handleTaskCreated,
+    handleTaskUpdated,
+    handleTaskDeleted,
   };
 });

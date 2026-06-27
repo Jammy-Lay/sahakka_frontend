@@ -1,6 +1,7 @@
 import { ref, computed } from "vue";
 import { defineStore } from "pinia";
 import api from "@/api/https";
+import { connectSocket, disconnectSocket } from "@/utils/socket";
 
 export const useAuthStore = defineStore("auth", () => {
   let user = ref({});
@@ -16,6 +17,7 @@ export const useAuthStore = defineStore("auth", () => {
       user.value = res.data.data;
       token.value = res.data.data.token;
       localStorage.setItem("token", token.value);
+      connectSocket();
     } catch (err) {
       throw new Error(err.response?.data?.message || "Sign in failed");
     }
@@ -31,6 +33,7 @@ export const useAuthStore = defineStore("auth", () => {
       getMe.value = {};
       token.value = null;
       localStorage.removeItem("token");
+      disconnectSocket();
     }
   };
 

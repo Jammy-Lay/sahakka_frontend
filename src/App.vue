@@ -1,10 +1,10 @@
 <script setup>
-// import { onMounted } from "vue";
-// import { initSocket } from "../services/socketService";
+import { onMounted } from "vue";
+import { initSocket } from "./services/socketService";
 
-// onMounted(() => {
-//   initSocket();
-// });
+onMounted(() => {
+  initSocket();
+});
 </script>
 
 <template>

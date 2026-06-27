@@ -27,24 +27,20 @@
               :offset="[-2, 2]"
             >
               <button
-                class="btn btn-white bg-white text-dark rounded-btn border-1 border-white fs-13 d-flex align-items-center gap-1"
+                class="btn btn-white bg-white text-dark rounded-btn border-1 border-white fs-14 d-flex align-items-center gap-1"
               >
-                <Filter size="16" /> Filter
+                <Filter size="15" /> Filter
               </button>
             </n-badge>
           </template>
 
           <!-- Popover Body -->
-          <div style="padding: 18px 16px">
+          <div class="p-3">
             <!-- Title -->
-            <div style="font-size: 13px; font-weight: 700; margin-bottom: 12px">
-              Filter by Date
-            </div>
+            <div class="fs-13 mb-2 text-dark fw-semibold">Filter by Date</div>
 
             <!-- Preset Pills -->
-            <div
-              style="display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px"
-            >
+            <div class="d-flex flex-column gap-1 mb-3">
               <div
                 v-for="preset in presets"
                 :key="preset.value"
@@ -53,7 +49,7 @@
                   activeFilter === preset.value ? 'preset-active' : 'preset-default'
                 "
               >
-                {{ preset.label }}
+                <calendar-clock size="16" class="me-2" /> {{ preset.label }}
               </div>
             </div>
 
@@ -61,11 +57,11 @@
             <div
               style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px"
             >
-              <div style="flex: 1; height: 1px; background: #e5e7eb" />
-              <span style="font-size: 11px; color: #9ca3af; white-space: nowrap"
-                >Custom Range</span
-              >
-              <div style="flex: 1; height: 1px; background: #e5e7eb" />
+              <div style="flex: 1; height: 1px; background: #e4e4e7" />
+              <span class="fs-11 text-dark" style="white-space: nowrap">
+                Custom Range
+              </span>
+              <div style="flex: 1; height: 1px; background: #e4e4e7" />
             </div>
 
             <!-- Date Range Picker -->
@@ -83,7 +79,11 @@
             />
 
             <!-- Clear Button -->
-            <div v-if="activeFilter !== 'all'" @click="clearFilter" class="btn bg-btn w-100 mt-3 fs-13 rounded-btn">
+            <div
+              v-if="activeFilter !== 'all'"
+              @click="clearFilter"
+              class="btn bg-btn w-100 mt-3 fs-13 rounded-btn"
+            >
               Clear Filter
             </div>
           </div>
@@ -95,7 +95,7 @@
         <n-tag
           closable
           :color="{ color: '#CFCCFC', textColor: '#6155F5', borderColor: '#CFCCFC' }"
-          style="font-size: 12px; border-radius: 20px; padding: 2px 14px;"
+          style="font-size: 12px; border-radius: 20px; padding: 2px 14px"
           @close="clearFilter"
           class="d-flex justify-content-center align-items-center w-fit"
         >
@@ -204,7 +204,7 @@ const applyCustomRange = (val) => {
   if (val) {
     customRange.value = val;
     activeFilter.value = "custom";
-    showFilter.value = false; 
+    showFilter.value = false;
   }
 };
 
@@ -320,7 +320,6 @@ const actTagIcon = (action) => {
   color: #171717;
   transition: background 0.15s;
 }
-
 
 .custom-picker :deep(.n-input) {
   --n-border-hover: 1px solid gray !important;
