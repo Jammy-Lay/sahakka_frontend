@@ -1,6 +1,7 @@
 import api from "@/api/https";
 import { defineStore } from "pinia";
 import { ref } from "vue";
+import router from "@/router";
 
 export const useTeamStore = defineStore("team", () => {
   let getTeamSection = ref([]);
@@ -9,8 +10,17 @@ export const useTeamStore = defineStore("team", () => {
   let getMember = ref({});
   let getActivityTeam = ref([]);
   let loading = ref(true);
-  let teamDetailLoading  = ref(true);
+  let teamDetailLoading = ref(true);
   let activityLoading = ref(true);
+
+  const handleMemberJoined = (data) => {
+    const workspace_id = router.currentRoute.value.params.workspace_id;
+    const team_id = router.currentRoute.value.params.team_id;
+    if (!workspace_id || data.workspace_id != workspace_id) return;
+
+    getTeamByWorkspaceStore(workspace_id);
+    if (team_id) getTeamByIdStore(workspace_id, team_id);
+  };
 
   const getTeamSectionStore = async (team_id) => {
     try {
@@ -37,7 +47,7 @@ export const useTeamStore = defineStore("team", () => {
 
   const getTeamByIdStore = async (workspace_id, team_id) => {
     try {
-      teamDetailLoading .value = true;
+      teamDetailLoading.value = true;
       const res = await api.get(`/workspace/${workspace_id}/team/${team_id}`);
       getTeamById.value = res.data.data;
       getMember.value = res.data.data.members.filter(
@@ -46,7 +56,7 @@ export const useTeamStore = defineStore("team", () => {
     } catch (err) {
       throw new Error(err.response?.data?.message || "Get team failed");
     } finally {
-      teamDetailLoading .value = false;
+      teamDetailLoading.value = false;
     }
   };
 
@@ -119,5 +129,6 @@ export const useTeamStore = defineStore("team", () => {
     getActivityTeamStore,
     getActivityTeam,
     activityLoading,
+    handleMemberJoined,
   };
 });

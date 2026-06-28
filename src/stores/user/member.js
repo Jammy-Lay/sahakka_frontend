@@ -1,11 +1,22 @@
 import api from "@/api/https";
 import { defineStore } from "pinia";
 import { ref } from "vue";
+import router from "@/router";
 
 export const useMemberStore = defineStore("members", () => {
   let getAllMemberInWorkspace = ref([]);
   let getAllMemberInTeam = ref([]);
   let loading = ref(true);
+  let selectedTeamId = ref(null);
+
+  const handleMemberJoined = (data) => {
+    const workspace_id = router.currentRoute.value.params.workspace_id;
+    const team_id = router.currentRoute.value.params.team_id;
+    if (!workspace_id || data.workspace_id != workspace_id) return;
+
+    getAllMemberInWorkspaceStore(workspace_id);
+    if (team_id) getAllMemberInTeamStore(workspace_id, team_id);
+  };
 
   const getAllMemberInWorkspaceStore = async (workspace_id) => {
     try {
@@ -70,6 +81,8 @@ export const useMemberStore = defineStore("members", () => {
     removeFromWorkspace,
     getAllMemberInTeamStore,
     removeFromTeam,
-    loading
+    loading,
+    handleMemberJoined,
+    selectedTeamId,
   };
 });

@@ -1,5 +1,5 @@
 <template>
-  <div class="">
+  <div class="pb-3">
     <template v-if="taskStore.loading">
       <TaskSkeleton />
     </template>
@@ -58,16 +58,17 @@
             class="tab-title"
             :class="activeTab === '' ? 'tab-dark' : 'tab-default'"
             @click="handleTabClick('')"
-            ><layout-dashboard size="16" /> All tasks</span
           >
+            <layout-dashboard size="16" /> {{ taskFilterLabel }}
+          </span>
           <span
             class="tab-title"
             :class="
               activeTab === 'todo' ? 'bg-blue-active text-white' : 'bg-blue text-blue'
             "
             @click="handleTabClick('todo')"
-            ><circle-check-big size="16" /> To do</span
-          >
+            ><circle-check-big size="16" /> To do
+          </span>
           <span
             class="tab-title"
             :class="
@@ -76,8 +77,8 @@
                 : 'bg-orange text-orange'
             "
             @click="handleTabClick('in_progress')"
-            ><circle-dashed size="16" /> In process</span
-          >
+            ><circle-dashed size="16" /> In process
+          </span>
           <span
             class="tab-title"
             :class="
@@ -86,8 +87,8 @@
                 : 'bg-purple text-purple'
             "
             @click="handleTabClick('submitted')"
-            ><Send size="16" /> Submitted</span
-          >
+            ><Send size="16" /> Submitted
+          </span>
           <span
             class="tab-title"
             :class="
@@ -96,16 +97,16 @@
                 : 'bg-green text-green'
             "
             @click="handleTabClick('approved')"
-            ><CircleCheck size="16" /> Approved</span
-          >
+            ><CircleCheck size="16" /> Approved
+          </span>
           <span
             class="tab-title"
             :class="
               activeTab === 'rejected' ? 'bg-red-active text-white' : 'bg-red text-danger'
             "
             @click="handleTabClick('rejected')"
-            ><CircleX size="16" /> Rejected</span
-          >
+            ><CircleX size="16" /> Rejected
+          </span>
         </div>
       </div>
 
@@ -1550,6 +1551,7 @@ const handleTabClick = (status) => {
 };
 
 const taskFilter = ref("all");
+const taskFilterLabel = computed(() => taskFilter.value === 'all' ? 'All Tasks' : 'My Tasks');
 
 const handleFilterChange = (filter) => {
   taskFilter.value = filter;
@@ -1746,10 +1748,10 @@ const handleDeleteTask = async (task) => {
 onMounted(async () => {
   await taskStore.getTaskByTeamStore(workspace_id.value, team_id.value);
 
-  socket.emit("join-workspace", {
-    workspace_id: workspace_id.value,
-    team_id: team_id.value,
-  });
+  // socket.emit("join-workspace", {
+  //   workspace_id: workspace_id.value,
+  //   team_id: team_id.value,
+  // });
 });
 
 // ── File attachment ──
@@ -1854,10 +1856,10 @@ const handleSubmit = async (task) => {
 };
 
 onUnmounted(() => {
-  socket.emit("leave-workspace", {
-    workspace_id: workspace_id.value,
-    team_id: team_id.value,
-  });
+  // socket.emit("leave-workspace", {
+  //   workspace_id: workspace_id.value,
+  //   team_id: team_id.value,
+  // });
   if (filePreviewUrl.value) URL.revokeObjectURL(filePreviewUrl.value);
 });
 

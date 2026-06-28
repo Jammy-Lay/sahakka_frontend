@@ -25,11 +25,12 @@
               :value="activeFilter !== 'all' ? 1 : 0"
               color="#6155F5"
               :offset="[-2, 2]"
+              class="font-pp"
             >
               <button
-                class="btn btn-white bg-white text-dark rounded-btn border-1 border-white fs-14 d-flex align-items-center gap-1"
+                class="btn btn-white font-pp bg-white text-dark rounded-btn border-1 border-white fs-13 d-flex align-items-center gap-1"
               >
-                <Filter size="15" /> Filter
+                <Filter size="16" /> Filter
               </button>
             </n-badge>
           </template>
@@ -169,7 +170,6 @@ onMounted(async () => {
   await teamStore.getActivityTeamStore(workspace_id.value, team_id.value);
 });
 
-// ─── Filter State ─────────────────────────────────────────────
 const showFilter = ref(false);
 const activeFilter = ref("all");
 const customRange = ref(null);

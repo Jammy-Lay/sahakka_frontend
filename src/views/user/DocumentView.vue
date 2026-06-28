@@ -125,6 +125,7 @@
             :document-title="doc.title"
             :created-at="doc.created_at"
             :document-id="doc.document_id"
+            :is-owner="isOwner"
             @delete-action="
               (docId) => {
                 deleteModal = true;
@@ -147,6 +148,7 @@ import SkeletonDocument from "@/components/Skeleton/SkeletonDocument.vue";
 import TitleTeamSkeleton from "@/components/team/TitleTeamSkeleton.vue";
 import { useDocumentStore } from "@/stores/user/document";
 import { useTeamStore } from "@/stores/user/team";
+import { UseWorkspaceStore } from "@/stores/user/workspace";
 import { notify } from "@/utils/toast";
 import { Search } from "lucide-vue-next";
 import { storeToRefs } from "pinia";
@@ -179,10 +181,18 @@ const { getDocumentByTeam } = storeToRefs(useDocument);
 const useTeam = useTeamStore();
 const { getTeamById } = storeToRefs(useTeam);
 
+const workspaceStore = UseWorkspaceStore();
+const { getAllWorkspace } = storeToRefs(workspaceStore);
+
 const document = computed(() => {
   return getDocumentByTeam.value.filter((doc) => {
     return doc.title.toLowerCase().includes(searchDoc.value.trim().toLocaleLowerCase());
   });
+});
+
+const isOwner = computed(() => {
+  const ws = getAllWorkspace.value.find((w) => w.workspace_id == workspace_id.value);
+  return ws?.my_role === "owner";
 });
 
 async function createDocument() {
@@ -203,7 +213,6 @@ async function createDocument() {
       documentName.value
     );
     documentName.value = "";
-    getDocumentByTeam.value.unshift(newDoc.data);
     showModal.value = false;
     toast.success(newDoc.message);
   } catch (error) {
@@ -222,13 +231,7 @@ async function deleteDocHandling() {
       document_id.value
     );
     deleteModal.value = false;
-    if (deleteDoc.result) {
-      const indexofDoc = getDocumentByTeam.value.findIndex(
-        (doc) => doc.document_id === document_id.value
-      );
-      getDocumentByTeam.value.splice(indexofDoc, 1);
-      return toast.success(deleteDoc.message);
-    }
+    toast.success(deleteDoc.message);
   } catch (error) {
     toast.error(error.message);
   } finally {
@@ -239,23 +242,15 @@ async function deleteDocHandling() {
 async function updateTitle(docId, title) {
   try {
     const currentDoc = getDocumentByTeam.value.find((doc) => doc.document_id === docId);
+    if (currentDoc?.title === title.trim()) return;
 
-    // same name -> no update and no toast
-    if (currentDoc?.title === title.trim()) {
-      return;
-    }
-
-    const updateTitle = await useDocument.updateTitleDocument(
+    const message = await useDocument.updateTitleDocument(
       workspace_id.value,
       team_id.value,
       docId,
       title.trim()
     );
-
-    if (updateTitle) {
-      currentDoc.title = title.trim();
-      toast.success(updateTitle);
-    }
+    if (message) toast.success(message);
   } catch (error) {
     toast.error(error.message);
     await useDocument.getAllDocument(workspace_id.value, team_id.value);

@@ -142,15 +142,13 @@ async function handleLogin() {
     await auth.login(email.value, password.value);
 
     const decoded = jwtDecode(auth.token);
-    // console.log("decoded token:", decoded);
 
     if (decoded.role === "admin") {
       toast.success("Signin Successfully", "/admin/dashboard");
       return;
     }
-    
-    const inviteToken = route.query.invite;
 
+    const inviteToken = route.query.invite;
     if (inviteToken) {
       router.push(`/invite?token=${inviteToken}`);
       return;
@@ -159,20 +157,32 @@ async function handleLogin() {
     const userId = decoded.id;
     const lastVisited = JSON.parse(localStorage.getItem(`lastVisited_${userId}`));
 
-    // console.log("userId:", userId);
-    // console.log("lastVisited:", lastVisited);
+    await workspaceStore.getMyWorkspaceStore();
 
     if (lastVisited?.workspace_id && lastVisited?.team_id) {
-      toast.success(
-        "Signin Successfully",
-        `/workspace/${lastVisited.workspace_id}/team/${lastVisited.team_id}/tasks`
+      const workspaceStillValid = workspaceStore.getAllWorkspace.find(
+        (w) => w.workspace_id === lastVisited.workspace_id
       );
-      return;
+
+      if (workspaceStillValid) {
+        await teamStore.getTeamByWorkspaceStore(lastVisited.workspace_id);
+        const teamStillValid = teamStore.getTeamByWorkspace.find(
+          (t) => t.team_id === lastVisited.team_id
+        );
+
+        if (teamStillValid) {
+          toast.success(
+            "Signin Successfully",
+            `/workspace/${lastVisited.workspace_id}/team/${lastVisited.team_id}/tasks`
+          );
+          return;
+        }
+      }
+
+      localStorage.removeItem(`lastVisited_${userId}`);
     }
 
-    await workspaceStore.getMyWorkspaceStore();
-    const workspace = workspaceStore.myWorkspaces[0];
-
+    const workspace = workspaceStore.getAllWorkspace[0];
     if (!workspace) {
       toast.success("Signin Successfully", "/no-workspace");
       return;
@@ -191,7 +201,7 @@ async function handleLogin() {
       `/workspace/${workspace.workspace_id}/team/${team.team_id}/tasks`
     );
   } catch (error) {
-    if(error.message === "Email not verify"){
+    if (error.message === "Email not verify") {
       router.push("/not-verify");
     }
     toast.error(error.message);

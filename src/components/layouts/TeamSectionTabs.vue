@@ -187,10 +187,10 @@ const handleInvite = async () => {
     );
 
     inviteEmail.value = "";
-    toast.success("INvite Successfully");
+    toast.success("Invite Successfully");
     showInvitePopover.value = false;
   } catch (error) {
-    console.error(error);
+    toast.error(error.message);
   } finally {
     isInviteLoading.value = false;
   }
@@ -207,7 +207,7 @@ const handleGenerate = async () => {
     passcode.value = res.data.token;
     toast.success("Generate Code Successfully");
   } catch (error) {
-    console.error(error);
+    toast.error(error.message);
   } finally {
     isGenerateLoading.value = false;
   }

@@ -1,17 +1,15 @@
 <template>
   <div>
     <div class="p-2 pt-3">
-      <h4 class="fw-bold">Members</h4>
+      <h5 class="fw-semibold">Members</h5>
       <div class="d-flex align-items-center gap-3">
-        <!-- Replace the h6 and keep filter button static -->
-        <h6 class="text-mute">
+        <h6 class="text-mute fs-14">
           Manage members access :
           <span class="fw-semibold text-dark">
             {{ selectedTeamId === null ? "All Members" : selectedTeamLabel }}
           </span>
         </h6>
 
-        <!-- Filter by Team -->
         <n-popover
           trigger="click"
           placement="bottom-end"
@@ -27,13 +25,16 @@
             </button>
           </template>
           <div class="d-flex flex-column gap-1">
+            <!-- All Members: owner only -->
             <div
+              v-if="isOwner"
               class="d-flex align-items-center gap-2 px-2 py-1 rounded workspace-item fs-13 cursor-pointer"
               :class="selectedTeamId === null ? 'fw-semibold bg-accent' : ''"
               @click="handleFilterChange(null)"
             >
               <Users size="15" /> All Members
             </div>
+            <!-- Teams: backend already scoped to this user's teams only -->
             <div
               v-for="team in getTeamByWorkspace"
               :key="team.team_id"
@@ -61,7 +62,7 @@
       </div>
 
       <div class="mt-4">
-        <TableViewMemberSkeleton v-if="memberStore.loading" />
+        <TableViewMemberSkeleton v-if="!pageReady || memberStore.loading" />
         <n-data-table
           v-else
           class="my-custom-table"
@@ -115,14 +116,14 @@
 </template>
 
 <script setup>
-import { ref, computed, h, onMounted, render } from "vue";
+import { ref, computed, h, onMounted } from "vue";
 import { NPopover } from "naive-ui";
 import { Ban } from "lucide-vue-next";
 import { useRoute, useRouter } from "vue-router";
 import { notify } from "@/utils/toast";
 import { useMemberStore } from "@/stores/user/member";
 import { useTeamStore } from "@/stores/user/team";
-import { useAuthStore } from "@/stores/auth";
+import { UseWorkspaceStore } from "@/stores/user/workspace";
 import { storeToRefs } from "pinia";
 import TableViewMemberSkeleton from "@/components/Skeleton/TableViewMemberSkeleton.vue";
 
@@ -132,34 +133,46 @@ const toast = notify(router);
 
 const workspace_id = computed(() => route.params.workspace_id);
 
-// Stores
 const memberStore = useMemberStore();
-const teamStore = useTeamStore();
-const authStore = useAuthStore();
-
-const { getAllMemberInWorkspace, getAllMemberInTeam } = storeToRefs(memberStore);
-const { getTeamByWorkspace } = storeToRefs(teamStore);
-const { getMe } = storeToRefs(authStore);
-
-const isOwner = computed(
-  () =>
-    getAllMemberInWorkspace.value.find((m) => m.user_id === getMe.value?.user_id)
-      ?.role === "owner"
+const { getAllMemberInWorkspace, getAllMemberInTeam, selectedTeamId } = storeToRefs(
+  memberStore
 );
 
-const loading = ref(false);
+const teamStore = useTeamStore();
+const { getTeamByWorkspace } = storeToRefs(teamStore);
 
-onMounted(async () => {
-  await Promise.all([
-    memberStore.getAllMemberInWorkspaceStore(workspace_id.value),
-    teamStore.getTeamByWorkspaceStore(workspace_id.value),
-  ]);
+const workspaceStore = UseWorkspaceStore();
+const { getAllWorkspace } = storeToRefs(workspaceStore);
+
+const isOwner = computed(() => {
+  const ws = getAllWorkspace.value.find((w) => w.workspace_id == workspace_id.value);
+  return ws?.my_role === "owner";
 });
 
-// UI State
+const pageReady = ref(false);
+
+onMounted(async () => {
+  pageReady.value = false;
+
+  await teamStore.getTeamByWorkspaceStore(workspace_id.value);
+
+  if (isOwner.value) {
+    await memberStore.getAllMemberInWorkspaceStore(workspace_id.value);
+  } else {
+    if (getTeamByWorkspace.value.length > 0) {
+      selectedTeamId.value = getTeamByWorkspace.value[0].team_id;
+      await memberStore.getAllMemberInTeamStore(
+        workspace_id.value,
+        getTeamByWorkspace.value[0].team_id
+      );
+    }
+  }
+
+  pageReady.value = true;
+});
+
 const showFilterPop = ref(false);
 const searchMember = ref("");
-const selectedTeamId = ref(null);
 const openPop = ref({});
 const showKickModal = ref(false);
 const kickTarget = ref(null);
@@ -190,6 +203,8 @@ function closePop(id, type) {
 }
 
 async function handleFilterChange(teamId) {
+  if (teamId === null && !isOwner.value) return;
+
   selectedTeamId.value = teamId;
   showFilterPop.value = false;
   openPop.value = {};
@@ -236,6 +251,8 @@ async function confirmKick() {
     toast.error(err.message);
   } finally {
     isKicking.value = false;
+    await teamStore.getTeamByWorkspaceStore(workspace_id.value);
+    await teamStore.getTeamByIdStore(workspace_id.value, selectedTeamId.value);
   }
 }
 
@@ -245,13 +262,11 @@ async function handleRoleChange(row, newRole) {
       role: newRole,
     });
     row.role = newRole;
-
     if (selectedTeamId.value !== null) {
       await memberStore.getAllMemberInTeamStore(workspace_id.value, selectedTeamId.value);
     } else {
       await memberStore.getAllMemberInWorkspaceStore(workspace_id.value);
     }
-
     toast.success("Role updated successfully");
   } catch (err) {
     toast.error(err.message);
@@ -270,156 +285,142 @@ const filteredData = computed(() =>
   )
 );
 
-const date = (date) => new Date(date).toLocaleDateString("en-GB", { dateStyle: "long" });
-// Table columns
-const columns = [
-  {
-    title: "Name",
-    key: "name",
-    render(row) {
-      return h("div", { class: "d-flex align-items-center gap-2" }, [
-        h("img", {
-          src: row.avatar,
-          class: "rounded-circle",
-          style: "width: 28px; height: 28px; object-fit: cover;",
-          onError: (e) => {
-            e.target.src = "/default-avatar.png";
-          },
-        }),
-        h("span", { class: "fs-13" }, row.name),
-      ]);
-    },
-  },
-  {
-    title: "Email",
-    key: "email",
-  },
-  {
-    title: "Join",
-    key: "joined_at",
-    render(row) {
-      return h("div", date(row.joined_at));
-    },
-  },
-  {
-    title: "Role",
-    key: "role",
-    render(row) {
-      const badge = h(
-        "span",
-        {
-          class: `tab-info w-fit fw-medium d-inline-block ${roleConfig[row.role]?.bg} ${
-            roleConfig[row.role]?.text
-          }`,
-          style: "cursor: not-allowed !important;",
-        },
-        row.role.charAt(0).toUpperCase() + row.role.slice(1)
-      );
+const date = (d) => new Date(d).toLocaleDateString("en-GB", { dateStyle: "long" });
 
-      if (!isOwner.value || row.role === "owner") {
-        return badge;
-      }
-
-      if (selectedTeamId.value === null) {
-        return h(
+const columns = computed(() => {
+  const base = [
+    {
+      title: "Name",
+      key: "name",
+      render(row) {
+        return h("div", { class: "d-flex align-items-center gap-2" }, [
+          h("img", {
+            src: row.avatar,
+            class: "rounded-circle",
+            style: "width: 28px; height: 28px; object-fit: cover;",
+            onError: (e) => {
+              e.target.src = "/default-avatar.png";
+            },
+          }),
+          h("span", { class: "fs-13" }, row.name),
+        ]);
+      },
+    },
+    { title: "Email", key: "email" },
+    {
+      title: "Join",
+      key: "joined_at",
+      render(row) {
+        return h("div", date(row.joined_at));
+      },
+    },
+    {
+      title: "Role",
+      key: "role",
+      render(row) {
+        const badgeClass = `tab-info w-fit fw-medium d-inline-block ${
+          roleConfig[row.role]?.bg
+        } ${roleConfig[row.role]?.text}`;
+        const badge = h(
           "span",
-          {
-            class: `tab-info w-fit fw-medium d-inline-block ${roleConfig[row.role]?.bg} ${
-              roleConfig[row.role]?.text
-            }`,
-            style: "cursor: not-allowed !important;",
-          },
+          { class: badgeClass, style: "cursor: not-allowed !important;" },
           row.role.charAt(0).toUpperCase() + row.role.slice(1)
         );
-      }
 
-      return h(
-        NPopover,
-        {
-          show: isPopOpen(row.user_id, "role"),
-          trigger: "click",
-          placement: "bottom-start",
-          showArrow: false,
-          style: "border-radius: 12px; padding: 6px; width: 120px;",
-          "onUpdate:show": (val) => {
-            openPop.value[`${row.user_id}_role`] = val;
-          },
-        },
-        {
-          trigger: () =>
-            h(
-              "span",
-              {
-                class: `tab-info w-fit fw-medium cursor-pointer d-inline-block ${
-                  roleConfig[row.role]?.bg
-                } ${roleConfig[row.role]?.text}`,
-                onClick: (e) => e.stopPropagation(),
-              },
-              row.role.charAt(0).toUpperCase() + row.role.slice(1)
-            ),
-          default: () =>
-            h(
-              "div",
-              {},
-              Object.entries(editableRoles).map(([key]) =>
-                h(
-                  "div",
-                  {
-                    class:
-                      "d-flex align-items-center gap-2 px-2 py-1 rounded workspace-item fs-13 fw-medium cursor-pointer text-capitalize",
-                    onClick: () => {
-                      closePop(row.user_id, "role");
-                      handleRoleChange(row, key);
-                    },
-                  },
-                  key.charAt(0).toUpperCase() + key.slice(1)
-                )
-              )
-            ),
+        if (!isOwner.value || row.role === "owner" || selectedTeamId.value === null) {
+          return badge;
         }
-      );
-    },
-  },
-  {
-    title: "Kick Member",
-    key: "kick",
-    render(row) {
-      const isDisabled = !isOwner.value || row.role === "owner";
 
-      return h(
-        "button",
-        {
-          class: `btn btn-sm fs-13 text-white rounded-btn d-flex align-items-center gap-1 px-3 ${
-            isDisabled ? "bg-danger opacity-50" : "bg-danger"
-          }`,
-          disabled: isDisabled,
-          onClick: (e) => {
-            e.stopPropagation();
-            if (!isDisabled) kickMember(row);
+        return h(
+          NPopover,
+          {
+            show: isPopOpen(row.user_id, "role"),
+            trigger: "click",
+            placement: "bottom-start",
+            showArrow: false,
+            style: "border-radius: 12px; padding: 6px; width: 120px;",
+            "onUpdate:show": (val) => {
+              openPop.value[`${row.user_id}_role`] = val;
+            },
           },
-        },
-        [h(Ban, { size: 14 }), "Kick"]
-      );
+          {
+            trigger: () =>
+              h(
+                "span",
+                {
+                  class: `tab-info w-fit fw-medium cursor-pointer d-inline-block ${
+                    roleConfig[row.role]?.bg
+                  } ${roleConfig[row.role]?.text}`,
+                  onClick: (e) => e.stopPropagation(),
+                },
+                row.role.charAt(0).toUpperCase() + row.role.slice(1)
+              ),
+            default: () =>
+              h(
+                "div",
+                {},
+                Object.entries(editableRoles).map(([key]) =>
+                  h(
+                    "div",
+                    {
+                      class:
+                        "d-flex align-items-center gap-2 px-2 py-1 rounded workspace-item fs-13 fw-medium cursor-pointer text-capitalize",
+                      onClick: () => {
+                        closePop(row.user_id, "role");
+                        handleRoleChange(row, key);
+                      },
+                    },
+                    key.charAt(0).toUpperCase() + key.slice(1)
+                  )
+                )
+              ),
+          }
+        );
+      },
     },
-  },
-];
+  ];
+
+  // Owner only: add Action column with kick button
+  if (isOwner.value) {
+    base.push({
+      title: "Action",
+      key: "kick",
+      render(row) {
+        const isDisabled = row.role === "owner";
+        return h(
+          "button",
+          {
+            class: `btn btn-sm fs-13 text-white rounded-btn d-flex align-items-center gap-1 px-3 bg-danger${
+              isDisabled ? " opacity-50" : ""
+            }`,
+            disabled: isDisabled,
+            onClick: (e) => {
+              e.stopPropagation();
+              if (!isDisabled) kickMember(row);
+            },
+          },
+          [h(Ban, { size: 14 }), "Kick"]
+        );
+      },
+    });
+  }
+
+  return base;
+});
 </script>
 
 <style scoped>
 .search-input:focus {
   outline: none;
 }
-
 .form-control:has(.search-input:focus) {
   border: 1.5px solid #171717;
 }
-
 .my-custom-table :deep(.n-data-table-wrapper) {
   border-radius: 16px !important;
   overflow: hidden !important;
   border: 1px solid #e4e4e7 !important;
 }
-
 .my-custom-table :deep(.n-data-table-th) {
   background-color: #f5f5f5 !important;
   color: #171717 !important;
@@ -427,12 +428,7 @@ const columns = [
   padding: 16px 24px !important;
   font-weight: 600 !important;
 }
-
 .my-custom-table :deep(.n-data-table-td) {
   padding: 14px 24px !important;
-}
-
-.cursor-not-allowed {
-  cursor: not-allowed !important;
 }
 </style>

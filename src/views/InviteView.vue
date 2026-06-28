@@ -10,10 +10,12 @@
       <p class="text-mute fs-14">You have been invited to join this team.</p>
       <button
         v-if="showButton"
-        class="btn bg-btn w-100 rounded-btn py-2"
         @click="joinTeam"
+        class="btn bg-btn w-100 rounded-btn py-2"
+        :disabled="isLoading"
       >
-        Join Team
+        <span v-if="isLoading" class="spinner-border spinner-border-sm me-2" />
+        {{ isLoading ? "Joining..." : "Join Team" }}
       </button>
     </div>
   </div>
@@ -24,6 +26,7 @@ import { useRoute, useRouter } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
 import { useInviteStore } from "@/stores/user/invite";
 import { notify } from "@/utils/toast";
+import { socket } from "@/utils/socket";
 
 const route = useRoute();
 const router = useRouter();
@@ -33,17 +36,15 @@ const auth = useAuthStore();
 const inviteStore = useInviteStore();
 
 const token = ref("");
-const loading = ref(false);
+const isLoading = ref(false);
 const showButton = ref(false);
 
 const status = computed(() => route.query.status || "");
 
-onMounted(() => {
+onMounted(async () => {
   token.value = route.query.token;
 
-  if (status.value) {
-    return;
-  }
+  if (status.value) return;
 
   if (!token.value) {
     router.push("/");
@@ -52,18 +53,21 @@ onMounted(() => {
 
   if (!auth.token) {
     router.push(`/login?invite=${token.value}`);
-
     return;
   }
-
   showButton.value = true;
+  await joinTeam();
 });
 
 async function joinTeam() {
   try {
-    loading.value = true;
-
+    isLoading.value = true;
     const result = await inviteStore.joinInvite(token.value);
+    
+    socket.emit("join-workspace", {
+      workspace_id: result.data.workspace_id,
+      team_id: result.data.team_id,
+    });
 
     toast.success(
       "Joined successfully",
@@ -71,8 +75,9 @@ async function joinTeam() {
     );
   } catch (err) {
     toast.error(err.message);
+    showButton.value = true;
   } finally {
-    loading.value = false;
+    isLoading.value = false;
   }
 }
 </script>

@@ -288,6 +288,7 @@ const { getAllWorkspace } = storeToRefs(workspaceStore);
 
 const taskStore = useTaskStore();
 const { tasksByTeam } = storeToRefs(taskStore);
+
 const submissionStore = useSubmissionStore();
 
 const getTeamPercent = (teamId) => {
@@ -299,6 +300,7 @@ const getTeamPercent = (teamId) => {
 
   return Math.round((approved / tasks.length) * 100);
 };
+
 const currentWorkspace = computed(() => {
   return (
     getAllWorkspace.value.find((w) => w.workspace_id == currentRouteWorkspaceId.value) ??
@@ -419,6 +421,7 @@ const openRename = (t) => {
   selectedTeam.value = t;
   renameName.value = t.title;
   renameDescription.value = t.description;
+  showPopover.value[t.team_id] = false;
   showRenameModal.value = true;
 };
 
@@ -459,12 +462,17 @@ const isLoading = ref(false);
 
 const openDelete = (t) => {
   selectedTeam.value = t;
+  showPopover.value[t.team_id] = false;
   showDeleteModal.value = true;
 };
 
 const handleDelete = async () => {
-  isLoading.value = true;
+  if (teamList.value.length === 1) {
+    return toast.error("Cannot delete the last team");
+  }
+
   try {
+    isLoading.value = true;
     const deletedTeamId = selectedTeam.value.team_id;
 
     await teamStore.deleteTeam(currentRouteWorkspaceId.value, deletedTeamId);
