@@ -12,6 +12,10 @@ export const UseWorkspaceStore = defineStore("workspace", () => {
     JSON.parse(localStorage.getItem("lastVisitedTeam")) ?? {},
   );
 
+  const handleMemberJoined = () => {
+    getMyWorkspaceStore();
+  };
+
   const currentWorkspace = computed(() => {
     return (
       getAllWorkspace.value.find(
@@ -74,6 +78,7 @@ export const UseWorkspaceStore = defineStore("workspace", () => {
     lastVisitedTeam,
     setLastVisitedTeam,
     getMyWorkspaceStore,
-    leaveWorkspace
+    leaveWorkspace,
+    handleMemberJoined
   };
 });

@@ -53,7 +53,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted } from "vue";
+import { ref, computed, watch, onMounted, onUnmounted } from "vue";
 import { NConfigProvider } from "naive-ui";
 import { useRoute } from "vue-router";
 import { storeToRefs } from "pinia";
@@ -64,6 +64,8 @@ import TeamSectionTabs from "@/components/layouts/TeamSectionTabs.vue";
 import TeamList from "@/components/layouts/TeamList.vue";
 import Calendar from "@/components/layouts/Calendar.vue";
 import FooterSidebarSkeleton from "@/components/team/FooterSidebarSkeleton.vue";
+import { socket } from "@/utils/socket";
+import { useKickListener } from "@/composables/useKickListener";
 
 const route = useRoute();
 const leftOpen = ref(true);
@@ -73,6 +75,8 @@ const { getMe } = storeToRefs(authStore);
 
 const workspaceStore = UseWorkspaceStore();
 const { currentWorkspaceId } = storeToRefs(workspaceStore);
+
+const { startListening, stopListening } = useKickListener();
 
 const activeBorderColor = computed(() => {
   const section = route.params.section ?? route.path.split("/").pop();
@@ -85,19 +89,28 @@ const activeBorderColor = computed(() => {
   return map[section?.toLowerCase()] ?? "#0088ff";
 });
 
+watch(
+  () => route.params,
+  ({ workspace_id, team_id }) => {
+    if (workspace_id) {
+      workspaceStore.setLastVisitedTeam(workspace_id, team_id, getMe.value?.user_id);
+      currentWorkspaceId.value = workspace_id;
+    }
+    socket.emit("join-workspace", { workspace_id, team_id });
+  },
+  { immediate: true, deep: true }
+);
+
 onMounted(async () => {
   await authStore.getMeStore();
 
-  watch(
-    () => route.params,
-    ({ workspace_id, team_id }) => {
-      if (workspace_id) {
-        workspaceStore.setLastVisitedTeam(workspace_id, team_id, getMe.value?.user_id);
-        currentWorkspaceId.value = workspace_id;
-      }
-    },
-    { immediate: true, deep: true }
-  );
+  if (getMe.value?.user_id) {
+    startListening(getMe.value.user_id);
+  }
+});
+
+onUnmounted(() => {
+  stopListening();
 });
 
 const showCalendar = computed(() => {

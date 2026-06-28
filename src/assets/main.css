@@ -43,6 +43,9 @@ body .n-popover.n-tooltip {
     0 2px 4px 0 rgba(0, 0, 0, 0.02) !important;
 } */
 
+.font-pp {
+  font-family: "Poppins" !important;
+}
 
 /* Error toast */
 .Vue-Toastification__toast--error {
@@ -398,7 +401,7 @@ body .n-popover.n-tooltip {
 }
 
 .tab-dark {
-  background: #171717;
+  background: #171717 !important;
   color: #fff;
   font-weight: 500 !important;
 }

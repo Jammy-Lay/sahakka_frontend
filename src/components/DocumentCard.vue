@@ -86,6 +86,7 @@
             </n-button>
 
             <n-button
+              v-if="isOwner"
               class="rounded-3 fw-bold d-flex justify-content-start px-2 fs-13 text-danger"
               quaternary
               @click.prevent="$emit('deleteAction', documentId)"
@@ -124,6 +125,7 @@ defineProps({
   userId: Number,
   avatar: String,
   createdAt: String,
+  isOwner: Boolean,
 });
 
 /**

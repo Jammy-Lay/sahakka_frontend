@@ -1,17 +1,54 @@
 <template>
-  <div>
+  <div class="pb-3">
     <SubmissionSkeleton v-if="submissionStore.loading" />
     <div v-else>
-      <div class="pt-4 pb-2 bg-body">
-        <div class="d-flex align-items-start justify-content-between mb-2">
-          <div>
-            <h2 class="fw-semibold fs-5 mb-1">Submissions</h2>
+      <div class="pt-4 pb-2 bg-body position-sticky top-0">
+        <div class="d-flex align-items-start justify-content-between mb-3">
+          <div class="d-flex gap-2">
+            <h2 class="fw-semibold fs-5 mb-1">Submissions :</h2>
+            <h2 class="fs-5 fw-semibold mb-1">{{ getTeamById.title }}</h2>
           </div>
+        </div>
+        <div class="d-flex flex-wrap gap-2 mb-3">
+          <span
+            class="tab-title"
+            :class="activeTab === 'all' ? 'tab-dark' : 'tab-default'"
+            @click="activeTab = 'all'"
+            ><layout-dashboard size="16" /> All Submissions
+          </span>
+          <span
+            class="tab-title"
+            :class="
+              activeTab === 'pending'
+                ? 'bg-orange-active text-white'
+                : 'bg-orange text-orange'
+            "
+            @click="activeTab = 'pending'"
+            ><CircleDashed size="16" /> Pending
+          </span>
+          <span
+            class="tab-title"
+            :class="
+              activeTab === 'approved'
+                ? 'bg-green-active text-white'
+                : 'bg-green text-green'
+            "
+            @click="activeTab = 'approved'"
+            ><CircleCheck size="16" /> Approved
+          </span>
+          <span
+            class="tab-title"
+            :class="
+              activeTab === 'rejected' ? 'bg-red-active text-white' : 'bg-red text-danger'
+            "
+            @click="activeTab = 'rejected'"
+            ><CircleX size="16" /> Rejected
+          </span>
         </div>
       </div>
 
       <n-empty
-        v-if="getAllSubmissionByTeam.length === 0"
+        v-if="filteredSubmissions.length === 0"
         description="No Data"
         class="mt-8"
         style="--n-icon-size: 45px; font-size: 14px"
@@ -20,7 +57,7 @@
       <div class="row g-3" v-else>
         <div
           class="col-md-6 col-lg-4"
-          v-for="sub in getAllSubmissionByTeam"
+          v-for="sub in filteredSubmissions"
           :key="sub.submission_id"
         >
           <div class="bg-white rounded-card p-3">
@@ -49,8 +86,10 @@
               <calendar :size="15" />
               <span>submitted time : {{ formatDateTime(sub.created_at) }}</span>
             </div>
-            <h6 class="mb-2 fw-semibold">{{ sub.task?.title }}</h6>
-            <p class="mb-2 text-mute fs-13">{{ sub.message || "No message provided" }}</p>
+            <h6 class="mb-2 fw-semibold">Task : {{ sub.task?.title }}</h6>
+            <p class="mb-2 text-mute fs-13">
+              Message : {{ sub.message || "No message provided" }}
+            </p>
             <base-button
               btn-name="Review"
               icon="eye"
@@ -62,10 +101,9 @@
       </div>
     </div>
 
-    <!-- Review Modal -->
+    <!-- Review Modal (unchanged) -->
     <n-modal v-model:show="showModal" :mask-closable="true">
       <div v-if="selectedSubmission" class="bg-white rounded-card" style="width: 600px">
-        <!-- Header -->
         <div class="d-flex align-items-center justify-content-between px-4 py-3">
           <div class="d-flex align-items-center gap-2">
             <n-button
@@ -106,7 +144,6 @@
 
         <n-divider style="margin: 0; --n-color: #e4e4e7" />
 
-        <!-- Body -->
         <div class="px-3 pt-3 pb-3">
           <div class="d-flex align-items-center gap-2 text-mute mb-3 fs-13">
             <calendar :size="15" />
@@ -114,17 +151,13 @@
               >submitted time : {{ formatDateTime(selectedSubmission.created_at) }}</span
             >
           </div>
-
-          <h6 class="mb-2 fw-semibold">{{ selectedSubmission.task?.title }}</h6>
+          <h6 class="mb-2 fw-semibold">Task : {{ selectedSubmission.task?.title }}</h6>
           <p class="mb-3 text-mute fs-13">
-            {{ selectedSubmission.message || "No message provided" }}
+            Message : {{ selectedSubmission.message || "No message provided" }}
           </p>
 
-          <!-- File Attachment -->
           <div class="mb-3" v-if="selectedSubmission.file">
             <p class="fw-medium text-dark mb-2 fs-15">File attachment</p>
-
-            <!-- Image: inline preview -->
             <div
               v-if="isImageFile(selectedSubmission.file)"
               class="w-fit d-flex flex-column bg-accent rounded-btn border"
@@ -134,7 +167,7 @@
                 <p class="mb-0 fs-14">{{ getFileName(selectedSubmission.file) }}</p>
               </div>
               <div
-                style="width: 400px; height: 200px; border-radius: 0 0 12px 12px"
+                style="width: 350px; height: 200px; border-radius: 0 0 12px 12px"
                 class="overflow-hidden"
               >
                 <n-image
@@ -146,8 +179,6 @@
                 />
               </div>
             </div>
-
-            <!-- PDF (or any non-image): click opens in new tab -->
             <a
               v-else
               :href="selectedSubmission.file"
@@ -232,7 +263,7 @@
               Close
             </button>
             <button
-              class="btn bg-btn rounded-4 py-2 px-3 d-flex align-items-center gap-2"
+              class="btn bg-btn rounded-card py-2 px-3 d-flex align-items-center gap-2 fs-14"
               :disabled="isLoading"
               @click="handleSend"
             >
@@ -256,6 +287,7 @@ import {
   CircleCheck,
   CircleX,
   CircleDashed,
+  Send,
 } from "lucide-vue-next";
 import BaseButton from "@/components/BaseButton.vue";
 import { useSubmissionStore } from "@/stores/user/submission";
@@ -263,6 +295,7 @@ import { useRoute, useRouter } from "vue-router";
 import { notify } from "@/utils/toast";
 import { storeToRefs } from "pinia";
 import SubmissionSkeleton from "@/components/Skeleton/SubmissionSkeleton.vue";
+import { useTeamStore } from "@/stores/user/team";
 
 const route = useRoute();
 const router = useRouter();
@@ -273,6 +306,9 @@ const team_id = computed(() => route.params.team_id);
 const submissionStore = useSubmissionStore();
 const { getAllSubmissionByTeam } = storeToRefs(submissionStore);
 
+const teamStore = useTeamStore();
+const { getTeamById } = storeToRefs(teamStore);
+
 const showModal = ref(false);
 const showStatusPop = ref(false);
 const selectedStatus = ref(null);
@@ -280,25 +316,17 @@ const feedback = ref("");
 const selectedSubmission = ref(null);
 const isLoading = ref(false);
 
+const activeTab = ref("all");
+
+const filteredSubmissions = computed(() => {
+  if (activeTab.value === "all") return getAllSubmissionByTeam.value;
+  return getAllSubmissionByTeam.value.filter((s) => s.status === activeTab.value);
+});
+
 const submissionStatusConfig = {
-  pending: {
-    icon: CircleDashed,
-    bg: "bg-orange",
-    text: "text-orange",
-    label: "Pending",
-  },
-  approved: {
-    icon: CircleCheck,
-    bg: "bg-green",
-    text: "text-green",
-    label: "Approved",
-  },
-  rejected: {
-    icon: CircleX,
-    bg: "bg-red",
-    text: "text-danger",
-    label: "Rejected",
-  },
+  pending: { icon: CircleDashed, bg: "bg-orange", text: "text-orange", label: "Pending" },
+  approved: { icon: CircleCheck, bg: "bg-green", text: "text-green", label: "Approved" },
+  rejected: { icon: CircleX, bg: "bg-red", text: "text-danger", label: "Rejected" },
 };
 
 const reviewStatusConfig = {
@@ -307,6 +335,7 @@ const reviewStatusConfig = {
 };
 
 onMounted(async () => {
+  teamStore.getTeamByIdStore(workspace_id.value, team_id.value);
   submissionStore.getAllSubmissionByTeamStore(workspace_id.value, team_id.value);
 });
 
@@ -345,15 +374,15 @@ const openReview = (sub) => {
 };
 
 async function handleSend() {
-  if (!selectedStatus.value) {
-    toast.error("Please select a review status first");
+  if (!feedback.value) {
+    toast.error("Feedback is required");
     return;
   }
 
-  const payload = {
-    status: selectedStatus.value,
-    feedback: feedback.value,
-  };
+  if (!selectedStatus.value) {
+    toast.error("Status is required");
+    return;
+  }
 
   try {
     isLoading.value = true;
@@ -361,11 +390,9 @@ async function handleSend() {
       workspace_id.value,
       team_id.value,
       selectedSubmission.value.submission_id,
-      payload
+      { status: selectedStatus.value, feedback: feedback.value }
     );
-
     await submissionStore.getAllSubmissionByTeamStore(workspace_id.value, team_id.value);
-
     feedback.value = "";
     selectedStatus.value = null;
     selectedSubmission.value = null;

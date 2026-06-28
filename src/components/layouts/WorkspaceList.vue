@@ -697,12 +697,27 @@ const handleDelete = async () => {
 
   try {
     isLoading.value = true;
-    await crudWorkspaceStore.deleteWorkspace(selectedWs.value.workspace_id);
+    const deletedWorkspaceId = selectedWs.value.workspace_id;
+
+    await crudWorkspaceStore.deleteWorkspace(deletedWorkspaceId);
     showPopover.value = false;
     toast.success("Workspace deleted successfully");
     showDeleteModal.value = false;
     selectedWs.value = null;
     await refreshWorkspaces();
+
+    if (String(currentRouteWorkspaceId.value) === String(deletedWorkspaceId)) {
+      const fallback = myWorkspaces.value[0];
+      if (fallback) {
+        await teamStore.getTeamByWorkspaceStore(fallback.workspace_id);
+        const firstTeam = getTeamByWorkspace.value?.[0];
+        if (firstTeam) {
+          router.push(
+            `/workspace/${fallback.workspace_id}/team/${firstTeam.team_id}/tasks`
+          );
+        }
+      }
+    }
   } catch (error) {
     toast.error(error.message);
   } finally {
@@ -742,11 +757,12 @@ const handleJoin = async () => {
 
   try {
     await crudWorkspaceStore.joinByToken(token);
-    showPopover.value = false;
-    toast.success("Joined workspace successfully");
     joinCode.value = "";
     showJoinPopover.value = false;
-    await refreshWorkspaces(); // ← silent refresh, no skeleton
+    showPopover.value = false;
+    toast.success("Joined workspace successfully");
+    await teamStore.getTeamByWorkspaceStore(currentRouteWorkspaceId.value);
+    await refreshWorkspaces();
   } catch (error) {
     toast.error(error.message);
   } finally {
@@ -768,7 +784,7 @@ const handleInvite = async () => {
     toast.success("Invite Successfully");
     showInvitePopover.value = false;
   } catch (error) {
-    console.error(error);
+    toast.error(error.message);
   } finally {
     isInviteLoading.value = false;
   }
@@ -785,7 +801,7 @@ const handleGenerate = async () => {
     passcode.value = res.data.token;
     toast.success("Generate Code Successfully");
   } catch (error) {
-    console.error(error);
+    toast.error(error.message);
   } finally {
     isGenerateLoading.value = false;
     isLoading.value = false;
