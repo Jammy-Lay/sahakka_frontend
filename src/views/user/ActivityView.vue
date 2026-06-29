@@ -154,7 +154,18 @@
 import { computed, onMounted, ref } from "vue";
 import { useRoute } from "vue-router";
 import { storeToRefs } from "pinia";
-import { Calendar, Filter, Plus, UserCheck, Send, Trash2, Eye } from "lucide-vue-next";
+import {
+  Calendar,
+  Filter,
+  Plus,
+  UserCheck,
+  Send,
+  Trash2,
+  Eye,
+  Ban,
+  LogOut,
+  Brush,
+} from "lucide-vue-next";
 import { NPopover, NBadge, NTag, NDatePicker, NIcon, NEmpty } from "naive-ui";
 import { useTeamStore } from "@/stores/user/team";
 import TeamActivitySkeleton from "@/components/Skeleton/TeamActivitySkeleton.vue";
@@ -275,10 +286,13 @@ const groupedActivities = computed(() => {
 const actTagClass = (action) => {
   const map = {
     create: "act-tag-create",
+    update: "act-tag-update",
     assign: "act-tag-assign",
     submit: "act-tag-submit",
     delete: "act-tag-delete",
     review: "act-tag-review",
+    remove: "act-tag-remove",
+    leave: "act-tag-leave",
   };
   return map[action?.toLowerCase()];
 };
@@ -286,10 +300,13 @@ const actTagClass = (action) => {
 const actTagIcon = (action) => {
   const map = {
     create: Plus,
+    update: Brush,
     assign: UserCheck,
     submit: Send,
     delete: Trash2,
     review: Eye,
+    remove: Ban,
+    leave: LogOut,
   };
   return map[action?.toLowerCase()];
 };
@@ -367,6 +384,43 @@ const actTagIcon = (action) => {
 .custom-picker :deep(.n-date-panel-month-calendar__padding) {
   height: 0 !important;
   min-height: 0 !important;
+}
+
+.custom-picker :deep(.n-button--primary-type) {
+  background: #171717 !important;
+  border-color: #171717 !important;
+  color: #fff !important;
+  border-radius: 8px !important;
+
+  --n-color: #171717 !important;
+  --n-color-hover: #171717 !important;
+  --n-color-focus: #171717 !important;
+  --n-color-pressed: #171717 !important;
+
+  --n-border: 1px solid #171717 !important;
+  --n-border-hover: 1px solid #171717 !important;
+  --n-border-focus: 1px solid #171717 !important;
+  --n-border-pressed: 1px solid #171717 !important;
+
+  --n-box-shadow-focus: none !important;
+  --n-wave-color: transparent !important; 
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+.custom-picker :deep(.n-button--primary-type:hover),
+.custom-picker :deep(.n-button--primary-type:focus),
+.custom-picker :deep(.n-button--primary-type:active),
+.custom-picker :deep(.n-button--primary-type.n-button--focus) {
+  background: #171717 !important;
+  border-color: #171717 !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+.custom-picker :deep(.n-button--primary-type *) {
+  box-shadow: none !important;
+  outline: none !important;
 }
 
 :deep(.n-tag__close) {

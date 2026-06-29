@@ -618,6 +618,11 @@ body .n-popover.n-tooltip {
   color: #0088ff;
 }
 
+.act-tag-update {
+  background: #b2dbff;
+  color: #0088ff;
+}
+
 .act-tag-submit {
   background: #cfccfc;
   color: #6155f5;
@@ -629,6 +634,16 @@ body .n-popover.n-tooltip {
 }
 
 .act-tag-delete {
+  background: #ffc3c4;
+  color: #FF383C;
+}
+
+.act-tag-remove {
+  background: #ffc3c4;
+  color: #FF383C;
+}
+
+.act-tag-leave {
   background: #ffc3c4;
   color: #FF383C;
 }

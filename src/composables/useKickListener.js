@@ -11,67 +11,94 @@ export function useKickListener() {
   const teamStore = useTeamStore();
   const { myWorkspaces } = storeToRefs(workspaceStore);
 
+  const redirectToFirstTeam = async (workspace_id) => {
+    await teamStore.getTeamByWorkspaceStore(workspace_id);
+    const teams = teamStore.getTeamByWorkspace;
+
+    if (teams && teams.length > 0) {
+      router.push(`/workspace/${workspace_id}/team/${teams[0].team_id}/tasks`);
+      return true;
+    }
+    return false;
+  };
+
+  const redirectToFallbackWorkspace = async () => {
+    await workspaceStore.getMyWorkspaceStore();
+    const workspaces = myWorkspaces.value;
+
+    if (!workspaces || workspaces.length === 0) {
+      router.push("/no-workspace");
+      return;
+    }
+
+    const redirected = await redirectToFirstTeam(workspaces[0].workspace_id);
+    if (!redirected) {
+      router.push("/no-workspace");
+    }
+  };
+
   const handleKickedFromTeam = async ({ workspace_id, team_id }) => {
     const currentWorkspaceId = route.params.workspace_id;
     const currentTeamId = route.params.team_id;
 
-    // refresh workspace + team data
+    const isInAffectedWorkspace = String(currentWorkspaceId) === String(workspace_id);
+    const isInAffectedTeam = String(currentTeamId) === String(team_id);
+
+    await workspaceStore.getMyWorkspaceStore();
+    await teamStore.getTeamByWorkspaceStore(workspace_id);
+
+    if (!isInAffectedWorkspace) return;
+    if (!isInAffectedTeam) return;
+
+    const remainingTeams = teamStore.getTeamByWorkspace;
+
+    if (remainingTeams && remainingTeams.length > 0) {
+      router.push(`/workspace/${workspace_id}/team/${remainingTeams[0].team_id}/tasks`);
+    } else {
+      await redirectToFallbackWorkspace();
+    }
+  };
+
+  const handleTeamDeleted = async ({ workspace_id, team_id }) => {
+    const currentWorkspaceId = route.params.workspace_id;
+    const currentTeamId = route.params.team_id;
+
+    const isViewingDeletedTeam =
+      String(currentWorkspaceId) === String(workspace_id) &&
+      String(currentTeamId) === String(team_id);
+
+    if (!isViewingDeletedTeam) return;
+
     await workspaceStore.getMyWorkspaceStore();
     await teamStore.getTeamByWorkspaceStore(workspace_id);
 
     const remainingTeams = teamStore.getTeamByWorkspace;
 
-    if (remainingTeams.length > 0) {
-      if (String(currentTeamId) === String(team_id)) {
-        router.push(
-          `/workspace/${workspace_id}/team/${remainingTeams[0].team_id}/tasks`,
-        );
-      }
+    if (remainingTeams && remainingTeams.length > 0) {
+      router.push(`/workspace/${workspace_id}/team/${remainingTeams[0].team_id}/tasks`);
     } else {
-      await redirectToFallback();
+      await redirectToFallbackWorkspace();
     }
   };
 
   const handleKickedFromWorkspace = async ({ workspace_id }) => {
     const currentWorkspaceId = route.params.workspace_id;
 
-    await workspaceStore.getMyWorkspaceStore();
+    if (String(currentWorkspaceId) !== String(workspace_id)) return;
 
-    // only redirect if currently in the affected workspace
-    if (String(currentWorkspaceId) === String(workspace_id)) {
-      await redirectToFallback();
-    }
-  };
-
-  const redirectToFallback = async () => {
-    const fallbackWorkspace = myWorkspaces.value[0];
-
-    if (!fallbackWorkspace) {
-      router.push("/no-workspace");
-      return;
-    }
-
-    await teamStore.getTeamByWorkspaceStore(fallbackWorkspace.workspace_id);
-    const firstTeam = teamStore.getTeamByWorkspace[0];
-
-    if (!firstTeam) {
-      router.push("/no-workspace");
-      return;
-    }
-
-    router.push(
-      `/workspace/${fallbackWorkspace.workspace_id}/team/${firstTeam.team_id}/tasks`,
-    );
+    await redirectToFallbackWorkspace();
   };
 
   const startListening = (userId) => {
     socket.on("kicked-from-team", handleKickedFromTeam);
     socket.on("kicked-from-workspace", handleKickedFromWorkspace);
+    socket.on("team-deleted", handleTeamDeleted);
   };
 
   const stopListening = () => {
     socket.off("kicked-from-team", handleKickedFromTeam);
     socket.off("kicked-from-workspace", handleKickedFromWorkspace);
+    socket.off("team-deleted", handleTeamDeleted);
   };
 
   return { startListening, stopListening };

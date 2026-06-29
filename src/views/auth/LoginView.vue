@@ -161,13 +161,13 @@ async function handleLogin() {
 
     if (lastVisited?.workspace_id && lastVisited?.team_id) {
       const workspaceStillValid = workspaceStore.getAllWorkspace.find(
-        (w) => w.workspace_id === lastVisited.workspace_id
+        (w) => String(w.workspace_id) === String(lastVisited.workspace_id)
       );
 
       if (workspaceStillValid) {
         await teamStore.getTeamByWorkspaceStore(lastVisited.workspace_id);
         const teamStillValid = teamStore.getTeamByWorkspace.find(
-          (t) => t.team_id === lastVisited.team_id
+          (t) => String(t.team_id) === String(lastVisited.team_id)
         );
 
         if (teamStillValid) {

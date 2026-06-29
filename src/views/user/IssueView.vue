@@ -353,7 +353,9 @@
                     trigger="click"
                     placement="bottom-start"
                     :show-arrow="false"
-                    :disabled="!canChangeAssigneeOnUpdate(task)"
+                    :disabled="
+                      !canChangeAssigneeOnUpdate(task) || isAssigneeLocked(task.status)
+                    "
                     style="border-radius: 12px; padding: 6px; width: fit-content"
                     @update:show="(val) => (openPop[`${task.id}_assignee`] = val)"
                   >
@@ -362,7 +364,8 @@
                         class="d-flex align-items-center gap-2 fs-13"
                         style="margin-top: 5px"
                         :class="
-                          canChangeAssigneeOnUpdate(task)
+                          canChangeAssigneeOnUpdate(task) &&
+                          !isAssigneeLocked(task.status)
                             ? 'cursor-pointer'
                             : 'cursor-default'
                         "
@@ -393,10 +396,11 @@
                         </template>
                       </span>
                     </template>
-                    <div>
+                    <div class="d-flex flex-column gap-1">
                       <div
                         v-if="canChangeAssignee"
                         class="d-flex align-items-center gap-2 px-2 py-1 rounded workspace-item fs-13 cursor-pointer"
+                        :class="!task.assigned_to?.user_id ? 'bg-accent' : ''"
                         @click="
                           closePop(task.id, 'assignee');
                           handleUpdateTask(task, true, true);
@@ -413,6 +417,9 @@
                         v-for="member in getAssigneeOptions"
                         :key="member.user_id"
                         class="d-flex align-items-center gap-2 px-2 py-1 rounded workspace-item fs-13 cursor-pointer"
+                        :class="
+                          task.assigned_to?.user_id === member.user_id ? 'bg-accent' : ''
+                        "
                         @click="
                           task.assigned_to = member;
                           task.assigned_by = getMe;
@@ -1072,7 +1079,10 @@
                     trigger="click"
                     placement="bottom-start"
                     v-model:show="showDetailAssigneePop"
-                    :disabled="!canChangeAssigneeOnUpdate(selectedTask)"
+                    :disabled="
+                      !canChangeAssigneeOnUpdate(selectedTask) ||
+                      isAssigneeLocked(selectedTask.status)
+                    "
                     :show-arrow="false"
                     style="border-radius: 12px; padding: 6px; width: fit-content"
                   >
@@ -1080,7 +1090,8 @@
                       <span
                         class="d-flex align-items-center gap-2 fs-13"
                         :class="
-                          canChangeAssigneeOnUpdate(selectedTask)
+                          canChangeAssigneeOnUpdate(selectedTask) &&
+                          !isAssigneeLocked(selectedTask.status)
                             ? 'cursor-pointer'
                             : 'cursor-default'
                         "
@@ -1111,10 +1122,11 @@
                         </template>
                       </span>
                     </template>
-                    <div>
+                    <div class="d-flex flex-column gap-1">
                       <div
                         v-if="canChangeAssignee"
                         class="d-flex align-items-center gap-2 px-2 py-1 rounded workspace-item fs-13 cursor-pointer"
+                        :class="!selectedTask.assigned_to?.user_id ? 'bg-accent' : ''"
                         @click="
                           selectedTask.assigned_to = null;
                           showDetailAssigneePop = false;
@@ -1133,6 +1145,11 @@
                         v-for="member in getAssigneeOptions"
                         :key="member.user_id"
                         class="d-flex align-items-center gap-2 px-2 py-1 rounded workspace-item fs-13 cursor-pointer"
+                        :class="
+                          selectedTask.assigned_to?.user_id === member.user_id
+                            ? 'bg-accent'
+                            : ''
+                        "
                         @click="
                           selectedTask.assigned_to = member;
                           selectedTask.assigned_by = getMe;
@@ -1294,29 +1311,56 @@
                 </template>
 
                 <template v-else>
-                  <!-- Image: show n-image thumbnail, click = built-in lightbox -->
+                  <!-- Image -->
                   <div
                     v-if="selectedFile.type.startsWith('image/')"
                     class="attach-thumb"
                     @click.stop
                   >
-                    <n-image
-                      :src="filePreviewUrl"
-                      width="32"
-                      height="32"
-                      object-fit="cover"
-                      style="border-radius: 6px; display: block"
-                      show-toolbar-tooltip
-                    />
+                    <n-tooltip
+                      placement="bottom"
+                      trigger="hover"
+                      :show-arrow="false"
+                      :keep-alive-on-hover="false"
+                      :style="{
+                        fontSize: '11px',
+                        padding: '4px 8px',
+                        borderRadius: '8px',
+                      }"
+                    >
+                      <template #trigger>
+                        <n-image
+                          :src="filePreviewUrl"
+                          width="32"
+                          height="32"
+                          object-fit="cover"
+                          style="border-radius: 6px; display: block"
+                          show-toolbar-tooltip
+                        />
+                      </template>
+                      Preview Image
+                    </n-tooltip>
                   </div>
 
-                  <div
+                  <!-- PDF -->
+                  <n-tooltip
                     v-else
-                    class="attach-pdf-icon cursor-pointer bg-blue"
-                    @click.stop="openFilePreview"
+                    placement="bottom"
+                    trigger="hover"
+                    :show-arrow="false"
+                    :keep-alive-on-hover="false"
+                    :style="{ fontSize: '11px', padding: '4px 8px', borderRadius: '8px' }"
                   >
-                    <FileText size="18" color="#0088ff" />
-                  </div>
+                    <template #trigger>
+                      <div
+                        class="attach-pdf-icon cursor-pointer bg-blue"
+                        @click.stop="openFilePreview"
+                      >
+                        <FileText size="18" color="#0088ff" />
+                      </div>
+                    </template>
+                    Open PDF
+                  </n-tooltip>
 
                   <span class="fs-13 text-dark fw-medium flex-grow-1 text-truncate">
                     {{ selectedFile.name }}
@@ -1379,7 +1423,11 @@
                 </template>
 
                 <template v-else>
-                  <div class="text-mute fs-13 text-center py-4">No activity yet</div>
+                  <n-empty
+                    description="No Data"
+                    class="mt-5"
+                    style="--n-icon-size: 35px; font-size: 12px"
+                  />
                 </template>
               </div>
             </div>
@@ -1552,7 +1600,9 @@ const handleTabClick = (status) => {
 };
 
 const taskFilter = ref("all");
-const taskFilterLabel = computed(() => taskFilter.value === 'all' ? 'All Tasks' : 'My Tasks');
+const taskFilterLabel = computed(() =>
+  taskFilter.value === "all" ? "All Tasks" : "My Tasks"
+);
 
 const handleFilterChange = (filter) => {
   taskFilter.value = filter;
@@ -1916,6 +1966,7 @@ const actTagIcon = (action) => {
 
 const lockedStatuses = ["submitted", "approved", "rejected"];
 const isStatusLocked = (status) => lockedStatuses.includes(status);
+const isAssigneeLocked = (status) => ["submitted", "approved"].includes(status);
 
 const statusConfig = {
   todo: { icon: CircleCheckBig, bg: "bg-blue", text: "text-blue", label: "To Do" },
@@ -2001,5 +2052,42 @@ const typeConfig = {
 .custom-picker :deep(.n-date-panel-month-calendar__padding) {
   height: 0 !important;
   min-height: 0 !important;
+}
+
+.custom-picker :deep(.n-button--primary-type) {
+  background: #171717 !important;
+  border-color: #171717 !important;
+  color: #fff !important;
+  border-radius: 8px !important;
+
+  --n-color: #171717 !important;
+  --n-color-hover: #171717 !important;
+  --n-color-focus: #171717 !important;
+  --n-color-pressed: #171717 !important;
+
+  --n-border: 1px solid #171717 !important;
+  --n-border-hover: 1px solid #171717 !important;
+  --n-border-focus: 1px solid #171717 !important;
+  --n-border-pressed: 1px solid #171717 !important;
+
+  --n-box-shadow-focus: none !important;
+  --n-wave-color: transparent !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+.custom-picker :deep(.n-button--primary-type:hover),
+.custom-picker :deep(.n-button--primary-type:focus),
+.custom-picker :deep(.n-button--primary-type:active),
+.custom-picker :deep(.n-button--primary-type.n-button--focus) {
+  background: #171717 !important;
+  border-color: #171717 !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+.custom-picker :deep(.n-button--primary-type *) {
+  box-shadow: none !important;
+  outline: none !important;
 }
 </style>

@@ -187,9 +187,20 @@
               class="attach-upload-box mb-0 text-decoration-none"
               style="cursor: pointer"
             >
-              <div class="attach-pdf-icon bg-blue">
-                <FileText size="18" color="#0088ff" />
-              </div>
+              <n-tooltip
+                placement="bottom"
+                trigger="hover"
+                :show-arrow="false"
+                :keep-alive-on-hover="false"
+                :style="{ fontSize: '11px', padding: '4px 8px', borderRadius: '8px' }"
+              >
+                <template #trigger>
+                  <div class="attach-pdf-icon bg-blue">
+                    <FileText size="18" color="#0088ff" />
+                  </div>
+                </template>
+                Open PDF
+              </n-tooltip>
               <span class="fs-13 text-dark fw-medium flex-grow-1 text-truncate">
                 {{ getFileName(selectedSubmission.file) }}
               </span>
