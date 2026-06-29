@@ -12,6 +12,7 @@ import { onBeforeUnmount, onMounted, ref } from "vue";
 import { useEditor, EditorContent, Extension } from "@tiptap/vue-3";
 import { Placeholder } from "@tiptap/extensions";
 import StarterKit from "@tiptap/starter-kit";
+import Underline from "@tiptap/extension-underline"; 
 import TipTapToolbar from "./TipTapToolbar.vue";
 import { useDocumentStore } from "@/stores/user/document.js";
 import { useRoute } from "vue-router";
@@ -27,6 +28,7 @@ const document_id = route.params.document_id;
 
 const title = ref("");
 let saveTimeout = null;
+let isLocalUpdate = false;
 
 const PreventTab = Extension.create({
   name: "preventTab",
@@ -55,6 +57,7 @@ const editor = useEditor({
       placeholder: "Write something…",
     }),
     Image.configure({ allowBase64: true }),
+    Underline,
     PreventTab,
   ],
   editorProps: {
@@ -73,8 +76,10 @@ const editor = useEditor({
     },
   },
   injectCSS: false,
-  onUpdate: async () => {
+  onUpdate: () => {
     emit("update:modelValue", editor.value.getHTML());
+
+    isLocalUpdate = true;
 
     clearTimeout(saveTimeout);
     saveTimeout = setTimeout(async () => {
@@ -84,25 +89,34 @@ const editor = useEditor({
         document_id,
         editor.value.getHTML()
       );
-    }, 500);
+      setTimeout(() => {
+        isLocalUpdate = false;
+      }, 300);
+    }, 800);
   },
 });
 
 const handleDocumentUpdated = (data) => {
   if (String(data.document_id) !== String(document_id)) return;
+  if (isLocalUpdate) return;
 
   const incoming = data.content;
   const current = editor.value.getHTML();
-
-  // Don't apply if it's the same content (prevents cursor jumping)
   if (incoming === current) return;
 
-  // Apply without adding to undo history
-  editor.value.chain().setMeta("addToHistory", false).setContent(incoming, false).run();
+  editor.value
+    .chain()
+    .setMeta("addToHistory", false)
+    .setContent(incoming, false)
+    .run();
 };
 
 onMounted(async () => {
-  const res = await useDocument.getDocumentById(workspace_id, team_id, document_id);
+  const res = await useDocument.getDocumentById(
+    workspace_id,
+    team_id,
+    document_id
+  );
   title.value = res.title;
   editor.value
     .chain()
@@ -111,7 +125,7 @@ onMounted(async () => {
     .run();
   editor.value.chain().focus().run();
 
-  socket.on("document-updated", handleDocumentUpdated);
+  socket.on("document-updated", handleDocumentUpdated); 
 });
 
 onBeforeUnmount(() => {
@@ -120,6 +134,7 @@ onBeforeUnmount(() => {
   editor.value?.destroy();
 });
 </script>
+
 <style scoped>
 :deep(.tiptap) {
   --primary: #cde7ff;
@@ -208,7 +223,6 @@ onBeforeUnmount(() => {
       direction: ltr;
       text-align: left;
       white-space: pre;
-      /* Preserves tabs, spaces, and line breaks */
       word-spacing: normal;
       word-break: normal;
     }
