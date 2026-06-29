@@ -17,10 +17,14 @@
           <textarea v-model="message" class="form-control support-textarea"
             placeholder="Describe your issue..."></textarea>
 
-          <button class="btn bg-btn w-100 rounded-btn py-2 fs-15 mt-2 d-flex justify-content-center align-items-center gap-2" @click="sendReport">
-            <Send size="16" /> Send report
+          <button
+            class="btn bg-btn w-100 rounded-btn py-2 fs-15 mt-2 d-flex justify-content-center align-items-center gap-2"
+            @click="sendReport" :disabled="isLoading">
+            <span v-if="isLoading" class="spinner-border spinner-border-sm" />
+            <Send v-else size="16" />
+            {{ isLoading ? "Sending..." : "Send report" }}
           </button>
- 
+
           <p class="page-sub fs-14 text-center">
             We'll review your message and get back to you as soon as possible.
           </p>
@@ -52,6 +56,7 @@ import { useProfileStore } from "@/stores/profile/profile"
 
 const router = useRouter();
 const toast = notify(router);
+const isLoading = ref(false);
 
 
 const message = ref("")
@@ -61,7 +66,7 @@ const profileStore = useProfileStore();
 const email = ref("");
 
 onMounted(async () => {
- await profileStore.getProfile()
+  await profileStore.getProfile()
   email.value = profileStore.user.email
   // console.log(email.value);
 
@@ -73,8 +78,9 @@ async function sendReport() {
     return toast.error("Please enter a message before sending.");
   }
 
+  isLoading.value = true;
   try {
-    const res = await fetch('https://formspree.io/f/xeebarjz', {
+    const res = await fetch('https://formspree.io/f/xykqpzke', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -90,17 +96,19 @@ async function sendReport() {
     if (res.ok) {
       showModal.value = true
       message.value = ""
-     toast.success("Mail sent! We'll get back to you within 24 hours.");
+      toast.success("Mail sent! We'll get back to you within 24 hours.");
     } else {
       showErrorModal.value = true
-    toast.error("Failed to send mail. Please try again.");
+      toast.error("Failed to send mail. Please try again.");
     }
 
-  } catch (err) { 
+  } catch (err) {
     // console.error('Network error:', err)
     showErrorModal.value = true
     toast.error(err);
 
+  } finally {
+    isLoading.value = false;
   }
 }
 </script>
