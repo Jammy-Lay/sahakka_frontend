@@ -31,29 +31,34 @@ export function useKickListener() {
       return;
     }
 
-    const redirected = await redirectToFirstTeam(workspaces[0].workspace_id);
-    if (!redirected) {
-      router.push("/no-workspace");
+    for (const ws of workspaces) {
+      const redirected = await redirectToFirstTeam(ws.workspace_id);
+      if (redirected) return;
     }
+
+    router.push("/no-workspace");
   };
 
   const handleKickedFromTeam = async ({ workspace_id, team_id }) => {
     const currentWorkspaceId = route.params.workspace_id;
     const currentTeamId = route.params.team_id;
 
-    const isInAffectedWorkspace = String(currentWorkspaceId) === String(workspace_id);
-    const isInAffectedTeam = String(currentTeamId) === String(team_id);
+    if (String(currentWorkspaceId) !== String(workspace_id)) return;
 
     await workspaceStore.getMyWorkspaceStore();
     await teamStore.getTeamByWorkspaceStore(workspace_id);
 
-    if (!isInAffectedWorkspace) return;
-    if (!isInAffectedTeam) return;
+    if (String(currentTeamId) !== String(team_id)) return;
 
     const remainingTeams = teamStore.getTeamByWorkspace;
+    const filteredTeams = remainingTeams?.filter(
+      (t) => String(t.team_id) !== String(team_id),
+    );
 
-    if (remainingTeams && remainingTeams.length > 0) {
-      router.push(`/workspace/${workspace_id}/team/${remainingTeams[0].team_id}/tasks`);
+    if (filteredTeams && filteredTeams.length > 0) {
+      router.push(
+        `/workspace/${workspace_id}/team/${filteredTeams[0].team_id}/tasks`,
+      );
     } else {
       await redirectToFallbackWorkspace();
     }
@@ -74,8 +79,14 @@ export function useKickListener() {
 
     const remainingTeams = teamStore.getTeamByWorkspace;
 
-    if (remainingTeams && remainingTeams.length > 0) {
-      router.push(`/workspace/${workspace_id}/team/${remainingTeams[0].team_id}/tasks`);
+    const filteredTeams = remainingTeams?.filter(
+      (t) => String(t.team_id) !== String(team_id),
+    );
+
+    if (filteredTeams && filteredTeams.length > 0) {
+      router.push(
+        `/workspace/${workspace_id}/team/${filteredTeams[0].team_id}/tasks`,
+      );
     } else {
       await redirectToFallbackWorkspace();
     }
@@ -89,7 +100,7 @@ export function useKickListener() {
     await redirectToFallbackWorkspace();
   };
 
-  const startListening = (userId) => {
+  const startListening = () => {
     socket.on("kicked-from-team", handleKickedFromTeam);
     socket.on("kicked-from-workspace", handleKickedFromWorkspace);
     socket.on("team-deleted", handleTeamDeleted);

@@ -315,6 +315,7 @@ watch(
   async (teamId) => {
     if (!teamId) return;
     const calls = [
+      teamStore.getTeamByWorkspaceStore(currentRouteWorkspaceId.value, teamId, true),
       teamStore.getTeamByIdStore(currentRouteWorkspaceId.value, teamId),
       taskStore.getTaskByTeamStore(currentRouteWorkspaceId.value, teamId),
       taskStore.getSummaryTaskStore(currentRouteWorkspaceId.value, teamId),

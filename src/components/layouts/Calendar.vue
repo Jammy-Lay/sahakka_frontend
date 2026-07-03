@@ -165,9 +165,10 @@
       <template v-if="taskStore.myTaskLoading">
         <MyTaskSkeleton />
       </template>
+
       <template v-else>
         <h5 class="text-dark fw-semibold my-3" style="font-size: 18px">My Task</h5>
-        <div class="d-flex flex-column gap-3 pb-2">
+        <div class="d-flex flex-column gap-3 text-nowrap">
           <n-empty
             v-if="getMyTask.length === 0"
             description="No Data"
@@ -414,6 +415,7 @@
                   placement="bottom-end"
                   v-model:show="showDetailTypePop"
                   :show-arrow="false"
+                  :disabled="isAssigneeLocked(selectedTask.status)"
                   style="border-radius: 12px; padding: 6px; width: 160px"
                 >
                   <template #trigger>
@@ -422,6 +424,9 @@
                       :class="[
                         typeConfig[selectedTask.type]?.bg,
                         typeConfig[selectedTask.type]?.text,
+                        isAssigneeLocked(selectedTask.status)
+                          ? 'cursor-default'
+                          : 'cursor-pointer',
                       ]"
                       @click.stop
                     >
@@ -507,6 +512,7 @@
                     placement="bottom-start"
                     v-model:show="showDetailPriorityPop"
                     :show-arrow="false"
+                    :disabled="isAssigneeLocked(selectedTask.status)"
                     style="border-radius: 12px; padding: 6px; width: 140px"
                   >
                     <template #trigger>
@@ -515,6 +521,9 @@
                         :class="[
                           priorityConfig[selectedTask.priority]?.bg,
                           priorityConfig[selectedTask.priority]?.text,
+                          isAssigneeLocked(selectedTask.status)
+                            ? 'cursor-default'
+                            : 'cursor-pointer',
                         ]"
                         @click.stop
                       >
@@ -664,6 +673,7 @@
                     trigger="click"
                     placement="bottom-start"
                     :show-arrow="false"
+                    :disabled="isAssigneeLocked(selectedTask.status)"
                     style="border-radius: 12px; padding: 0; overflow: hidden"
                   >
                     <template #trigger>
@@ -672,6 +682,9 @@
                         :class="[
                           selectedTask.start_date ? 'text-dark' : 'text-mute',
                           showDetailStartDatePop ? 'bg-active' : '',
+                          isAssigneeLocked(selectedTask.status)
+                            ? 'cursor-default'
+                            : 'cursor-pointer',
                         ]"
                         @click.stop
                       >
@@ -707,6 +720,7 @@
                     trigger="click"
                     placement="bottom-start"
                     :show-arrow="false"
+                    :disabled="isAssigneeLocked(selectedTask.status)"
                     style="border-radius: 12px; padding: 0; overflow: hidden"
                   >
                     <template #trigger>
@@ -715,6 +729,9 @@
                         :class="[
                           selectedTask.end_date ? 'text-dark' : 'text-mute',
                           showDetailEndDatePop ? 'bg-active' : '',
+                          isAssigneeLocked(selectedTask.status)
+                            ? 'cursor-default'
+                            : 'cursor-pointer',
                         ]"
                         @click.stop
                       >
@@ -749,6 +766,7 @@
                   v-model="selectedTask.title"
                   class="detail-title-input fw-bold mb-2"
                   rows="1"
+                  :disabled="isAssigneeLocked(selectedTask.status)"
                   @blur="handleUpdateTask(selectedTask)"
                   @input="autoResize"
                   placeholder="Task Title"
@@ -758,6 +776,7 @@
                   placeholder="No description provided"
                   class="detail-desc-input fs-13 text-mute mb-4"
                   rows="1"
+                  :disabled="isAssigneeLocked(selectedTask.status)"
                   @blur="handleUpdateTask(selectedTask)"
                   @input="autoResize"
                 />
@@ -947,6 +966,7 @@ import {
   Link,
   MessageCircle,
   Eye,
+  UserMinus,
 } from "lucide-vue-next";
 import { useTaskStore } from "@/stores/user/task";
 import { storeToRefs } from "pinia";
@@ -1173,7 +1193,9 @@ const getAssigneeOptions = computed(() => {
     return getTeamById.value.members;
   }
   if (myWorkspaceRole.value === "moderator") {
-    return getMember.value;
+    return getMember.value.filter(
+      (m) => m.user_id === getMe.value?.user_id || m.role === "member"
+    );
   }
   return getMember.value.filter((m) => m.user_id === getMe.value?.user_id);
 });
@@ -1233,6 +1255,11 @@ const handleUpdateTask = async (task, forceField = null, assigneeChanged = false
     }
   } catch (error) {
     toast.error(error.message);
+
+    if (selectedTask.value?.id === task.id && originalTask.value) {
+      selectedTask.value = { ...selectedTask.value, ...originalTask.value };
+    }
+
     await taskStore.getTaskByTeamStore(workspace_id.value, team_id.value, "", true);
   }
 };
@@ -1285,6 +1312,7 @@ const actTagClass = (action) => {
   const map = {
     create: "act-tag-create",
     assign: "act-tag-assign",
+    unassign: "act-tag-unassign",
     submit: "act-tag-submit",
     review: "act-tag-review",
   };
@@ -1292,7 +1320,13 @@ const actTagClass = (action) => {
 };
 
 const actTagIcon = (action) => {
-  const map = { create: Plus, assign: UserCheck, submit: Send, review: Eye };
+  const map = {
+    create: Plus,
+    assign: UserCheck,
+    unassign: UserMinus,
+    submit: Send,
+    review: Eye,
+  };
   return map[action?.toLowerCase()];
 };
 
