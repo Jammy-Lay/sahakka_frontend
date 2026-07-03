@@ -714,6 +714,11 @@ body .n-popover.n-tooltip {
   color: #34c759;
 }
 
+.act-tag-join {
+  background: #c2eecd;
+  color: #34c759;
+}
+
 .act-tag-assign {
   background: #b2dbff;
   color: #0088ff;
@@ -745,6 +750,11 @@ body .n-popover.n-tooltip {
 }
 
 .act-tag-leave {
+  background: #ffc3c4;
+  color: #FF383C;
+}
+
+.act-tag-unassign {
   background: #ffc3c4;
   color: #FF383C;
 }

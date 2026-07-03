@@ -346,8 +346,17 @@ const reviewStatusConfig = {
 };
 
 onMounted(async () => {
-  teamStore.getTeamByIdStore(workspace_id.value, team_id.value);
-  submissionStore.getAllSubmissionByTeamStore(workspace_id.value, team_id.value);
+  await teamStore.getTeamByIdStore(workspace_id.value, team_id.value);
+  await submissionStore.getAllSubmissionByTeamStore(workspace_id.value, team_id.value);
+
+  const submissionIdFromQuery = route.query.submission_id;
+  if (submissionIdFromQuery) {
+    const found = getAllSubmissionByTeam.value.find(
+      (s) => String(s.submission_id) === String(submissionIdFromQuery)
+    );
+    if (found) openReview(found);
+    router.replace({ query: {} });
+  }
 });
 
 const formatDateTime = (dateString) => {

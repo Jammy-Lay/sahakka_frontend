@@ -237,7 +237,7 @@
           style="--n-icon-size: 25px; font-size: 10px"
         />
 
-        <n-scrollbar style="max-height: 132px" v-else>
+        <n-scrollbar style="max-height: 180px" v-else>
           <div
             v-for="ws in joinedWorkspaces"
             :key="ws.workspace_id"

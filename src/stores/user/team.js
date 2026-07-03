@@ -32,16 +32,16 @@ export const useTeamStore = defineStore("team", () => {
     }
   };
 
-  const getTeamByWorkspaceStore = async (workspace_id) => {
+  const getTeamByWorkspaceStore = async (workspace_id, silent = false) => {
     try {
-      loading.value = true;
+      if (!silent) loading.value = true;
       const res = await api.get(`/workspace/${workspace_id}/teams`);
       getTeamByWorkspace.value = res.data.data.team;
       // console.log(getTeamByWorkspace.value);
     } catch (err) {
       throw new Error(err.response?.data?.message || "Get team failed");
     } finally {
-      loading.value = false;
+      if (!silent) loading.value = false;
     }
   };
 

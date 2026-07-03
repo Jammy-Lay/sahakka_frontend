@@ -2,6 +2,7 @@ import api from "@/api/https";
 import { defineStore } from "pinia";
 import { ref } from "vue";
 import router from "@/router";
+import { UseWorkspaceStore } from "./workspace";
 
 export const useMemberStore = defineStore("members", () => {
   let getAllMemberInWorkspace = ref([]);
@@ -14,7 +15,17 @@ export const useMemberStore = defineStore("members", () => {
     const team_id = router.currentRoute.value.params.team_id;
     if (!workspace_id || data.workspace_id != workspace_id) return;
 
-    getAllMemberInWorkspaceStore(workspace_id);
+    const workspaceStore = UseWorkspaceStore();
+    const currentWorkspace = workspaceStore.getAllWorkspace.find(
+      (w) => w.workspace_id == workspace_id,
+    );
+    
+    const isOwner = currentWorkspace?.my_role === "owner";
+
+    if (isOwner) {
+      getAllMemberInWorkspaceStore(workspace_id);
+    }
+
     if (team_id) getAllMemberInTeamStore(workspace_id, team_id);
   };
 
