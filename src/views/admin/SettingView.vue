@@ -343,7 +343,7 @@ const profile = useGetProfile();
 const auth = useAuthStore();
 
 const router = useRouter();
-const toast = notify();
+const toast = notify(router);
 
 const imageSource = ref(null);
 const showCropper = ref(false);

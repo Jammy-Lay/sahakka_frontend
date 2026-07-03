@@ -89,8 +89,10 @@ import { useUserStore } from "@/stores/admin/users";
 import api from "@/api/https";
 import { useToast } from "vue-toastification";
 import SkeletonUser from "@/components/Skeleton/SkeletonUser.vue";
+import { notify } from "@/utils/toast";
+import router from "@/router";
 
-const toast = useToast();
+const toast = notify(router);
 const usersStore = useUserStore();
 const loading = ref(true);
 const searchEmail = ref("");
