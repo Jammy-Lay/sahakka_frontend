@@ -196,7 +196,7 @@
               class="d-flex align-items-center justify-content-between"
               style="padding: 0 10px; padding-top: 10px"
             >
-              <span class="fw-bold fs-15 ps-1">Join with code or token</span>
+              <span class="fw-bold fs-15 ps-1">Join with passcode</span>
               <n-button
                 text
                 size="small"
@@ -211,7 +211,7 @@
 
             <div style="padding: 10px">
               <div class="p-2 rounded-btn bg-accent border border-1">
-                <p class="fs-13 mb-2 ps-1 text-dark">Code or token</p>
+                <p class="fs-13 mb-2 ps-1 text-dark">Passcode</p>
                 <BaseInput
                   v-model="joinCode"
                   input-placeholder="XXXXXXXX"
@@ -791,7 +791,6 @@ const handleInvite = async () => {
 };
 
 const handleGenerate = async () => {
-  isLoading.value = true;
   isGenerateLoading.value = true;
   try {
     const res = await inviteStore.generatePasscode(
@@ -804,7 +803,6 @@ const handleGenerate = async () => {
     toast.error(error.message);
   } finally {
     isGenerateLoading.value = false;
-    isLoading.value = false;
   }
 };
 
@@ -817,6 +815,13 @@ const handleCopy = async () => {
     isCopy.value = false;
   }, 2000);
 };
+
+watch(currentRouteTeamId, () => {
+  passcode.value = "";
+  inviteEmail.value = "";
+  isCopy.value = false;
+  showInvitePopover.value = false;
+});
 
 const handleLogout = async () => {
   try {

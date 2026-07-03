@@ -144,17 +144,17 @@ async function goHome() {
 onMounted(async () => {
   await profileStore.getProfile();
 
-  //   const userId = profileStore.user?.user_id;
-  //   if (userId) {
-  //     const raw = localStorage.getItem(`lastVisited_${userId}`);
-  //     if (raw) {
-  //       try {
-  //         lastVisited.value = JSON.parse(raw);
-  //       } catch (err) {
-  //         console.error("Failed to parse lastVisited:", err);
-  //       }
-  //     }
-  //   }
+    const userId = profileStore.user?.user_id;
+    if (userId) {
+      const raw = localStorage.getItem(`lastVisited_${userId}`);
+      if (raw) {
+        try {
+          lastVisited.value = JSON.parse(raw);
+        } catch (err) {
+          console.error("Failed to parse lastVisited:", err);
+        }
+      }
+    }
 });
 </script>
 <style scoped>

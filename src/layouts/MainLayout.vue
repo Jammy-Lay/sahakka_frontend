@@ -95,8 +95,8 @@ watch(
     if (workspace_id) {
       workspaceStore.setLastVisitedTeam(workspace_id, team_id, getMe.value?.user_id);
       currentWorkspaceId.value = workspace_id;
+      socket.emit("join-workspace", { workspace_id, team_id });
     }
-    socket.emit("join-workspace", { workspace_id, team_id });
   },
   { immediate: true, deep: true }
 );

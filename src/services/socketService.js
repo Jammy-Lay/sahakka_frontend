@@ -7,6 +7,7 @@ import { socket, connectSocket, disconnectSocket } from "@/utils/socket";
 import router from "@/router";
 import { useSubmissionStore } from "@/stores/user/submission";
 import { useAuthStore } from "@/stores/auth";
+import { useProfileStore } from "@/stores/profile/profile";
 
 let initialized = false;
 
@@ -20,6 +21,8 @@ export const initSocket = () => {
   const workspaceStore = UseWorkspaceStore();
   const documentStore = useDocumentStore();
   const submissionStore = useSubmissionStore();
+  const profileStore = useProfileStore();
+  const authStore = useAuthStore();
 
   socket.off("task-created");
   socket.off("task-updated");
@@ -34,6 +37,7 @@ export const initSocket = () => {
   socket.off("document-deleted");
   socket.off("submission-created");
   socket.off("submission-updated");
+  socket.off("profile-updated");
   socket.off("connect");
 
   socket.on("connect", () => {
@@ -48,6 +52,10 @@ export const initSocket = () => {
     const { workspace_id, team_id } = router.currentRoute.value.params;
     if (workspace_id && team_id)
       await teamStore.getActivityTeamStore(workspace_id, team_id);
+
+    if (data.workspace_id && data.team_id) {
+      await taskStore.prefetchTeamTasks(data.workspace_id, data.team_id);
+    }
   });
 
   socket.on("task-updated", async (data) => {
@@ -55,6 +63,10 @@ export const initSocket = () => {
     const { workspace_id, team_id } = router.currentRoute.value.params;
     if (workspace_id && team_id)
       await teamStore.getActivityTeamStore(workspace_id, team_id);
+
+    if (data.workspace_id && data.team_id) {
+      await taskStore.prefetchTeamTasks(data.workspace_id, data.team_id);
+    }
   });
 
   socket.on("task-deleted", async (data) => {
@@ -62,6 +74,10 @@ export const initSocket = () => {
     const { workspace_id, team_id } = router.currentRoute.value.params;
     if (workspace_id && team_id)
       await teamStore.getActivityTeamStore(workspace_id, team_id);
+
+    if (data.workspace_id && data.team_id) {
+      await taskStore.prefetchTeamTasks(data.workspace_id, data.team_id);
+    }
   });
 
   socket.on("document-created", async (data) => {
@@ -76,6 +92,10 @@ export const initSocket = () => {
     const { workspace_id, team_id } = router.currentRoute.value.params;
     if (workspace_id && team_id)
       await teamStore.getActivityTeamStore(workspace_id, team_id);
+  });
+
+  socket.on("document-updated-content", async (data) => {
+    documentStore.handleDocumentUpdated(data);
   });
 
   socket.on("document-deleted", async (data) => {
@@ -94,27 +114,53 @@ export const initSocket = () => {
       await teamStore.getActivityTeamStore(workspace_id, team_id);
   });
 
+  socket.on("profile-updated", async (data) => {
+    const { workspace_id, team_id } = router.currentRoute.value.params;
+
+    if (authStore?.getMe) {
+      const currentUser = authStore.getMe.value ?? authStore.getMe;
+      if (String(currentUser?.user_id) === String(data.user_id)) {
+        if (data.name !== undefined) currentUser.name = data.name;
+        if (data.avatar !== undefined) currentUser.avatar = data.avatar;
+      }
+    }
+
+    memberStore.handleProfileUpdated(data);
+    teamStore.handleProfileUpdated(data);
+    profileStore.handleProfileUpdated(data);
+
+    await workspaceStore.getMyWorkspaceStore();
+
+    if (workspace_id) {
+      await teamStore.getTeamByWorkspaceStore(workspace_id, true);
+
+      if (team_id) {
+        await teamStore.getTeamByIdStore(workspace_id, team_id);
+        await taskStore.getTaskByTeamStore(workspace_id, team_id, "", true);
+        await taskStore.getMyTaskStore(workspace_id, team_id, "", true);
+      }
+    }
+  });
+
   socket.on("team-member-removed", async (data) => {
     const authStore = useAuthStore();
     const currentUserId = authStore.getMe?.user_id;
-
     if (String(currentUserId) === String(data.user_id)) return;
-    else {
-      const { workspace_id, team_id } = router.currentRoute.value.params;
-      if (
-        String(workspace_id) !== String(data.workspace_id) ||
-        String(team_id) !== String(data.team_id)
-      )
-        return;
 
-      await teamStore.getTeamByWorkspaceStore(data.workspace_id);
-      await teamStore.getTeamByIdStore(data.workspace_id, data.team_id);
+    const { workspace_id } = router.currentRoute.value.params;
+    if (String(workspace_id) !== String(data.workspace_id)) return;
+
+    await teamStore.getTeamByWorkspaceStore(data.workspace_id, true);
+    await teamStore.getTeamByIdStore(data.workspace_id, data.team_id);
+
+    if (String(memberStore.selectedTeamId) === String(data.team_id)) {
       await memberStore.getAllMemberInTeamStore(
         data.workspace_id,
         data.team_id,
       );
-      await teamStore.getActivityTeamStore(data.workspace_id, data.team_id);
     }
+
+    await teamStore.getActivityTeamStore(data.workspace_id, data.team_id);
   });
 
   socket.on("workspace-updated", async (data) => {
@@ -127,8 +173,12 @@ export const initSocket = () => {
 
   socket.on("role-updated", async (data) => {
     await workspaceStore.getMyWorkspaceStore();
+
+    const { workspace_id, team_id } = router.currentRoute.value.params;
+    if (String(data.workspace_id) !== String(workspace_id)) return;
+
     await teamStore.getTeamByWorkspaceStore(data.workspace_id);
-    const team_id = router.currentRoute.value.params.team_id;
+
     if (team_id) {
       await teamStore.getTeamByIdStore(data.workspace_id, team_id);
     }
