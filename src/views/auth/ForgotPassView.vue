@@ -20,7 +20,7 @@
             <h6 class="text-mute mb-6">We'll send a reset link to your email.</h6>
 
             <form @submit.prevent="forgotPassword">
-              <label class="mb-2 text-dark">Email</label>
+              <label class="mb-2 text-dark required">Email</label>
               <BaseInput
                 input-style="padding: 12px 0"
                 input-class="ps-3 rounded-btn text-dark fs-15"

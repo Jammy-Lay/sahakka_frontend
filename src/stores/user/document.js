@@ -1,6 +1,8 @@
 import api from "@/api/https";
 import { defineStore } from "pinia";
 import { ref } from "vue";
+import html2pdf from "html2pdf.js";
+import { marked } from "marked";
 
 export const useDocumentStore = defineStore("document", () => {
   let getDocumentByTeam = ref([]);
@@ -109,6 +111,65 @@ export const useDocumentStore = defineStore("document", () => {
       (d) => String(d.document_id) !== String(document_id),
     );
   };
+  const downloadDocument = async (workspaceId, teamId, documentId, title) => {
+    const res = await api.get(
+      `/workspace/${workspaceId}/team/${teamId}/document/${documentId}`
+    );
+
+    const { result, message, data } = res.data;
+    if (!result) throw new Error(message || "Failed to get document");
+
+    const bodyHtml = data.content;
+
+
+    const container = document.createElement("div");
+    container.style.padding = "24px";
+    container.style.fontFamily = "Arial, sans-serif";
+    container.style.color = "#1a1a1a";
+    container.innerHTML = `
+  <style>
+    h1 { font-size: 32px; font-weight: 700; color: #3b82f6; margin: 0 0 16px; }
+    blockquote {
+      border-left: 4px solid #3b82f6;
+      margin: 12px 0;
+      padding: 12px 16px;
+      background: #dbeafe;
+      color: #1e3a5f;
+    }
+    pre {
+      background: #f3f4f6;
+      padding: 10px 14px;
+      border-radius: 6px;
+      overflow-x: auto;
+      margin: 12px 0;
+      display: inline-block;
+    }
+    pre code {
+      font-family: "Courier New", monospace;
+      font-size: 13px;
+      color: #db2777;
+    }
+    p { font-size: 14px; line-height: 1.6; margin: 0 0 12px; }
+    strong { font-weight: 700; }
+  </style>
+  ${data.content}
+`;
+
+    const opt = {
+      margin: 10,
+      filename: `${sanitizeFilename(title)}.pdf`,
+      image: { type: "jpeg", quality: 0.98 },
+      html2canvas: { scale: 2 },
+      jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
+      pagebreak: { mode: ["avoid-all", "css", "legacy"] },
+    };
+
+    await html2pdf().set(opt).from(container).save();
+  }
+
+  function sanitizeFilename(name) {
+    return name.replace(/[/\\?%*:|"<>]/g, "-").trim() || "document";
+  }
 
   return {
     getDocumentByTeam,
@@ -121,5 +182,6 @@ export const useDocumentStore = defineStore("document", () => {
     handleDocumentCreated,
     handleDocumentUpdated,
     handleDocumentDeleted,
+    downloadDocument,
   };
 });

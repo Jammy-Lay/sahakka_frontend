@@ -29,14 +29,14 @@
           <n-divider style="margin: 5px 0; --n-color: #e4e4e7" />
 
           <div class="px-4 pt-2 pb-3">
-            <label class="mb-2 fs-12 fw-medium d-block">Team Name</label>
+            <label class="mb-2 fs-12 fw-medium d-block required">Team Name</label>
             <BaseInput
               v-model="teamName"
               input-placeholder="Team name"
               input-class="py-1 fs-13 rounded-btn-sm mb-3"
             />
 
-            <label class="mb-2 fs-12 fw-medium d-block">Description</label>
+            <label class="mb-2 fs-12 fw-medium d-block required">Description</label>
             <BaseInput
               v-model="description"
               input-placeholder="Description"

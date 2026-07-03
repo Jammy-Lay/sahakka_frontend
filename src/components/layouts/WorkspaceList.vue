@@ -75,7 +75,7 @@
               </button>
             </template>
             <div style="padding: 10px">
-              <h6 class="fw-semibold fs-13 ps-1">Workspace name</h6>
+              <h6 class="fw-semibold fs-13 ps-1 required">Workspace name</h6>
               <BaseInput
                 v-model="newWorkspaceName"
                 input-placeholder="Name"
@@ -196,7 +196,7 @@
               class="d-flex align-items-center justify-content-between"
               style="padding: 0 10px; padding-top: 10px"
             >
-              <span class="fw-bold fs-15 ps-1">Join with code or token</span>
+              <span class="fw-bold fs-15 ps-1 required">Join with code or token</span>
               <n-button
                 text
                 size="small"

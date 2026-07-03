@@ -78,7 +78,7 @@ const isResend = ref(false);
 const value = ref([]);
 let forgotEmail = ref(sessionStorage.getItem("forgot_email"));
 
-const OTP_TIME = 15;
+const OTP_TIME = 59;
 const countdown = ref(0);
 let timer = null;
 

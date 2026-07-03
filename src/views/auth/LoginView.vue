@@ -22,7 +22,7 @@
             <h6 class="text-mute mb-6">Enter your account to complete your work.</h6>
 
             <form @submit.prevent="handleLogin">
-              <label class="mb-2 text-dark">Email</label>
+              <label class="mb-2 text-dark required">Email</label>
               <BaseInput
                 input-style="padding: 12px 0"
                 input-class="ps-3 rounded-btn text-dark fs-15"
@@ -32,7 +32,7 @@
               <p v-if="err.email" class="text-danger mt-1 fs-14">{{ err.email }}</p>
 
               <div :class="err.email ? 'mt-3' : 'mt-4'">
-                <label class="mb-2 text-dark">Password</label>
+                <label class="mb-2 text-dark required">Password</label>
                 <div class="position-relative">
                   <BaseInput
                     :input-type="showPassword ? 'text' : 'password'"

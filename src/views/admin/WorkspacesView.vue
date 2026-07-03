@@ -118,12 +118,13 @@ import Loading from "@/components/layouts/Loading.vue";
 import { useToast } from "vue-toastification";
 import SkeletonWorkspace from "@/components/Skeleton/SkeletonWorkspace.vue";
 import api from "@/api/https";
+import { notify } from "@/utils/toast";
 
 const useWorkspace = useWorkspaceStore();
 const useTeam = useTeamstore();
 const useTask = useTaskstore();
 const loading = ref(false);
-const toast = useToast();
+const toast = notify(router);
 const projects = ref([]);
 
 // search

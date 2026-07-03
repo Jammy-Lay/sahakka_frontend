@@ -596,13 +596,13 @@
         <n-divider style="margin: 5px 0; --n-color: #e4e4e7" />
 
         <div class="px-4 pt-2 pb-4">
-          <label class="mb-2 fs-13 text-dark mt-2">Title</label>
+          <label class="mb-2 fs-13 text-dark mt-2 required">Title</label>
           <BaseInput
             v-model="form.title"
             input-placeholder="Title"
             input-class="py-2 fs-13 rounded-btn-sm bg-white mb-3"
           />
-          <label class="mb-2 fs-13 text-dark">Description</label>
+          <label class="mb-2 fs-13 text-dark required">Description</label>
           <textarea
             v-model="form.description"
             placeholder="Description"
@@ -1329,7 +1329,7 @@
               </div>
 
               <!-- File/Link Attachment -->
-              <p class="fw-semibold fs-15 mb-2">
+              <p class="fw-semibold fs-15 mb-2 required">
                 File attachment <Link size="15" class="ms-1" />
               </p>
               <input
@@ -1409,7 +1409,7 @@
               </div>
 
               <!-- Messages -->
-              <p class="fw-semibold fs-15 mb-2">
+              <p class="fw-semibold fs-15 mb-2 required">
                 Messages <message-circle size="16" class="text-mute ms-1" />
               </p>
               <textarea

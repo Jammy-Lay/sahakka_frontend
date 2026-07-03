@@ -14,6 +14,7 @@
         <!-- <p>{{ message }}</p> -->
 
         <div class="support-form">
+          <label class="required">Describe your issue</label>
           <textarea v-model="message" class="form-control support-textarea"
             placeholder="Describe your issue..."></textarea>
 

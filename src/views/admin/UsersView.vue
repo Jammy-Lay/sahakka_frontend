@@ -31,11 +31,8 @@
                     <n-tab-pane name="allUsers" tab="Users">
                         <div class="row pt-3 g-4">
                             <div class="col-lg-12">
-                                <n-data-table
-                                    :columns="columnsAllUsers"
-                                    :data="dataAllUsers"
-                                    :pagination="dataAllUsers.length >= 9 ? { pageSize: 9 } : false"
-                                    :bordered="false"
+                                <n-data-table :columns="columnsAllUsers" :data="dataAllUsers"
+                                    :pagination="dataAllUsers.length >= 9 ? { pageSize: 9 } : false" :bordered="false"
                                     class="task-table" />
                             </div>
                         </div>
@@ -44,12 +41,9 @@
                     <n-tab-pane name="userActive" tab="Users Active">
                         <div class="row pt-3 g-4">
                             <div class="col-lg-12">
-                                <n-data-table
-                                    :columns="columnsUserActive"
-                                    :data="dataUsersActive"
+                                <n-data-table :columns="columnsUserActive" :data="dataUsersActive"
                                     :pagination="dataUsersActive.length >= 9 ? { pageSize: 9 } : false"
-                                    :bordered="false"
-                                    class="task-table" />
+                                    :bordered="false" class="task-table" />
                             </div>
                         </div>
                     </n-tab-pane>
@@ -57,12 +51,9 @@
                     <n-tab-pane name="newRegister" tab="User Register">
                         <div class="row pt-3 g-4">
                             <div class="col-lg-12">
-                                <n-data-table
-                                    :columns="columnsNewRegister"
-                                    :data="dataNewRegister"
+                                <n-data-table :columns="columnsNewRegister" :data="dataNewRegister"
                                     :pagination="dataNewRegister.length >= 9 ? { pageSize: 9 } : false"
-                                    :bordered="false"
-                                    class="task-table" />
+                                    :bordered="false" class="task-table" />
                             </div>
                         </div>
                     </n-tab-pane>
@@ -70,11 +61,8 @@
                     <n-tab-pane name="userBlock" tab="User Blocked">
                         <div class="row pt-3 g-4">
                             <div class="col-lg-12">
-                                <n-data-table
-                                    :columns="columnsUserBlock"
-                                    :data="dataUserBlock"
-                                    :pagination="dataUserBlock.length >= 9 ? { pageSize: 9 } : false"
-                                    :bordered="false"
+                                <n-data-table :columns="columnsUserBlock" :data="dataUserBlock"
+                                    :pagination="dataUserBlock.length >= 9 ? { pageSize: 9 } : false" :bordered="false"
                                     class="task-table" />
                             </div>
                         </div>
@@ -101,8 +89,10 @@ import { useUserStore } from "@/stores/admin/users";
 import api from "@/api/https";
 import { useToast } from "vue-toastification";
 import SkeletonUser from "@/components/Skeleton/SkeletonUser.vue";
+import { notify } from "@/utils/toast";
+import router from "@/router";
 
-const toast = useToast();
+const toast = notify(router);
 const usersStore = useUserStore();
 const loading = ref(true);
 const searchEmail = ref("");
@@ -216,12 +206,18 @@ const columnsAllUsers = [
     {
         title: "NAME",
         key: "name",
+        width: 180,
+        ellipsis: {
+            tooltip: true
+        }
     },
     {
         title: "EMAIL",
         key: "email",
-        render: (row) =>
-            h("span", { class: "fw-medium text-secondary" }, row.email),
+        width: 250,
+        ellipsis: {
+            tooltip: true,
+        },
     },
     {
         title: "DATE",
@@ -271,9 +267,9 @@ const columnsAllUsers = [
                     trigger: "click",
                     onSelect: (key) => handleAction(key, row),
                     themeOverrides: {
-                    borderRadius: "12px",
-                    width: "180px" // Optional
-                }
+                        borderRadius: "12px",
+                        width: "180px" // Optional
+                    }
                 },
                 {
                     default: () =>
@@ -315,12 +311,18 @@ const columnsUserActive = [
     {
         title: "NAME",
         key: "name",
+        width: 180,
+        ellipsis: {
+            tooltip: true
+        }
     },
     {
         title: "EMAIL",
         key: "email",
-        render: (row) =>
-            h("span", { class: "fw-medium text-secondary" }, row.email),
+        width: 250,
+        ellipsis: {
+            tooltip: true,
+        },
     },
     {
         title: "DATE",
@@ -370,9 +372,9 @@ const columnsUserActive = [
                     trigger: "click",
                     onSelect: (key) => handleAction(key, row),
                     themeOverrides: {
-                    borderRadius: "12px",
-                    width: "180px" // Optional
-                }
+                        borderRadius: "12px",
+                        width: "180px" // Optional
+                    }
                 },
                 {
                     default: () =>
@@ -412,12 +414,18 @@ const columnsNewRegister = [
     {
         title: "NAME",
         key: "name",
+        width: 180,
+        ellipsis: {
+            tooltip: true
+        }
     },
     {
         title: "EMAIL",
         key: "email",
-        render: (row) =>
-            h("span", { class: "fw-medium text-secondary" }, row.email),
+        width: 250,
+        ellipsis: {
+            tooltip: true,
+        },
     },
     {
         title: "DATE",
@@ -476,12 +484,18 @@ const columnsUserBlock = [
     {
         title: "NAME",
         key: "name",
+        width: 180,
+        ellipsis: {
+            tooltip: true
+        }
     },
     {
         title: "EMAIL",
         key: "email",
-        render: (row) =>
-            h("span", { class: "fw-medium text-secondary" }, row.email),
+        width: 250,
+        ellipsis: {
+            tooltip: true,
+        },
     },
     {
         title: "DATE",
@@ -531,9 +545,9 @@ const columnsUserBlock = [
                     trigger: "click",
                     onSelect: (key) => handleAction(key, row),
                     themeOverrides: {
-                    borderRadius: "12px",
-                    width: "180px" // Optional
-                }
+                        borderRadius: "12px",
+                        width: "180px" // Optional
+                    }
                 },
                 {
                     default: () =>
@@ -622,10 +636,12 @@ onMounted(async () => {
 :deep(.task-table .n-data-table-td) {
     border-bottom: 1px solid rgba(0, 0, 0, 0.06);
 }
+
 /* Target Naive UI's dropdown popover menu container */
 .n-dropdown-menu {
     border-radius: 12px !important;
 }
+
 .search-input:focus {
     outline: none;
 }
