@@ -20,6 +20,7 @@ import router from "./router";
 import naive from "naive-ui";
 import VCalendar from "v-calendar";
 import "v-calendar/style.css";
+import { useAuthStore } from "./stores/auth";
 
 const app = createApp(App);
 
@@ -27,6 +28,11 @@ app.use(createPinia());
 app.use(router);
 app.use(naive);
 app.use(VCalendar, {});
+
+const auth = useAuthStore();
+if (auth.isLoggedIn) {
+  await auth.getMeStore().catch(() => auth.logout());
+}
 
 app.use(Toast, {
   position: "bottom-right",

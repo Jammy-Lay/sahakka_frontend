@@ -2,13 +2,19 @@ import { ref, computed } from "vue";
 import { defineStore } from "pinia";
 import api from "@/api/https";
 import { connectSocket, disconnectSocket } from "@/utils/socket";
+import { decodeToken } from "@/utils/jwt.js";
 
 export const useAuthStore = defineStore("auth", () => {
   let user = ref({});
   let loading = ref(true);
   let token = ref(localStorage.getItem("token"));
   let isLoggedIn = computed(() => !!token.value);
-  let role = computed(() => user.value?.role || null);
+
+  let role = computed(() => {
+    const decoded = decodeToken(token.value);
+    return decoded?.role || null;
+  });
+
 
   let getMe = ref({});
 
