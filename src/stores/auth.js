@@ -10,11 +10,6 @@ export const useAuthStore = defineStore("auth", () => {
   let token = ref(localStorage.getItem("token"));
   let isLoggedIn = computed(() => !!token.value);
 
-  let role = computed(() => {
-    const decoded = decodeToken(token.value);
-    return decoded?.role || null;
-  });
-
 
   let getMe = ref({});
 
@@ -108,7 +103,6 @@ export const useAuthStore = defineStore("auth", () => {
     user,
     token,
     isLoggedIn,
-    role,
     login,
     logout,
     getMe,

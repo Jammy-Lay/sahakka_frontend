@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from "vue-router";
 import HomeView from "../views/LandingPageView.vue";
 import { useAuthStore } from "@/stores/auth.js";
+import { jwtDecode } from "jwt-decode";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -225,17 +226,18 @@ router.beforeEach(async (to) => {
   const needsAuth = to.matched.some((r) => r.meta.requiresAuth);
   const needsAdmin = to.matched.some((r) => r.meta.requiresAdmin);
   const needsMembership = to.matched.some((r) => r.meta.requiresMembership);
-
+  
   if (!needsAuth && !needsAdmin && !needsMembership) return true;
-
+  
   if (!auth.isLoggedIn) {
     return needsAdmin
-      ? { name: "not-found" }
-      : { name: "login", query: { redirect: to.fullPath } };
+    ? { name: "not-found" }
+    : { name: "login", query: { redirect: to.fullPath } };
   }
-
+  
+  const decoded = jwtDecode(auth.token);
   if (needsAdmin) {
-    if (!auth.role) {
+    if (!decoded.role) {
       try {
         await auth.getMeStore();
       } catch (err) {
@@ -243,7 +245,7 @@ router.beforeEach(async (to) => {
         return { name: "not-found" };
       }
     }
-    if (auth.role !== "admin") {
+    if (decoded.role !== "admin") {
       return { name: "not-found" };
     }
   }
