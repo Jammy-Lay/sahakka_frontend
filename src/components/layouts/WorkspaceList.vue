@@ -791,7 +791,6 @@ const handleInvite = async () => {
 };
 
 const handleGenerate = async () => {
-  isLoading.value = true;
   isGenerateLoading.value = true;
   try {
     const res = await inviteStore.generatePasscode(
@@ -804,7 +803,6 @@ const handleGenerate = async () => {
     toast.error(error.message);
   } finally {
     isGenerateLoading.value = false;
-    isLoading.value = false;
   }
 };
 
@@ -817,6 +815,13 @@ const handleCopy = async () => {
     isCopy.value = false;
   }, 2000);
 };
+
+watch(currentRouteTeamId, () => {
+  passcode.value = "";
+  inviteEmail.value = "";
+  isCopy.value = false;
+  showInvitePopover.value = false;
+});
 
 const handleLogout = async () => {
   try {

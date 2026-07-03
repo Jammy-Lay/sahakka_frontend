@@ -223,6 +223,13 @@ const handleCopy = async () => {
     isCopy.value = false;
   }, 2000);
 };
+
+watch(currentRouteTeamId, () => {
+  passcode.value = "";
+  inviteEmail.value = "";
+  isCopy.value = false;
+  showInvitePopover.value = false;
+});
 </script>
 
 <style scoped>

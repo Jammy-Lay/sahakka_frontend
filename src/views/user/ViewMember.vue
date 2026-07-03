@@ -157,6 +157,7 @@ onMounted(async () => {
   await teamStore.getTeamByWorkspaceStore(workspace_id.value);
 
   if (isOwner.value) {
+    selectedTeamId.value = null;
     await memberStore.getAllMemberInWorkspaceStore(workspace_id.value);
   } else {
     if (getTeamByWorkspace.value.length > 0) {
@@ -165,6 +166,8 @@ onMounted(async () => {
         workspace_id.value,
         getTeamByWorkspace.value[0].team_id
       );
+    } else {
+      selectedTeamId.value = null;
     }
   }
 
