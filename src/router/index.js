@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from "vue-router";
 import HomeView from "../views/LandingPageView.vue";
+import { useAuthStore } from "@/stores/auth.js";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -122,6 +123,7 @@ const router = createRouter({
     {
       path: "/settings",
       component: () => import("../layouts/ProfileLayout.vue"),
+      meta: { requiresAuth: true },
       children: [
         {
           path: "",
@@ -147,6 +149,7 @@ const router = createRouter({
     {
       path: "/admin/",
       component: () => import("../layouts/AdminLayout.vue"),
+      meta: { requiresAuth: true, requiresAdmin: true },
       children: [
         {
           path: "dashboard",
@@ -214,6 +217,38 @@ const router = createRouter({
 // Dynamic title handler
 router.afterEach((to) => {
   document.title = to.meta.title || "Sahakka — Team Collaboration Made Simple";
+});
+
+router.beforeEach(async (to) => {
+  const auth = useAuthStore();
+
+  const needsAuth = to.matched.some((r) => r.meta.requiresAuth);
+  const needsAdmin = to.matched.some((r) => r.meta.requiresAdmin);
+  const needsMembership = to.matched.some((r) => r.meta.requiresMembership);
+
+  if (!needsAuth && !needsAdmin && !needsMembership) return true;
+
+  if (!auth.isLoggedIn) {
+    return needsAdmin
+      ? { name: "not-found" }
+      : { name: "login", query: { redirect: to.fullPath } };
+  }
+
+  if (needsAdmin) {
+    if (!auth.role) {
+      try {
+        await auth.getMeStore();
+      } catch (err) {
+        auth.logout();
+        return { name: "not-found" };
+      }
+    }
+    if (auth.role !== "admin") {
+      return { name: "not-found" };
+    }
+  }
+
+  return true;
 });
 
 export default router;
