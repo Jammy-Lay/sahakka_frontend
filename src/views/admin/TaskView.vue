@@ -267,23 +267,23 @@ const formatDate = (d) => {
 }
 
 .badge-urgent {
-    background: #faece7;
-    color: #993c1d;
+    background-color: #cfccfc !important;
+    color: #6155f5 !important;
 }
 
 .badge-high {
-    background: #faeeda;
-    color: #854f0b;
+    background-color: #ffc3c4 !important;
+    color: #ff383c !important;
 }
 
 .badge-medium {
-    background: #e6f1fb;
-    color: #185fa5;
+    background-color: #ffddbe !important;
+    color: #ff8d28 !important;
 }
 
 .badge-low {
-    background: #eaf3de;
-    color: #3b6d11;
+    background-color: #D5D4D6 !important;
+    color: #171717 !important;
 }
 
 /* ── Footer ── */

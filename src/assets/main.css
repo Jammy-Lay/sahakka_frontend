@@ -880,3 +880,8 @@ body .n-popover.n-tooltip {
 .n-submenu-children .n-menu-item-content::after {
   left: 28px !important;
 }
+
+.required::after {
+    content: " *";
+    color: red;
+}

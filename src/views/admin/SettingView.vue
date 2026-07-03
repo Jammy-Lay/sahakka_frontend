@@ -42,7 +42,8 @@
                             <n-dropdown :options="avatarDropdownOptions" placement="bottom-start" trigger="click"
                                 :theme-overrides="{ borderRadius: '12px', width: '180px' }"
                                 @select="handleAvatarDropdown">
-                                <button class="avatar-edit-btn" style="background-color: #171717; border: 2px solid #fff;" type="button">
+                                <button class="avatar-edit-btn"
+                                    style="background-color: #171717; border: 2px solid #fff;" type="button">
                                     <Pencil :size="16" />
                                 </button>
                             </n-dropdown>
@@ -257,15 +258,27 @@
                     </div>
                 </template>
                 <div class="px-4">
-                    <n-form-item-row label="Current Password">
+                    <n-form-item-row>
+                        <template #label>
+                            Current Password <span style="color: red;">*</span>
+                        </template>
+
                         <n-input v-model:value="passwordForm.current" type="password" show-password-on="click"
                             placeholder="Enter current password" size="large" />
                     </n-form-item-row>
-                    <n-form-item-row label="New Password">
+                    <n-form-item-row>
+                        <template #label>
+                            New Password <span style="color: red;">*</span>
+                        </template>
+
                         <n-input v-model:value="passwordForm.new" type="password" show-password-on="click"
                             placeholder="Enter current password" size="large" />
                     </n-form-item-row>
-                    <n-form-item-row label="Confirm New Password">
+                    <n-form-item-row>
+                        <template #label>
+                            Confirm New Password <span style="color: red;">*</span>
+                        </template>
+
                         <n-input v-model:value="passwordForm.cf" type="password" show-password-on="click"
                             placeholder="Re-enter new password" size="large" />
                     </n-form-item-row>
