@@ -783,7 +783,7 @@
               </div>
 
               <!-- File/Link Attachment -->
-              <p class="fw-semibold fs-15 mb-2">
+              <p class="fw-semibold fs-15 mb-2 required">
                 File attachment <Link size="15" class="ms-1" />
               </p>
               <input
@@ -863,7 +863,7 @@
               </div>
 
               <!-- Messages -->
-              <p class="fw-semibold fs-15 mb-2">
+              <p class="fw-semibold fs-15 mb-2 required">
                 Messages <message-circle size="16" class="text-mute ms-1" />
               </p>
               <textarea

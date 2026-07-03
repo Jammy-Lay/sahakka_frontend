@@ -159,11 +159,13 @@ import Loading from "@/components/layouts/Loading.vue";
 import { useToast } from "vue-toastification";
 import Chart from "chart.js/auto";
 import Dashboard from "@/components/Skeleton/Dashboard.vue";
+import { notify } from "@/utils/toast";
+import router from "@/router";
 
 const chartRef = ref(null);
 const selectedRange = ref("week");
 let chartInstance = null;
-const toast = useToast();
+const toast = notify(router);
 const loading = ref(false);
 
 const todayLabel = new Intl.DateTimeFormat("en-US", {
@@ -194,7 +196,6 @@ const fetchDashboard = async () => {
     try {
         const res = await api.get('/sahakka-admin/dashboard');
         dashboard.value = res.data.data;
-        console.log("Dashboard API response:", res.data.data);
     } catch (error) {
         toast.error("Failed to load");
     } finally {

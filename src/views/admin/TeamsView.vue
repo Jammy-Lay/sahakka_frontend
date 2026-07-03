@@ -39,7 +39,7 @@
         </div>
 
         <!-- Pagination -->
-        <div class="mt-2 d-flex justify-content-end">
+        <div class="mt-4 d-flex justify-content-end">
             <n-pagination v-if="totalPages > 1" v-model:page="currentPage" :page-count="totalPages">
                 <template #prev>
                     <ChevronLeft />
@@ -63,11 +63,12 @@ import Loading from "@/components/layouts/Loading.vue";
 import { useToast } from "vue-toastification";
 import BaseCardTeam from "@/components/BaseCardTeam.vue";
 import SkeletonTeam from "@/components/Skeleton/SkeletonTeam.vue";
+import { notify } from "@/utils/toast";
 
 const useTeam = useTeamstore();
 const useTask = useTaskstore();
 const loading = ref(false);
-const toast = useToast();
+const toast = notify(router);
 
 const projects = ref([]);
 const searchQuery = ref("");

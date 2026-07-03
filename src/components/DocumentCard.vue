@@ -1,48 +1,24 @@
 <template>
-  <router-link
-    :to="{ name: 'editor', params: { document_id: documentId } }"
-    class="text-decoration-none"
-  >
+  <router-link :to="{ name: 'editor', params: { document_id: documentId } }" class="text-decoration-none">
     <n-card class="rounded-4 h-100" :bordered="false" style="padding: 0.75rem">
       <template #cover>
-        <div
-          class="decorate-container w-100 p-3 overflow-hidden"
-          style="border-radius: 0.75rem"
-          :style="{ backgroundColor: getSequentialColor(documentId) }"
-        >
-          <div
-            class="h-100 position-relative d-flex flex-column align-items-center justify-content-center"
-          >
-            <file-text
-              class="z-2 position-absolute icon-doc-1"
-              size="70"
+        <div class="decorate-container w-100 p-3 overflow-hidden" style="border-radius: 0.75rem"
+          :style="{ backgroundColor: getSequentialColor(documentId) }">
+          <div class="h-100 position-relative d-flex flex-column align-items-center justify-content-center">
+            <file-text class="z-2 position-absolute icon-doc-1" size="70"
               :fill="getSequentialColor(documentId, undefined, 0)"
-              :color="getSequentialColor(documentId, undefined, 50)"
-            />
-            <file-text
-              class="position-absolute icon-doc z-1"
-              size="70"
-              :color="getSequentialColor(documentId, undefined, 50)"
-            />
+              :color="getSequentialColor(documentId, undefined, 50)" />
+            <file-text class="position-absolute icon-doc z-1" size="70"
+              :color="getSequentialColor(documentId, undefined, 50)" />
           </div>
         </div>
       </template>
       <div style="height: 1rem"></div>
-      <div
-        class="doc-title d-flex align-items-center justify-content-between text-nowrap"
-      >
+      <div class="doc-title d-flex align-items-center justify-content-between text-nowrap">
         <!-- <file color="var(--bs-info)" size="26" /> -->
-        <h5
-          ref="editTitle"
-          :contenteditable="edit"
-          @click.prevent
-          @dblclick="editAction"
-          @blur="
-            $emit('updateTitle', documentId, editTitle.innerText, updateTitleHandling)
-          "
-          @keydown="lineBreak"
-          class="title w-100 m-0 fw-semibold"
-        >
+        <h5 ref="editTitle" :contenteditable="edit" @click.prevent @dblclick="editAction" @blur="
+          $emit('updateTitle', documentId, editTitle.innerText, updateTitleHandling)
+          " @keydown="lineBreak" class="title w-100 m-0 fw-semibold">
           {{
             documentTitle.length > 20 && !edit
               ? documentTitle.substring(0, 20) + "..."
@@ -62,42 +38,53 @@
           <h6 class="fw-normal m-0 fs-14">{{ date(createdAt) }}</h6>
         </div>
         <n-popover
-          placement="bottom-end"
-          trigger="click"
-          :show-arrow="false"
-          style="border-radius: 12px; padding: 6px; width: 120px"
-        >
-          <template #trigger>
-            <n-button quaternary circle @click.prevent class="px-2"
-              ><more-vertical-icon size="20"
-            /></n-button>
-          </template>
+  placement="bottom-end"
+  trigger="click"
+  :show-arrow="false"
+  style="border-radius: 12px; padding: 6px; width: 120px"
+>
+  <template #trigger>
+    <n-button quaternary circle @click.prevent class="px-2"
+      ><more-vertical-icon size="20"
+    /></n-button>
+  </template>
 
-          <div class="d-flex flex-column">
-            <n-button
-              class="rounded-3 fw-bold d-flex justify-content-start px-2 fs-13"
-              @click.prevent="editAction"
-              quaternary
-            >
-              <template #icon>
-                <brush size="16" />
-              </template>
-              <span>Rename</span>
-            </n-button>
+  <div class="d-flex flex-column">
+    <n-button
+      class="rounded-3 fw-bold d-flex justify-content-start px-2 fs-13"
+      @click.prevent="editAction"
+      quaternary
+    >
+      <template #icon>
+        <brush size="16" />
+      </template>
+      <span>Rename</span>
+    </n-button>
 
-            <n-button
-              v-if="isOwner"
-              class="rounded-3 fw-bold d-flex justify-content-start px-2 fs-13 text-danger"
-              quaternary
-              @click.prevent="$emit('deleteAction', documentId)"
-            >
-              <template #icon>
-                <trash2-icon size="16" />
-              </template>
-              <span>Delete</span>
-            </n-button>
-          </div>
-        </n-popover>
+    <n-button
+      class="rounded-3 fw-bold d-flex justify-content-start px-2 fs-13"
+      @click.prevent="$emit('downloadAction', documentId, documentTitle)"
+      quaternary
+    >
+      <template #icon>
+        <download size="16" />
+      </template>
+      <span>Download</span>
+    </n-button>
+
+    <n-button
+      v-if="isOwner"
+      class="rounded-3 fw-bold d-flex justify-content-start px-2 fs-13 text-danger"
+      quaternary
+      @click.prevent="$emit('deleteAction', documentId)"
+    >
+      <template #icon>
+        <trash2-icon size="16" />
+      </template>
+      <span>Delete</span>
+    </n-button>
+  </div>
+</n-popover>
       </div>
     </n-card>
   </router-link>
@@ -111,6 +98,7 @@ import {
   File,
   FileText,
   MoreVerticalIcon,
+  Download,
   Trash2Icon,
 } from "lucide-vue-next";
 import { nextTick, ref } from "vue";
@@ -198,7 +186,7 @@ function updateTitleHandling() {
 
 /* Added deep selector targeting to override Naive UI card padding cleanly */
 
-.n-card > .n-card-content {
+.n-card>.n-card-content {
   padding: 0;
 }
 

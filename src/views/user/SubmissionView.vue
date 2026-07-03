@@ -208,7 +208,7 @@
           </div>
 
           <div class="mb-2">
-            <label class="fs-14 text-dark mb-1">Feedback</label>
+            <label class="fs-14 text-dark mb-1 required">Feedback</label>
             <textarea
               v-model="feedback"
               placeholder="Feedback"
