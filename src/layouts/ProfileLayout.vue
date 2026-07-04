@@ -232,7 +232,7 @@ onMounted(async () => {
 }
 
 .nav-item:hover {
-  background: #f0f2f5;
+  background: #f5f5f5;
   color: #1a1a2e;
 }
 

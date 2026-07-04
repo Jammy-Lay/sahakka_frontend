@@ -1,6 +1,8 @@
 import { createRouter, createWebHistory } from "vue-router";
 import HomeView from "../views/LandingPageView.vue";
 import { useAuthStore } from "@/stores/auth.js";
+import { UseWorkspaceStore } from "@/stores/user/workspace";
+import { useTeamStore } from "@/stores/user/team";
 import { jwtDecode } from "jwt-decode";
 
 const router = createRouter({
@@ -40,6 +42,7 @@ const router = createRouter({
       path: "/workspace",
       name: "workspace",
       component: () => import("../layouts/MainLayout.vue"),
+      meta: { requiresAuth: true, requiresMembership: true },
       children: [
         {
           path: ":workspace_id/team/:team_id/tasks",
@@ -201,12 +204,6 @@ const router = createRouter({
       ],
     },
     {
-      path: "/loading",
-      name: "loading",
-      component: () => import("../components/layouts/Loading.vue"),
-      meta: { title: "Loading | Sahakka" },
-    },
-    {
       path: "/:pathMatch(.*)*",
       name: "not-found",
       component: () => import("../views/NotFoundView.vue"),
@@ -215,7 +212,6 @@ const router = createRouter({
   ],
 });
 
-// Dynamic title handler
 router.afterEach((to) => {
   document.title = to.meta.title || "Sahakka — Team Collaboration Made Simple";
 });
@@ -226,17 +222,22 @@ router.beforeEach(async (to) => {
   const needsAuth = to.matched.some((r) => r.meta.requiresAuth);
   const needsAdmin = to.matched.some((r) => r.meta.requiresAdmin);
   const needsMembership = to.matched.some((r) => r.meta.requiresMembership);
-  
+
   if (!needsAuth && !needsAdmin && !needsMembership) return true;
-  
+
   if (!auth.isLoggedIn) {
-    return needsAdmin
-    ? { name: "not-found" }
-    : { name: "login", query: { redirect: to.fullPath } };
+    return needsAdmin ? { name: "not-found" } : { name: "login" };
   }
-  
-  const decoded = jwtDecode(auth.token);
+
   if (needsAdmin) {
+    let decoded;
+    try {
+      decoded = jwtDecode(auth.token);
+    } catch (err) {
+      auth.logout();
+      return { name: "login", query: { redirect: to.fullPath } };
+    }
+
     if (!decoded.role) {
       try {
         await auth.getMeStore();
@@ -247,6 +248,48 @@ router.beforeEach(async (to) => {
     }
     if (decoded.role !== "admin") {
       return { name: "not-found" };
+    }
+  }
+
+  if (needsMembership) {
+    const { workspace_id, team_id } = to.params;
+
+    if (workspace_id) {
+      const workspaceStore = UseWorkspaceStore();
+
+      if (workspaceStore.getAllWorkspace.length === 0) {
+        try {
+          await workspaceStore.getMyWorkspaceStore();
+        } catch (err) {
+          return { name: "login" };
+        }
+      }
+
+      const inWorkspace = workspaceStore.getAllWorkspace.some(
+        (w) => String(w.workspace_id) === String(workspace_id),
+      );
+
+      if (!inWorkspace) {
+        return { name: "not-found" };
+      }
+
+      if (team_id) {
+        const teamStore = useTeamStore();
+
+        try {
+          await teamStore.getTeamByWorkspaceStore(workspace_id, true);
+        } catch (err) {
+          return { name: "not-found" };
+        }
+
+        const inTeam = teamStore.getTeamByWorkspace.some(
+          (t) => String(t.team_id) === String(team_id),
+        );
+
+        if (!inTeam) {
+          return { name: "not-found" };
+        }
+      }
     }
   }
 

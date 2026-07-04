@@ -5,6 +5,15 @@
         class="navbar-left d-flex align-items-center justify-content-between ps-3 bg-accent"
       >
         <WorkspaceList @close-sidebar="leftOpen = false" />
+        <n-badge
+          :value="2"
+          color="#FF383C"
+          :offset="[-24, 0]"
+          class="custom-badge ms-auto me-1"
+          processing
+        >
+          <Bell class="me-4" size="22" />
+        </n-badge>
         <button
           class="border-0 bg-dark text-white h-100 d-flex align-items-center px-2"
           @click="leftOpen = !leftOpen"
@@ -119,6 +128,17 @@ const showCalendar = computed(() => {
 </script>
 
 <style scoped>
+:deep(.custom-badge .n-badge-sup) {
+  padding: auto !important;
+  text-align: center !important;
+
+  color: #ffffff;
+  font-size: 9.5px !important;
+  border: none !important;
+
+  box-sizing: border-box !important;
+}
+
 .app-wrapper {
   display: flex;
   flex-direction: column;

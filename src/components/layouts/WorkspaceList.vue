@@ -361,12 +361,18 @@
                 />
               </div>
               <div>
-                <BaseButton
-                  :btnName="isInviteLoading ? 'Inviting...' : 'Invite'"
-                  class="fs-13 rounded-btn-sm fw-medium text-nowrap h-100"
+                <button
+                  class="btn bg-btn rounded-btn-sm d-flex align-items-center gap-1 fs-13 text-nowrap h-100"
                   :disabled="isInviteLoading"
                   @click="handleInvite"
-                />
+                >
+                  <span
+                    v-if="isInviteLoading"
+                    class="spinner-border spinner-border-sm me-2"
+                  />
+                  <Plus v-else :size="15" />
+                  {{ isInviteLoading ? "Inviting..." : "Invite" }}
+                </button>
               </div>
             </div>
 
