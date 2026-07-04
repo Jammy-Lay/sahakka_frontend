@@ -39,12 +39,17 @@ export const initSocket = () => {
   socket.off("submission-updated");
   socket.off("profile-updated");
   socket.off("connect");
+   socket.off("error"); 
 
   socket.on("connect", () => {
     const { workspace_id, team_id } = router.currentRoute.value.params;
     if (workspace_id) {
       socket.emit("join-workspace", { workspace_id, team_id });
     }
+  });
+
+  socket.on("error", (err) => {
+    console.error("Socket error:", err.message);
   });
 
   socket.on("task-created", async (data) => {
@@ -138,12 +143,13 @@ export const initSocket = () => {
         await teamStore.getTeamByIdStore(workspace_id, team_id);
         await taskStore.getTaskByTeamStore(workspace_id, team_id, "", true);
         await taskStore.getMyTaskStore(workspace_id, team_id, "", true);
+        await documentStore.getAllDocument(workspace_id, team_id);
+        await teamStore.getActivityTeamStore(workspace_id, team_id);
       }
     }
   });
 
   socket.on("team-member-removed", async (data) => {
-    const authStore = useAuthStore();
     const currentUserId = authStore.getMe?.user_id;
     if (String(currentUserId) === String(data.user_id)) return;
 
@@ -212,7 +218,7 @@ export const initSocket = () => {
         "",
         true,
       );
-      await taskStore.getActivityTeamStore(data.workspace_id, data.team_id);
+      await teamStore.getActivityTeamStore(data.workspace_id, data.team_id);
     }
   });
 
@@ -235,7 +241,7 @@ export const initSocket = () => {
         true,
       );
       await teamStore.getTeamByWorkspaceStore(data.workspace_id, true);
-      await taskStore.getActivityTeamStore(data.workspace_id, data.team_id);
+      await teamStore.getActivityTeamStore(data.workspace_id, data.team_id);
     }
   });
 

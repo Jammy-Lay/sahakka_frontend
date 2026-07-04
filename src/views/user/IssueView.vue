@@ -602,7 +602,7 @@
             input-placeholder="Title"
             input-class="py-2 fs-13 rounded-btn-sm bg-white mb-3"
           />
-          <label class="mb-2 fs-13 text-dark required">Description</label>
+          <label class="mb-2 fs-13 text-dark">Description</label>
           <textarea
             v-model="form.description"
             placeholder="Description"

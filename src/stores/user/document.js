@@ -113,14 +113,13 @@ export const useDocumentStore = defineStore("document", () => {
   };
   const downloadDocument = async (workspaceId, teamId, documentId, title) => {
     const res = await api.get(
-      `/workspace/${workspaceId}/team/${teamId}/document/${documentId}`
+      `/workspace/${workspaceId}/team/${teamId}/document/${documentId}`,
     );
 
     const { result, message, data } = res.data;
     if (!result) throw new Error(message || "Failed to get document");
 
     const bodyHtml = data.content;
-
 
     const container = document.createElement("div");
     container.style.padding = "24px";
@@ -165,7 +164,7 @@ export const useDocumentStore = defineStore("document", () => {
     };
 
     await html2pdf().set(opt).from(container).save();
-  }
+  };
 
   function sanitizeFilename(name) {
     return name.replace(/[/\\?%*:|"<>]/g, "-").trim() || "document";
