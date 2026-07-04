@@ -307,6 +307,7 @@ import { notify } from "@/utils/toast";
 import { storeToRefs } from "pinia";
 import SubmissionSkeleton from "@/components/Skeleton/SubmissionSkeleton.vue";
 import { useTeamStore } from "@/stores/user/team";
+import { useTaskStore } from "@/stores/user/task";
 
 const route = useRoute();
 const router = useRouter();
@@ -319,6 +320,8 @@ const { getAllSubmissionByTeam } = storeToRefs(submissionStore);
 
 const teamStore = useTeamStore();
 const { getTeamById } = storeToRefs(teamStore);
+
+const taskStore = useTaskStore();
 
 const showModal = ref(false);
 const showStatusPop = ref(false);
@@ -413,6 +416,7 @@ async function handleSend() {
       { status: selectedStatus.value, feedback: feedback.value }
     );
     await submissionStore.getAllSubmissionByTeamStore(workspace_id.value, team_id.value);
+    await taskStore.getTaskByTeamStore(workspace_id.value, team_id.value, "", true);
     feedback.value = "";
     selectedStatus.value = null;
     selectedSubmission.value = null;
