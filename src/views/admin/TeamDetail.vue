@@ -158,10 +158,10 @@ import { useToast } from "vue-toastification";
 import { useTaskstore } from "@/stores/admin/tasks";
 import SkeletonTeamDetail from "@/components/Skeleton/SkeletonTeamDetail.vue";
 import { notify } from "@/utils/toast";
+import router from "@/router";
 
 const toast = notify(router);
 const loading = ref(false);
-const router = useRouter();
 const route = useRoute();
 
 const useTeam = useTeamstore();
