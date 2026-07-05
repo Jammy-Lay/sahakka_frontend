@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory } from "vue-router";
-import HomeView from "../views/LandingPageView.vue";
+import HomeView from "../views/HomeView.vue";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -9,6 +9,12 @@ const router = createRouter({
       name: "home",
       component: HomeView,
       meta: { title: "Sahakka — Team Collaboration Made Simple" },
+    },
+    {
+      path: "/about",
+      name: "about",
+      component: () => import("../views/AboutView.vue"),
+      meta: { title: "About | Sahakka" },
     },
     {
       path: "/register",
@@ -100,12 +106,6 @@ const router = createRouter({
       name: "invite",
       component: () => import("../views/InviteView.vue"),
       meta: { title: "Invitation | Sahakka" },
-    },
-    {
-      path: "/about",
-      name: "about",
-      component: () => import("../views/AboutView.vue"),
-      meta: { title: "About | Sahakka" },
     },
     {
       path: "/not-verify",
