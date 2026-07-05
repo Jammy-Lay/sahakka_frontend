@@ -115,8 +115,8 @@ import { useTeamStore } from "@/stores/user/team";
 import { Mail, X, Copy, Check } from "lucide-vue-next";
 import { useInviteStore } from "@/stores/user/invite";
 import BaseInput from "@/components/BaseInput.vue";
-import BaseButton from "@/components/BaseButton.vue";
 import { notify } from "@/utils/toast";
+import { require, isEmail, validates } from "@/utils/validate";
 
 const route = useRoute();
 const router = useRouter();
@@ -179,7 +179,15 @@ function getBorderColor(index) {
 }
 
 const handleInvite = async () => {
-  if (!inviteEmail.value.trim()) return;
+  const err = validates(inviteEmail.value, [
+    (v) => require(v, "Email is required"),
+    (v) => isEmail(v, "Please enter a valid email"),
+  ]);
+
+  if (err) {
+    toast.error(err);
+    return;
+  }
 
   isInviteLoading.value = true;
   try {
@@ -194,6 +202,7 @@ const handleInvite = async () => {
     showInvitePopover.value = false;
   } catch (error) {
     toast.error(error.message);
+    inviteEmail.value = "";
   } finally {
     isInviteLoading.value = false;
   }

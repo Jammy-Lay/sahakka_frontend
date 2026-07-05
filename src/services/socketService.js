@@ -156,6 +156,7 @@ export const initSocket = () => {
     const { workspace_id } = router.currentRoute.value.params;
     if (String(workspace_id) !== String(data.workspace_id)) return;
 
+    await workspaceStore.getMyWorkspaceStore();
     await teamStore.getTeamByWorkspaceStore(data.workspace_id, true);
     await teamStore.getTeamByIdStore(data.workspace_id, data.team_id);
 

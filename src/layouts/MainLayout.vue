@@ -5,15 +5,6 @@
         class="navbar-left d-flex align-items-center justify-content-between ps-3 bg-accent"
       >
         <WorkspaceList @close-sidebar="leftOpen = false" />
-        <n-badge
-          :value="2"
-          color="#FF383C"
-          :offset="[-24, 0]"
-          class="custom-badge ms-auto me-1"
-          processing
-        >
-          <Bell class="me-4" size="22" />
-        </n-badge>
         <button
           class="border-0 bg-dark text-white h-100 d-flex align-items-center px-2"
           @click="leftOpen = !leftOpen"
@@ -78,6 +69,7 @@ import { useKickListener } from "@/composables/useKickListener";
 
 const route = useRoute();
 const leftOpen = ref(true);
+const showPopover = ref(false);
 
 const authStore = useAuthStore();
 const { getMe } = storeToRefs(authStore);
