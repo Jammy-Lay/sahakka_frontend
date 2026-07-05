@@ -65,7 +65,6 @@ import TeamList from "@/components/layouts/TeamList.vue";
 import Calendar from "@/components/layouts/Calendar.vue";
 import FooterSidebarSkeleton from "@/components/team/FooterSidebarSkeleton.vue";
 import { socket } from "@/utils/socket";
-import { useKickListener } from "@/composables/useKickListener";
 
 const route = useRoute();
 const leftOpen = ref(true);
@@ -75,8 +74,6 @@ const { getMe } = storeToRefs(authStore);
 
 const workspaceStore = UseWorkspaceStore();
 const { currentWorkspaceId } = storeToRefs(workspaceStore);
-
-const { startListening, stopListening } = useKickListener();
 
 const activeBorderColor = computed(() => {
   const section = route.params.section ?? route.path.split("/").pop();
@@ -101,17 +98,9 @@ watch(
   { immediate: true, deep: true }
 );
 
-onMounted(async () => {
-  await authStore.getMeStore();
-
-  if (getMe.value?.user_id) {
-    startListening(getMe.value.user_id);
-  }
-});
-
-onUnmounted(() => {
-  stopListening();
-});
+// onMounted(async () => {
+//   await authStore.getMeStore();
+// });
 
 const showCalendar = computed(() => {
   return route.name !== "viewMember" && route.name !== "submissions" && route.name !== "analytics";

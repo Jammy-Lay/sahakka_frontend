@@ -571,7 +571,9 @@
                 </div>
               </div>
 
-              <p class="fw-semibold mb-2 text-truncate" style="font-size: 18px">{{ task.title }}</p>
+              <p class="fw-semibold mb-2 text-truncate" style="font-size: 18px">
+                {{ task.title }}
+              </p>
               <p class="mb-0 text-mute fs-15 card-width">
                 <n-ellipsis :tooltip="false">
                   {{ task.description || "No description provided" }}
@@ -1595,9 +1597,7 @@
         <n-divider style="margin: 5px 0; --n-color: #e4e4e7" />
         <div class="px-4 pt-2 pb-3">
           <template v-if="feedbackLoading">
-            <div class="d-flex justify-content-center py-4">
-              <span class="spinner-border spinner-border-sm" />
-            </div>
+            <FeedbackSkeleton />
           </template>
 
           <template v-else-if="feedback">
@@ -1667,6 +1667,7 @@ import { UseWorkspaceStore } from "@/stores/user/workspace";
 import { useSubmissionStore } from "@/stores/user/submission";
 import TaskSkeleton from "@/components/task/TaskSkeleton.vue";
 import { socket } from "@/utils/socket";
+import FeedbackSkeleton from "@/components/Skeleton/FeedbackSkeleton.vue";
 
 const route = useRoute();
 const router = useRouter();

@@ -28,7 +28,7 @@ export function useKickListener() {
         `[useKickListener] redirectToFirstTeam failed for workspace ${workspace_id}:`,
         err,
       );
-      return false; // treat as "no usable team here", keep the fallback loop going
+      return false;
     }
   };
 
@@ -53,20 +53,33 @@ export function useKickListener() {
         "[useKickListener] redirectToFallbackWorkspace failed:",
         err,
       );
-      router.push("/no-workspace"); // fail-safe: always land somewhere instead of hanging
+      router.push("/no-workspace");
+    }
+  };
+
+  const refreshMyWorkspaces = async () => {
+    try {
+      await workspaceStore.getMyWorkspaceStore();
+    } catch (err) {
+      console.error("[useKickListener] refreshMyWorkspaces failed:", err);
     }
   };
 
   const handleKickedFromTeam = async ({ workspace_id, team_id }) => {
+    await refreshMyWorkspaces();
+    const currentWorkspaceId = route.params.workspace_id;
+    const currentTeamId = route.params.team_id;
+
+    if (String(currentWorkspaceId) !== String(workspace_id)) {
+      return;
+    }
+
+    if (String(currentTeamId) !== String(team_id)) {
+      return;
+    }
+
     try {
-      await workspaceStore.getMyWorkspaceStore();
-      await teamStore.getTeamByWorkspaceStore(workspace_id);
-
-      const currentWorkspaceId = route.params.workspace_id;
-      const currentTeamId = route.params.team_id;
-
-      if (String(currentWorkspaceId) !== String(workspace_id)) return;
-      if (String(currentTeamId) !== String(team_id)) return;
+      await teamStore.getTeamByWorkspaceStore(workspace_id, true);
 
       const remainingTeams = teamStore.getTeamByWorkspace;
       const filteredTeams = remainingTeams?.filter(
@@ -87,18 +100,20 @@ export function useKickListener() {
   };
 
   const handleTeamDeleted = async ({ workspace_id, team_id }) => {
+    await refreshMyWorkspaces();
+    const currentWorkspaceId = route.params.workspace_id;
+    const currentTeamId = route.params.team_id;
+
+    const isViewingDeletedTeam =
+      String(currentWorkspaceId) === String(workspace_id) &&
+      String(currentTeamId) === String(team_id);
+
+    if (!isViewingDeletedTeam) {
+      return;
+    }
+
     try {
-      await workspaceStore.getMyWorkspaceStore();
-      await teamStore.getTeamByWorkspaceStore(workspace_id);
-
-      const currentWorkspaceId = route.params.workspace_id;
-      const currentTeamId = route.params.team_id;
-
-      const isViewingDeletedTeam =
-        String(currentWorkspaceId) === String(workspace_id) &&
-        String(currentTeamId) === String(team_id);
-
-      if (!isViewingDeletedTeam) return;
+      await teamStore.getTeamByWorkspaceStore(workspace_id, true);
 
       const remainingTeams = teamStore.getTeamByWorkspace;
       const filteredTeams = remainingTeams?.filter(

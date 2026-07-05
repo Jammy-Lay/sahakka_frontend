@@ -64,7 +64,7 @@ body .n-popover.n-tooltip {
 .Vue-Toastification__toast-body {
   display: flex !important;
   align-items: center !important;
-  font-size: 16px !important;
+  font-size: 15px !important;
   font-weight: 500 !important;
   padding: 0 !important;
   margin: 0 !important;
