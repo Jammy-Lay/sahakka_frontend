@@ -39,9 +39,10 @@
             <div class="skeleton cell-md"></div>
             <div class="skeleton cell-lg"></div>
             <div class="skeleton cell-md"></div>
+            <div class="skeleton cell-md"></div>
           </div>
 
-          <div v-for="i in 6" :key="i" class="skeleton-row">
+          <div v-for="i in 4" :key="i" class="skeleton-row">
             <div class="skeleton rank-icon"></div>
 
             <div class="d-flex align-items-center gap-2">
@@ -50,6 +51,7 @@
             </div>
 
             <div class="skeleton email"></div>
+            <div class="skeleton role"></div>
 
             <div class="skeleton pill"></div>
           </div>
@@ -153,11 +155,16 @@
 /* ============ table ============ */
 .skeleton-row {
   display: grid;
-  grid-template-columns: 56px 1.5fr 2fr 1.5fr;
+  grid-template-columns: 56px 1.5fr 2fr 1fr 1.5fr;
   align-items: center;
   gap: 16px;
   padding: 14px 24px;
   border-bottom: 1px solid #f3f4f6;
+}
+
+.role {
+  width: 80px;
+  height: 14px;
 }
 
 .skeleton-header {
