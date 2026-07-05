@@ -1,156 +1,220 @@
 <template>
-    <main>
-      <section class="position-relative overflow-hidden hero-section">
-        <img src="../assets/image/m.svg" class="position-absolute m-path top-0 start-0 z-0" alt="" style="scale: 1.6 1;">
-        <div class="container-fluid h-100">
-          <div class="row h-100 align-items-center">
-            <div class="col-xxl-6 z-2">
-              <div class="d-flex flex-column gap-4 justify-content-center">
-                <div class="w-fit bg-white rounded-pill d-flex align-items-center gap-2 px-3 py-2">
-                  <div class="bg-black rounded-circle" style="width: 8px; height: 8px;"></div>
-                  <p class="m-0 fw-semibold text-nowrap">Now public in beta</p>
-                </div>
-                <div class="hero-title text-white position-relative w-100">
-                  <h1>Create, assign, complete and</h1>
-                  <h1 class="d-block d-xxl-none">Submit</h1>
-                  <div class="decorate-hero-btn d-none d-xxl-block  rounded-pill w-fit px-6 py-3 position-absolute">
-                    <img class="position-absolute star star1" src="../assets/image/star.svg" alt="">
-                    <img class="position-absolute star star2" src="../assets/image/star.svg" alt="">
-                    <p class="display-5 m-0">Submit</p>
-                    <img class="position-absolute cursor" src="../assets/image/cursor.svg" alt="">
-                  </div>
-                </div>
-                <p class="text-white fs-4 z-1">Sahakka brings tasks into one calm workspace — so your
-                  team
-                  spends less time coordinating and more time building.</p>
-                <router-link :to="{ name: 'login' }" class="get-started z-1 text-nowrap overflow-hidden">
-                  <span>Get started</span>
-                  <div class="icon-container">
-                    <ArrowRight class="icon-arrow" size="32" />
-                  </div>
-                </router-link>
-              </div>
-            </div>
-            <div class="d-none d-xxl-block col-lg-6 z-1 h-100">
-              <div class="position-relative h-100">
-                <img src="../assets/image/workspace.png" alt="" class="w-100 workspace-img position-absolute">
-                <img src="../assets/image/task-card.png" alt="" class="w-75 task-card-img position-absolute">
-              </div>
-            </div>
+  <header class="fixed-top z-9999">
+    <nav class="navbar navbar-expand-lg bg-white">
+      <div class="container-fluid d-flex justify-between align-items-center h-100">
+        <router-link :to="{ name: 'home' }" class="navbar-brand">
+          <img height="50" src="../assets/image/logo-nospace.svg" alt="" srcset="">
+        </router-link>
+
+        <button ref="collapse" class="navbar-toggler border-dark border-2 shadow-none rounded-4 px-4 py-2" type="button"
+          data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false"
+          aria-label="Toggle navigation">
+          <Menu />
+        </button>
+
+        <div class="collapse navbar-collapse justify-content-end gap-5 gap-lg-2" id="navbarNav">
+          <ul class="navbar-nav">
+            <li class="nav-item">
+              <router-link :to="{ name: 'login' }"
+                class="nav-link rounded-btn py-3 text-black d-flex align-items-center gap-2">
+                <Mail size="16" />
+                Contact us
+              </router-link>
+            </li>
+          </ul>
+          <div class="d-flex gap-2">
+            <router-link :to="{ name: 'register' }" class="btn rounded-btn btn-light border px-4 py-2">Sign
+              up</router-link>
+            <router-link :to="{ name: 'login' }" class="btn rounded-btn btn-primary px-4 py-2">Sign in</router-link>
           </div>
         </div>
-      </section>
-  
-      <section class="product-section">
-        <div class="container">
-          <div class="row g-5">
-            <div class="col-12 section-title">
-              <h3 class="fs-2">Product</h3>
-              <h2>One workspace, every view your team needs</h2>
-            </div>
-            <div class="col-12 position-relative">
-              <video ref="playVdo" class="w-100 shadow-lg my-5" src="../assets/image/Sahakka.mp4" :autoplay="pause" muted
-                loop>
-                <source src="../assets/image/Sahakka.webm" type="video/webm" />
-                <source src="../assets/image/Sahakka.mp4" type="video/mp4" />
-              </video>
-              <button @click="play" class="btn position-absolute play-vdo">
-                <Pause v-if="pause" />
-                <Play v-else />
-              </button>
-            </div>
-            <div class="col-12">
-              <p class="fs-4">Update everything by just click and select.</p>
-            </div>
-          </div>
-        </div>
-      </section>
-  
-      <section class="feature-section">
-        <div class="container">
-          <div class="row g-5">
-            <div class="col-12 section-title">
-              <h3 class="fs-2 position-relative feature-title w-fit">
-                Feature
-                <img class="star star1 position-absolute" src="../assets/image/star-black.svg" alt="">
-                <img class="star star2 position-absolute" src="../assets/image/star-black.svg" alt="">
-              </h3>
-              <h2>Built for teams that move fast</h2>
-            </div>
-            <div class="col-12 feature-card-container">
-              <div class="row g-4">
-                <div class="col-12 feature-card">
-                  <FeatureCard :icon="ShieldCheck" color="#008bfc" t1="Role-Base access" t2="Control who sees what"
-                    t3="Granular permissions per project, team, or individual. Keep sensitive work private without blocking collaboration." />
-                </div>
-                <div class="col-12 feature-card col-md-6">
-                  <FeatureCard :icon="ShieldCheck" color="#3bc65e" t1="Team analytics" t2="See how your team works"
-                    t3="Cycle time, throughput, and velocity in plain language. Spot bottlenecks before they become crises." />
-                </div>
-                <div class="col-12 feature-card col-md-6">
-                  <FeatureCard :icon="ShieldCheck" color="#fe8d31" t1="Timeline planning" t2="Deadlines that stick"
-                    t3="Visual timelines show who owns what and when it's due" />
+
+      </div>
+    </nav>
+  </header>
+
+  <main>
+    <div style="height: 8vh"></div>
+    <section class="position-relative overflow-hidden hero-section">
+      <img src="../assets/image/m.svg" class="position-absolute m-path top-0 start-0 z-0" alt="" style="scale: 1.6 1;">
+      <div class="container-fluid h-100">
+        <div class="row h-100 align-items-center">
+          <div class="col-xxl-6 z-2">
+            <div class="d-flex flex-column gap-4 justify-content-center">
+              <div class="w-fit bg-white rounded-pill d-flex align-items-center gap-2 px-3 py-2">
+                <div class="bg-black rounded-circle" style="width: 8px; height: 8px;"></div>
+                <p class="m-0 fw-semibold text-nowrap">Now public in beta</p>
+              </div>
+              <div class="hero-title text-white position-relative w-100">
+                <h1>Create, assign, complete and</h1>
+                <h1 class="d-block d-xxl-none">Submit</h1>
+                <div class="decorate-hero-btn d-none d-xxl-block  rounded-pill w-fit px-6 py-3 position-absolute">
+                  <img class="position-absolute star star1" src="../assets/image/star.svg" alt="">
+                  <img class="position-absolute star star2" src="../assets/image/star.svg" alt="">
+                  <p class="display-5 m-0">Submit</p>
+                  <img class="position-absolute cursor" src="../assets/image/cursor.svg" alt="">
                 </div>
               </div>
+              <p class="text-white fs-4 z-1">Sahakka brings tasks into one calm workspace — so your
+                team
+                spends less time coordinating and more time building.</p>
+              <router-link :to="{ name: 'login' }" class="get-started z-1 text-nowrap overflow-hidden">
+                <span>Get started</span>
+                <div class="icon-container">
+                  <ArrowRight class="icon-arrow" size="32" />
+                </div>
+              </router-link>
+            </div>
+          </div>
+          <div class="d-none d-xxl-block col-lg-6 z-1 h-100">
+            <div class="position-relative h-100">
+              <img src="../assets/image/workspace.png" alt="" class="w-100 workspace-img position-absolute">
+              <img src="../assets/image/task-card.png" alt="" class="w-75 task-card-img position-absolute">
             </div>
           </div>
         </div>
-      </section>
-  
-      <section class="how-it-work-section">
-        <div class="container">
-          <div class="row">
-            <div class="col-12 section-title">
-              <h3 class="fs-2">How it works</h3>
-              <h2>From chaos to clarity in four steps</h2>
-            </div>
+      </div>
+    </section>
+
+    <section class="product-section">
+      <div class="container">
+        <div class="row g-5">
+          <div class="col-12 section-title">
+            <h3 class="fs-2">Product</h3>
+            <h2>One workspace, every view your team needs</h2>
+          </div>
+          <div class="col-12 position-relative">
+            <video ref="playVdo" class="w-100 shadow-lg my-5" src="../assets/image/Sahakka.mp4" :autoplay="pause" muted
+              loop>
+              <source src="../assets/image/Sahakka.webm" type="video/webm" />
+              <source src="../assets/image/Sahakka.mp4" type="video/mp4" />
+            </video>
+            <button @click="play" class="btn position-absolute play-vdo">
+              <Pause v-if="pause" />
+              <Play v-else />
+            </button>
+          </div>
+          <div class="col-12">
+            <p class="fs-4">Update everything by just click and select.</p>
           </div>
         </div>
-        <div class="container-fluid overflow-x-auto py-5 how-it-work-container" ref="scrollContainer" @mousedown="startDrag" @mouseleave="stopDrag" @mouseup="stopDrag", @mousemove="onDrag">
-          <div class="row">
-            <div class="col-12">
-              <div class="row flex-nowrap gap-4">
-                <div class="block p-0"></div>
-                  <HowItWorkCard 
-                    v-for="(content, index) in cardContent"
-                    :key="index" 
-                    :img="content.src"
-                    :color="content.color" 
-                    :t1="content.t1" 
-                    :t2="content.t2"
-                  />
-                <div class="block"></div>
+      </div>
+    </section>
+
+    <section class="feature-section">
+      <div class="container">
+        <div class="row g-5">
+          <div class="col-12 section-title">
+            <h3 class="fs-2 position-relative feature-title w-fit">
+              Feature
+              <img class="star star1 position-absolute" src="../assets/image/star-black.svg" alt="">
+              <img class="star star2 position-absolute" src="../assets/image/star-black.svg" alt="">
+            </h3>
+            <h2>Built for teams that move fast</h2>
+          </div>
+          <div class="col-12 feature-card-container">
+            <div class="row g-4">
+              <div class="col-12">
+                <FeatureCard :icon="ShieldCheck" color="#008bfc" t1="Role-Base access" t2="Control who sees what"
+                  t3="Granular permissions per project, team, or individual. Keep sensitive work private without blocking collaboration." />
+              </div>
+              <div class="col-12 col-md-6">
+                <FeatureCard :icon="ShieldCheck" color="#3bc65e" t1="Team analytics" t2="See how your team works"
+                  t3="Cycle time, throughput, and velocity in plain language. Spot bottlenecks before they become crises." />
+              </div>
+              <div class="col-12 col-md-6">
+                <FeatureCard :icon="ShieldCheck" color="#fe8d31" t1="Timeline planning" t2="Deadlines that stick"
+                  t3="Visual timelines show who owns what and when it's due" />
               </div>
             </div>
           </div>
         </div>
-        <div class="container mt-5">
-          <div class="d-flex align-items-center gap-2 text-bg-dark w-fit px-3 py-2 rounded-pill">
-            <h4 class="m-0">Scroll to right</h4>
-            <ArrowRight size="24"/>
+      </div>
+    </section>
+
+    <section class="how-it-work-section">
+      <div class="container">
+        <div class="row">
+          <div class="col-12 section-title">
+            <h3 class="fs-2">How it works</h3>
+            <h2>From chaos to clarity in four steps</h2>
           </div>
         </div>
-      </section>
-  
-      <section class="get-started-section bg-black">
-        <div class="container d-flex">
-          <div class="bg-white p-7 d-flex flex-column gap-4 w-100" style="border-radius: 3.5rem">
-            <div>
-              <h2>Get started</h2>
-              <h2 class="display-3">Your team's best work starts here</h2>
+      </div>
+      <div class="container-fluid overflow-x-auto py-5 how-it-work-container">
+        <div class="row">
+          <div class="col-12">
+            <div class="row flex-nowrap gap-4">
+              <div class="block p-0"></div>
+                <HowItWorkCard 
+                  v-for="(content, index) in cardContent"
+                  :key="index" 
+                  :img="content.src"
+                  :color="content.color" 
+                  :t1="content.t1" 
+                  :t2="content.t2"
+                />
+              <div class="block"></div>
             </div>
-            <p class="fs-4">No credit card required · Free forever for small teams</p>
-            <router-link :to="{ name: 'login' }" class="get-started get-started-2 z-1 text-nowrap overflow-hidden">
-              <span>Get started</span>
-              <div class="icon-container">
-                <ArrowRight class="icon-arrow" size="32" />
-              </div>
-            </router-link>
           </div>
         </div>
-      </section>
+      </div>
+      <div class="container mt-5">
+        <div class="d-flex align-items-center gap-2 text-bg-dark w-fit px-3 py-2 rounded-pill">
+          <h4 class="m-0">Scroll to right</h4>
+          <ArrowRight size="24"/>
+        </div>
+      </div>
+    </section>
+
+    <section class="get-started-section bg-black">
+      <div class="container">
+        <div class="bg-white p-7 d-flex flex-column gap-4" style="border-radius: 3.5rem">
+          <div>
+            <h2>Get started</h2>
+            <h2 class="display-3">Your team's best work starts here</h2>
+          </div>
+          <p class="fs-4">No credit card required · Free forever for small teams</p>
+          <router-link :to="{ name: 'login' }" class="get-started get-started-2 z-1 text-nowrap overflow-hidden">
+            <span>Get started</span>
+            <div class="icon-container">
+              <ArrowRight class="icon-arrow" size="32" />
+            </div>
+          </router-link>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="pb-1">
+    <div class="container">
+      <div class="logo"><img src="../assets/image/logo-nospace.svg" height="70" alt=""></div>
+      <div style="height: 60px"></div>
+      <div class="row">
+        <div class="col-4">
+          <h3 class="fw-bold mb-3">Company</h3>
+          <ul class="navbar-nav">
+            <li>
+              <router-link :to="{ name: 'home' }" class="nav-link fw-medium">About us</router-link>
+            </li>
+          </ul>
+        </div>
+      </div>
+      <div class="row mt-5 g-3">
+        <div class="col-md-6">
+          <h6 class="fw-bold text-muted">&copy;&nbsp;{{ new Date().getFullYear() }}  Sahakka, Inc. All rights reserved.</h6>
+        </div>
+        <div class="col-md-6">
+          <h6 class="fw-bold text-muted text-lg-end">Made with care for teams who ship.</h6>
+        </div>
+      </div>
+      <div class="mt-10">
+        <img class="w-100" src="../assets/image/shakka-name.svg" alt="">
+      </div>
+    </div>
+  </footer>
   
-    </main>
 </template>
 
 <script setup>
@@ -165,6 +229,11 @@
 
   let playVdo = ref(null);
   let pause = ref(true);
+
+  // function imageUrl(name) {
+  //   return new URL('../assets/image/how-it-work/' + name + '.png', import.meta.url).href
+  // }
+  
 
   const cardContent = [
     {
@@ -202,29 +271,6 @@
     }
   }
 
-  let isDragging = false;
-  let startX;
-  let scrollLeft;
-  const scrollContainer = ref(null);
-
-  const startDrag = (e) => {
-    isDragging = true;
-    startX = e.pageX - scrollContainer.value.offsetLeft;
-    scrollLeft = scrollContainer.value.scrollLeft;
-  }
-
-  const stopDrag = () => {
-    isDragging = false;
-  }
-
-  const onDrag = (e) => {
-    if (!isDragging) return;
-    e.preventDefault();
-
-    const x = e.pageX - scrollContainer.value.offsetLeft;
-    const walk = (x - startX) * 2;
-    scrollContainer.value.scrollLeft = scrollLeft - walk;
-  }
 
 </script>
 
@@ -254,6 +300,16 @@
     --bs-btn-disabled-border-color: var(--disable);
   }
 
+  nav {
+    padding: 14px 3.125rem;
+  }
+
+  @media screen and (max-width: 768px) {
+    nav {
+      padding: 14px 0;
+    }
+  }
+
   .hero-section {
     height: 92vh;
     background: #171717;
@@ -274,9 +330,8 @@
       linear-gradient(#171717, #171717) padding-box,
       linear-gradient(var(--gradient-direction), var(--gradient-start), var(--gradient-end)) border-box;
 
-    right: 0%;
+    right: 5%;
     bottom: 10px;
-    transform: translateX(-80px);
 
     p {
       background-image:
@@ -417,16 +472,6 @@
     padding-block: 110px;
   }
 
-  footer ul li a {
-    transition: all 300ms ease;
-    /*border-radius: 16px;*/
-    &:hover {
-      padding-inline: 20px;
-      background-color: #171717;
-      color: var(--bs-white)
-    }
-  }
-
   .product-section {
     background-color: var(--bs-white);
     opacity: 1;
@@ -464,10 +509,6 @@
       top: -40px;
       left: 120%;
     }
-
-  }
-  .feature-card {
-    transition: all 300ms ease;
   }
 
   .play-vdo {
@@ -487,7 +528,11 @@
   }
   
   .how-it-work-container::-webkit-scrollbar {
-    height: 8px;
+    height: 15px;
+  }
+
+  .how-it-work-container::-webkit-scrollbar-track-piece {
+    margin-inline: 310px;
   }
 
   @media screen and (max-width: 768px) {
