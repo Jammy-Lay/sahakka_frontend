@@ -78,7 +78,7 @@ const isResend = ref(false);
 const value = ref([]);
 let forgotEmail = ref(sessionStorage.getItem("forgot_email"));
 
-const OTP_TIME = 15;
+const OTP_TIME = 59;
 const countdown = ref(0);
 let timer = null;
 
@@ -139,6 +139,8 @@ async function handleOtp() {
     isLoading.value = true;
     await auth.verifyOtp(forgotEmail.value, otp);
     localStorage.removeItem("otp_expiry");
+    sessionStorage.removeItem("allowOtp");
+    sessionStorage.setItem("allowNewPassword", "true");
     toast.success("Verify Successfully", "/new-password");
   } catch (err) {
     toast.error(err.message);

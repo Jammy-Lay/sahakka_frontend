@@ -78,7 +78,7 @@
         <n-divider style="margin: 5px 0; --n-color: #e4e4e7" />
 
         <div class="px-4 pt-2 pb-3">
-          <label class="mb-2 fs-13 fw-medium text-dark d-block">Email</label>
+          <label class="mb-2 fs-13 fw-medium text-dark d-block required">Email</label>
           <BaseInput
             v-model="email"
             input-placeholder="Enter your email"

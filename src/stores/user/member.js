@@ -2,6 +2,7 @@ import api from "@/api/https";
 import { defineStore } from "pinia";
 import { ref } from "vue";
 import router from "@/router";
+import { UseWorkspaceStore } from "./workspace";
 
 export const useMemberStore = defineStore("members", () => {
   let getAllMemberInWorkspace = ref([]);
@@ -11,11 +12,50 @@ export const useMemberStore = defineStore("members", () => {
 
   const handleMemberJoined = (data) => {
     const workspace_id = router.currentRoute.value.params.workspace_id;
-    const team_id = router.currentRoute.value.params.team_id;
     if (!workspace_id || data.workspace_id != workspace_id) return;
 
-    getAllMemberInWorkspaceStore(workspace_id);
-    if (team_id) getAllMemberInTeamStore(workspace_id, team_id);
+    const workspaceStore = UseWorkspaceStore();
+    const currentWorkspace = workspaceStore.getAllWorkspace.find(
+      (w) => w.workspace_id == workspace_id,
+    );
+    const isOwner = currentWorkspace?.my_role === "owner";
+
+    if (isOwner) {
+      getAllMemberInWorkspaceStore(workspace_id);
+    }
+
+    if (
+      selectedTeamId.value &&
+      String(selectedTeamId.value) === String(data.team_id)
+    ) {
+      getAllMemberInTeamStore(workspace_id, selectedTeamId.value);
+    }
+  };
+
+  const handleProfileUpdated = ({ user_id, name, avatar }) => {
+    const workspace_id = router.currentRoute.value.params.workspace_id;
+
+    const patch = (list) => {
+      const i = list.value.findIndex(
+        (m) => String(m.user_id) === String(user_id),
+      );
+      if (i !== -1) {
+        if (name !== undefined) list.value[i].name = name;
+        if (avatar !== undefined) list.value[i].avatar = avatar;
+      }
+    };
+
+    const workspaceStore = UseWorkspaceStore();
+    const currentWorkspace = workspaceStore.getAllWorkspace.find(
+      (w) => w.workspace_id == workspace_id,
+    );
+    const isOwner = currentWorkspace?.my_role === "owner";
+
+    if (isOwner) {
+      patch(getAllMemberInWorkspace);
+    }
+
+    patch(getAllMemberInTeam);
   };
 
   const getAllMemberInWorkspaceStore = async (workspace_id) => {
@@ -84,5 +124,6 @@ export const useMemberStore = defineStore("members", () => {
     loading,
     handleMemberJoined,
     selectedTeamId,
+    handleProfileUpdated,
   };
 });

@@ -1,110 +1,112 @@
 <template>
   <div>
     <TeamActivitySkeleton v-if="teamStore.activityLoading" />
-    <div v-else class="mt-4">
-      <div class="d-flex justify-content-between align-items-center mb-3">
-        <div>
-          <h2 class="fw-semibold fs-5 mb-1">{{ getTeamById.title }}</h2>
-          <p class="text-secondary fs-13 mb-0">{{ getTeamById.description }}</p>
-        </div>
+    <div v-else>
+      <div class="pt-4 pb-1 bg-body position-sticky top-0">
+        <div class="d-flex justify-content-between align-items-start mb-2">
+          <div>
+            <h2 class="fw-semibold fs-5 mb-1">{{ getTeamById.title }}</h2>
+            <p class="text-secondary fs-13 mb-0">{{ getTeamById.description }}</p>
+          </div>
 
-        <n-popover
-          v-model:show="showFilter"
-          trigger="click"
-          placement="bottom-end"
-          :show-arrow="false"
-          style="
-            padding: 0;
-            border-radius: 16px;
-            width: 290px;
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
-          "
-        >
-          <template #trigger>
-            <n-badge
-              :value="activeFilter !== 'all' ? 1 : 0"
-              color="#6155F5"
-              :offset="[-2, 2]"
-              class="font-pp"
-            >
-              <button
-                class="btn btn-white font-pp bg-white text-dark rounded-btn border-1 border-white fs-13 d-flex align-items-center gap-1"
+          <n-popover
+            v-model:show="showFilter"
+            trigger="click"
+            placement="bottom-end"
+            :show-arrow="false"
+            style="
+              padding: 0;
+              border-radius: 16px;
+              width: 290px;
+              box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+            "
+          >
+            <template #trigger>
+              <n-badge
+                :value="activeFilter !== 'all' ? 1 : 0"
+                color="#6155F5"
+                :offset="[-2, 2]"
+                class="font-pp"
               >
-                <Filter size="16" /> Filter
-              </button>
-            </n-badge>
-          </template>
+                <button
+                  class="btn btn-white font-pp bg-white text-dark rounded-btn border-1 border-white fs-13 d-flex align-items-center gap-1"
+                >
+                  <Filter size="16" /> Filter
+                </button>
+              </n-badge>
+            </template>
 
-          <!-- Popover Body -->
-          <div class="p-3">
-            <!-- Title -->
-            <div class="fs-13 mb-2 text-dark fw-semibold">Filter by Date</div>
+            <!-- Popover Body -->
+            <div class="p-3">
+              <!-- Title -->
+              <div class="fs-13 mb-2 text-dark fw-semibold">Filter by Date</div>
 
-            <!-- Preset Pills -->
-            <div class="d-flex flex-column gap-1 mb-3">
+              <!-- Preset Pills -->
+              <div class="d-flex flex-column gap-1 mb-3">
+                <div
+                  v-for="preset in presets"
+                  :key="preset.value"
+                  @click="applyPreset(preset.value)"
+                  :class="
+                    activeFilter === preset.value ? 'preset-active' : 'preset-default'
+                  "
+                >
+                  <calendar-clock size="16" class="me-2" /> {{ preset.label }}
+                </div>
+              </div>
+
+              <!-- Divider -->
               <div
-                v-for="preset in presets"
-                :key="preset.value"
-                @click="applyPreset(preset.value)"
-                :class="
-                  activeFilter === preset.value ? 'preset-active' : 'preset-default'
-                "
+                style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px"
               >
-                <calendar-clock size="16" class="me-2" /> {{ preset.label }}
+                <div style="flex: 1; height: 1px; background: #e4e4e7" />
+                <span class="fs-11 text-dark" style="white-space: nowrap">
+                  Custom Range
+                </span>
+                <div style="flex: 1; height: 1px; background: #e4e4e7" />
+              </div>
+
+              <!-- Date Range Picker -->
+              <n-date-picker
+                v-model:value="customRange"
+                type="daterange"
+                size="small"
+                clearable
+                :to="false"
+                class="custom-picker"
+                start-placeholder="Start Date"
+                end-placeholder="End Date"
+                @update:value="applyCustomRange"
+                style="width: 100%"
+              />
+
+              <!-- Clear Button -->
+              <div
+                v-if="activeFilter !== 'all'"
+                @click="clearFilter"
+                class="btn bg-btn w-100 mt-3 fs-13 rounded-btn"
+              >
+                Clear Filter
               </div>
             </div>
+          </n-popover>
+        </div>
 
-            <!-- Divider -->
-            <div
-              style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px"
-            >
-              <div style="flex: 1; height: 1px; background: #e4e4e7" />
-              <span class="fs-11 text-dark" style="white-space: nowrap">
-                Custom Range
-              </span>
-              <div style="flex: 1; height: 1px; background: #e4e4e7" />
-            </div>
-
-            <!-- Date Range Picker -->
-            <n-date-picker
-              v-model:value="customRange"
-              type="daterange"
-              size="small"
-              clearable
-              :to="false"
-              class="custom-picker"
-              start-placeholder="Start Date"
-              end-placeholder="End Date"
-              @update:value="applyCustomRange"
-              style="width: 100%"
-            />
-
-            <!-- Clear Button -->
-            <div
-              v-if="activeFilter !== 'all'"
-              @click="clearFilter"
-              class="btn bg-btn w-100 mt-3 fs-13 rounded-btn"
-            >
-              Clear Filter
-            </div>
-          </div>
-        </n-popover>
-      </div>
-
-      <!-- Active Filter Tag -->
-      <div v-if="activeFilter !== 'all'" class="mb-3">
-        <n-tag
-          closable
-          :color="{ color: '#CFCCFC', textColor: '#6155F5', borderColor: '#CFCCFC' }"
-          style="font-size: 12px; border-radius: 20px; padding: 2px 14px"
-          @close="clearFilter"
-          class="d-flex justify-content-center align-items-center w-fit"
-        >
-          <template #icon>
-            <n-icon :size="13"><Calendar /></n-icon>
-          </template>
-          {{ activeFilterLabel }}
-        </n-tag>
+        <!-- Active Filter Tag -->
+        <div v-if="activeFilter !== 'all'" class="mb-3">
+          <n-tag
+            closable
+            :color="{ color: '#CFCCFC', textColor: '#6155F5', borderColor: '#CFCCFC' }"
+            style="font-size: 12px; border-radius: 20px; padding: 2px 14px"
+            @close="clearFilter"
+            class="d-flex justify-content-center align-items-center w-fit"
+          >
+            <template #icon>
+              <n-icon :size="13"><Calendar /></n-icon>
+            </template>
+            {{ activeFilterLabel }}
+          </n-tag>
+        </div>
       </div>
 
       <!-- Empty State -->
@@ -127,7 +129,7 @@
               <div class="activity-card rounded-card">
                 <span class="act-tag" :class="actTagClass(act.action)">
                   <component :is="actTagIcon(act.action)" size="14" />
-                  {{ act.action }}
+                  {{ formatActionLabel(act.action) }}
                 </span>
                 <div class="d-flex align-items-center justify-content-between mb-2">
                   <div class="d-flex align-items-center gap-2">
@@ -165,6 +167,8 @@ import {
   Ban,
   LogOut,
   Brush,
+  UserPlus,
+  UserMinus,
 } from "lucide-vue-next";
 import { NPopover, NBadge, NTag, NDatePicker, NIcon, NEmpty } from "naive-ui";
 import { useTeamStore } from "@/stores/user/team";
@@ -288,11 +292,14 @@ const actTagClass = (action) => {
     create: "act-tag-create",
     update: "act-tag-update",
     assign: "act-tag-assign",
+    unassign: "act-tag-unassign",
     submit: "act-tag-submit",
     delete: "act-tag-delete",
     review: "act-tag-review",
     remove: "act-tag-remove",
     leave: "act-tag-leave",
+    join_by_invite: "act-tag-join",
+    join_by_passcode: "act-tag-join",
   };
   return map[action?.toLowerCase()];
 };
@@ -302,13 +309,21 @@ const actTagIcon = (action) => {
     create: Plus,
     update: Brush,
     assign: UserCheck,
+    unassign: UserMinus,
     submit: Send,
     delete: Trash2,
     review: Eye,
     remove: Ban,
     leave: LogOut,
+    join_by_passcode: UserPlus,
+    join_by_invite: UserPlus,
   };
   return map[action?.toLowerCase()];
+};
+
+const formatActionLabel = (action) => {
+  if (!action) return "";
+  return action.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 };
 </script>
 
@@ -403,7 +418,7 @@ const actTagIcon = (action) => {
   --n-border-pressed: 1px solid #171717 !important;
 
   --n-box-shadow-focus: none !important;
-  --n-wave-color: transparent !important; 
+  --n-wave-color: transparent !important;
   box-shadow: none !important;
   outline: none !important;
 }

@@ -157,6 +157,7 @@ onMounted(async () => {
   await teamStore.getTeamByWorkspaceStore(workspace_id.value);
 
   if (isOwner.value) {
+    selectedTeamId.value = null;
     await memberStore.getAllMemberInWorkspaceStore(workspace_id.value);
   } else {
     if (getTeamByWorkspace.value.length > 0) {
@@ -165,6 +166,8 @@ onMounted(async () => {
         workspace_id.value,
         getTeamByWorkspace.value[0].team_id
       );
+    } else {
+      selectedTeamId.value = null;
     }
   }
 
@@ -239,7 +242,6 @@ async function confirmKick() {
         selectedTeamId.value,
         kickTarget.value.user_id
       );
-      await memberStore.getAllMemberInTeamStore(workspace_id.value, selectedTeamId.value);
     } else {
       await memberStore.removeFromWorkspace(workspace_id.value, kickTarget.value.user_id);
       await memberStore.getAllMemberInWorkspaceStore(workspace_id.value);
@@ -251,8 +253,10 @@ async function confirmKick() {
     toast.error(err.message);
   } finally {
     isKicking.value = false;
-    await teamStore.getTeamByWorkspaceStore(workspace_id.value);
-    await teamStore.getTeamByIdStore(workspace_id.value, selectedTeamId.value);
+    await teamStore.getTeamByWorkspaceStore(workspace_id.value, true);
+    if (selectedTeamId.value !== null) {
+      await teamStore.getTeamByIdStore(workspace_id.value, selectedTeamId.value);
+    }
   }
 }
 
@@ -422,8 +426,8 @@ const columns = computed(() => {
   border: 1px solid #e4e4e7 !important;
 }
 .my-custom-table :deep(.n-data-table-th) {
-  background-color: #f5f5f5 !important;
-  color: #171717 !important;
+  background-color: #b2dbff !important;
+  color: #0088ff !important;
   border-bottom: 1px solid #e4e4e7;
   padding: 16px 24px !important;
   font-weight: 600 !important;

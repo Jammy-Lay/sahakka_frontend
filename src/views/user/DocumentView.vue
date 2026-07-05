@@ -53,7 +53,7 @@
       <n-divider style="margin: 5px 0; --n-color: #e4e4e7" />
 
       <div class="px-4 pt-2 pb-3">
-        <label class="mb-2 fs-12 fw-medium d-block">Document Name</label>
+        <label class="mb-2 fs-12 fw-medium d-block required">Document Name</label>
         <BaseInput
           v-model="documentName"
           input-placeholder="Document name"
@@ -118,24 +118,25 @@
         style="--n-icon-size: 45px; font-size: 14px"
       />
       <div v-else class="row pt-4 g-3">
-        <div v-for="(doc, index) in document" :key="index" class="col-md-6 col-lg-4">
-          <document-card
-            :avatar="doc.created_by.avatar"
-            :user-name="doc.created_by.name"
-            :document-title="doc.title"
-            :created-at="doc.created_at"
-            :document-id="doc.document_id"
-            :is-owner="isOwner"
-            @delete-action="
-              (docId) => {
-                deleteModal = true;
-                document_id = docId;
-              }
-            "
-            @update-title="updateTitle"
-          />
-        </div>
-      </div>
+  <div v-for="(doc, index) in document" :key="index" class="col-md-6 col-lg-4">
+    <document-card
+      :avatar="doc.created_by.avatar"
+      :user-name="doc.created_by.name"
+      :document-title="doc.title"
+      :created-at="doc.created_at"
+      :document-id="doc.document_id"
+      :is-owner="isOwner"
+      @delete-action="
+        (docId) => {
+          deleteModal = true;
+          document_id = docId;
+        }
+      "
+      @update-title="updateTitle"
+      @download-action="downloadDocHandling"
+    />
+  </div>
+</div>
     </div>
   </main>
 </template>
@@ -254,6 +255,19 @@ async function updateTitle(docId, title) {
   } catch (error) {
     toast.error(error.message);
     await useDocument.getAllDocument(workspace_id.value, team_id.value);
+  }
+}
+
+async function downloadDocHandling(docId, title) {
+  try {
+    await useDocument.downloadDocument(
+      workspace_id.value,
+      team_id.value,
+      docId,
+      title
+    );
+  } catch (error) {
+    toast.error(error.message);
   }
 }
 

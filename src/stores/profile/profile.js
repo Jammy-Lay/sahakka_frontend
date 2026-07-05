@@ -107,6 +107,12 @@ export const useProfileStore = defineStore("profile", () => {
     }
   };
 
+  const handleProfileUpdated = ({ user_id, name, avatar }) => {
+    if (String(user.value?.user_id) !== String(user_id)) return;
+    if (name !== undefined) user.value.name = name;
+    if (avatar !== undefined) user.value.avatar = avatar;
+  };
+
   return {
     user,
     myWorkspaces,
@@ -121,5 +127,6 @@ export const useProfileStore = defineStore("profile", () => {
     UpdateAvatar,
     DeleteAvatar,
     loading,
+    handleProfileUpdated,
   };
 });

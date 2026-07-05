@@ -1,5 +1,5 @@
 <template>
-  <div class="pt-3 pb-2 bg-body pe-3">
+  <div class="pt-3 pb-3 bg-body pe-3">
     <div class="pt-2">
       <VCalendar
         v-model="selectedDate"
@@ -165,9 +165,10 @@
       <template v-if="taskStore.myTaskLoading">
         <MyTaskSkeleton />
       </template>
+
       <template v-else>
         <h5 class="text-dark fw-semibold my-3" style="font-size: 18px">My Task</h5>
-        <div class="d-flex flex-column gap-3 pb-2">
+        <div class="d-flex flex-column gap-3 text-nowrap">
           <n-empty
             v-if="getMyTask.length === 0"
             description="No Data"
@@ -201,7 +202,9 @@
                   class="rounded-circle object-fit-cover"
                   style="width: 30px; height: 30px"
                 />
-                <span class="fw-semibold fs-13">{{ task.assigned_to?.name }}</span>
+                <span class="fw-semibold fs-13 text-truncate">{{
+                  task.assigned_to?.name
+                }}</span>
                 <span class="fw-bold text-mute fs-12">·</span>
                 <span class="text-mute fs-13">Self-assigned the task</span>
               </template>
@@ -213,7 +216,9 @@
                   class="rounded-circle object-fit-cover"
                   style="width: 30px; height: 30px"
                 />
-                <span class="fw-semibold fs-13">{{ task.assigned_by?.name }}</span>
+                <span class="fw-semibold fs-13 text-truncate">{{
+                  task.assigned_by?.name
+                }}</span>
                 <span class="fw-bold text-mute fs-12">·</span>
                 <span
                   v-if="task.assigned_to?.user_id === getMe.user_id"
@@ -226,7 +231,7 @@
               </template>
             </div>
 
-            <div class="d-flex flex-column gap-1">
+            <div class="d-flex flex-column gap-1 mt-1">
               <div class="task-meta-row">
                 <span class="d-flex align-items-center gap-1 fs-14 text-mute"
                   ><Ghost size="15" /> Priority</span
@@ -236,6 +241,7 @@
                   trigger="click"
                   placement="bottom-start"
                   :show-arrow="false"
+                  :disabled="isAssigneeLocked(task.status)"
                   style="border-radius: 12px; padding: 6px; width: 120px"
                   @update:show="(val) => (openPop[`${task.id}_priority`] = val)"
                 >
@@ -245,6 +251,9 @@
                       :class="[
                         priorityConfig[task.priority]?.bg,
                         priorityConfig[task.priority]?.text,
+                        isAssigneeLocked(task.status)
+                          ? 'cursor-default'
+                          : 'cursor-pointer',
                       ]"
                       @click.stop
                     >
@@ -256,11 +265,12 @@
                       {{ task.priority }}
                     </span>
                   </template>
-                  <div>
+                  <div class="d-flex flex-column gap-1">
                     <div
                       v-for="(cfg, key) in priorityConfig"
                       :key="key"
                       class="d-flex align-items-center gap-2 px-2 py-1 rounded workspace-item fs-13 fw-medium cursor-pointer text-capitalize"
+                      :class="task.priority === key ? 'bg-accent' : ''"
                       @click="
                         task.priority = key;
                         closePop(task.id, 'priority');
@@ -283,6 +293,7 @@
                   trigger="click"
                   placement="bottom-start"
                   :show-arrow="false"
+                  :disabled="isAssigneeLocked(task.status)"
                   style="border-radius: 12px; padding: 0; overflow: hidden"
                   @update:show="(val) => (openPop[`${task.id}_end_date`] = val)"
                 >
@@ -293,6 +304,9 @@
                       :class="[
                         task.end_date ? 'text-dark fw-medium' : 'text-mute',
                         isPopOpen(task.id, 'end_date') ? 'bg-active' : '',
+                        isAssigneeLocked(task.status)
+                          ? 'cursor-default'
+                          : 'cursor-pointer',
                       ]"
                     >
                       {{ task.end_date ? formatDate(task.end_date) : "Set date" }}
@@ -317,8 +331,8 @@
               </div>
             </div>
 
-            <p class="task-title mb-2 mt-2">{{ task.title }}</p>
-            <p class="task-desc mb-0">
+            <p class="task-title mb-2 mt-2 text-truncate">{{ task.title }}</p>
+            <p class="task-desc mb-0 text-truncate">
               {{ task.description || "No description provided" }}
             </p>
           </div>
@@ -408,47 +422,91 @@
                   </template>
                 </div>
 
-                <!-- Type badge -->
-                <n-popover
-                  trigger="click"
-                  placement="bottom-end"
-                  v-model:show="showDetailTypePop"
-                  :show-arrow="false"
-                  style="border-radius: 12px; padding: 6px; width: 160px"
-                >
-                  <template #trigger>
-                    <span
-                      class="tab-info fw-medium cursor-pointer"
-                      :class="[
-                        typeConfig[selectedTask.type]?.bg,
-                        typeConfig[selectedTask.type]?.text,
-                      ]"
-                      @click.stop
-                    >
-                      <Circle
-                        size="10"
-                        :fill="typeConfig[selectedTask.type]?.fill"
-                        stroke-width="0"
-                      />
-                      {{ selectedTask.type }}
-                    </span>
-                  </template>
-                  <div>
-                    <div
-                      v-for="(cfg, key) in typeConfig"
-                      :key="key"
-                      class="d-flex align-items-center gap-2 px-2 py-1 rounded workspace-item fs-13 fw-medium cursor-pointer text-capitalize"
-                      @click="
-                        selectedTask.type = key;
-                        showDetailTypePop = false;
-                        handleUpdateTask(selectedTask, true);
-                      "
-                    >
-                      <Circle size="10" :fill="cfg.fill" stroke-width="0" />
-                      {{ key }}
+                <div class="d-flex justify-content-center align-items-center">
+                  <n-popover
+                    trigger="click"
+                    placement="bottom-end"
+                    v-model:show="showDetailTypePop"
+                    :show-arrow="false"
+                    :disabled="isAssigneeLocked(selectedTask.status)"
+                    style="border-radius: 12px; padding: 6px; width: 160px"
+                  >
+                    <template #trigger>
+                      <span
+                        class="tab-info fw-medium cursor-pointer h-fit"
+                        :class="[
+                          typeConfig[selectedTask.type]?.bg,
+                          typeConfig[selectedTask.type]?.text,
+                          isAssigneeLocked(selectedTask.status)
+                            ? 'cursor-default'
+                            : 'cursor-pointer',
+                        ]"
+                        @click.stop
+                      >
+                        <Circle
+                          size="10"
+                          :fill="typeConfig[selectedTask.type]?.fill"
+                          stroke-width="0"
+                        />
+                        {{ selectedTask.type }}
+                      </span>
+                    </template>
+                    <div class="d-flex flex-column gap-1">
+                      <div
+                        v-for="(cfg, key) in typeConfig"
+                        :key="key"
+                        class="d-flex align-items-center gap-2 px-2 py-1 rounded workspace-item fs-13 fw-medium cursor-pointer text-capitalize"
+                        :class="selectedTask.type === key ? 'bg-accent' : ''"
+                        @click="
+                          selectedTask.type = key;
+                          showDetailTypePop = false;
+                          handleUpdateTask(selectedTask, true);
+                        "
+                      >
+                        <Circle size="10" :fill="cfg.fill" stroke-width="0" />
+                        {{ key }}
+                      </div>
                     </div>
-                  </div>
-                </n-popover>
+                  </n-popover>
+
+                  <n-tooltip
+                    v-if="
+                      selectedTask.status === 'approved' ||
+                      selectedTask.status === 'rejected'
+                    "
+                    placement="bottom"
+                    trigger="hover"
+                    :show-arrow="false"
+                    :keep-alive-on-hover="false"
+                    :style="{
+                      fontSize: '11px !important',
+                      padding: '4px 8px !important',
+                      borderRadius: '8px !important',
+                      marginTop: '3px !important',
+                      marginLeft: '0px !important',
+                      pointerEvents: 'none',
+                    }"
+                  >
+                    <template #trigger>
+                      <button
+                        class="ms-3"
+                        :class="
+                          selectedTask.status === 'approved'
+                            ? 'icon-action-btn-check'
+                            : 'icon-action-btn-trash'
+                        "
+                        @click.stop="openFeedback(selectedTask)"
+                      >
+                        <MessageCircleCheck
+                          v-if="selectedTask.status === 'approved'"
+                          size="20"
+                        />
+                        <MessageCircleX v-else size="20" />
+                      </button>
+                    </template>
+                    Feedback
+                  </n-tooltip>
+                </div>
               </div>
 
               <!-- Meta rows -->
@@ -482,11 +540,12 @@
                         {{ statusConfigFull[selectedTask.status]?.label }}
                       </span>
                     </template>
-                    <div>
+                    <div class="d-flex flex-column gap-1">
                       <div
                         v-for="(cfg, key) in statusConfig"
                         :key="key"
                         class="d-flex align-items-center gap-2 px-2 py-1 rounded workspace-item fs-13 fw-medium cursor-pointer"
+                        :class="selectedTask.status === key ? 'bg-accent' : ''"
                         @click="
                           selectedTask.status = key;
                           showDetailStatusPop = false;
@@ -507,6 +566,7 @@
                     placement="bottom-start"
                     v-model:show="showDetailPriorityPop"
                     :show-arrow="false"
+                    :disabled="isAssigneeLocked(selectedTask.status)"
                     style="border-radius: 12px; padding: 6px; width: 140px"
                   >
                     <template #trigger>
@@ -515,6 +575,9 @@
                         :class="[
                           priorityConfig[selectedTask.priority]?.bg,
                           priorityConfig[selectedTask.priority]?.text,
+                          isAssigneeLocked(selectedTask.status)
+                            ? 'cursor-default'
+                            : 'cursor-pointer',
                         ]"
                         @click.stop
                       >
@@ -526,11 +589,12 @@
                         {{ selectedTask.priority }}
                       </span>
                     </template>
-                    <div>
+                    <div class="d-flex flex-column gap-1">
                       <div
                         v-for="(cfg, key) in priorityConfig"
                         :key="key"
                         class="d-flex align-items-center gap-2 px-2 py-1 rounded workspace-item fs-13 fw-medium cursor-pointer text-capitalize"
+                        :class="selectedTask.priority === key ? 'bg-accent' : ''"
                         @click="
                           selectedTask.priority = key;
                           showDetailPriorityPop = false;
@@ -664,6 +728,7 @@
                     trigger="click"
                     placement="bottom-start"
                     :show-arrow="false"
+                    :disabled="isAssigneeLocked(selectedTask.status)"
                     style="border-radius: 12px; padding: 0; overflow: hidden"
                   >
                     <template #trigger>
@@ -672,6 +737,9 @@
                         :class="[
                           selectedTask.start_date ? 'text-dark' : 'text-mute',
                           showDetailStartDatePop ? 'bg-active' : '',
+                          isAssigneeLocked(selectedTask.status)
+                            ? 'cursor-default'
+                            : 'cursor-pointer',
                         ]"
                         @click.stop
                       >
@@ -707,6 +775,7 @@
                     trigger="click"
                     placement="bottom-start"
                     :show-arrow="false"
+                    :disabled="isAssigneeLocked(selectedTask.status)"
                     style="border-radius: 12px; padding: 0; overflow: hidden"
                   >
                     <template #trigger>
@@ -715,6 +784,9 @@
                         :class="[
                           selectedTask.end_date ? 'text-dark' : 'text-mute',
                           showDetailEndDatePop ? 'bg-active' : '',
+                          isAssigneeLocked(selectedTask.status)
+                            ? 'cursor-default'
+                            : 'cursor-pointer',
                         ]"
                         @click.stop
                       >
@@ -749,6 +821,7 @@
                   v-model="selectedTask.title"
                   class="detail-title-input fw-bold mb-2"
                   rows="1"
+                  :disabled="isAssigneeLocked(selectedTask.status)"
                   @blur="handleUpdateTask(selectedTask)"
                   @input="autoResize"
                   placeholder="Task Title"
@@ -758,13 +831,14 @@
                   placeholder="No description provided"
                   class="detail-desc-input fs-13 text-mute mb-4"
                   rows="1"
+                  :disabled="isAssigneeLocked(selectedTask.status)"
                   @blur="handleUpdateTask(selectedTask)"
                   @input="autoResize"
                 />
               </div>
 
               <!-- File/Link Attachment -->
-              <p class="fw-semibold fs-15 mb-2">
+              <p class="fw-semibold fs-15 mb-2 required">
                 File attachment <Link size="15" class="ms-1" />
               </p>
               <input
@@ -844,7 +918,7 @@
               </div>
 
               <!-- Messages -->
-              <p class="fw-semibold fs-15 mb-2">
+              <p class="fw-semibold fs-15 mb-2 required">
                 Messages <message-circle size="16" class="text-mute ms-1" />
               </p>
               <textarea
@@ -921,6 +995,56 @@
         </div>
       </div>
     </n-modal>
+
+    <!-- Feedback Modal -->
+    <n-modal v-model:show="showFeedbackModal" :mask-closable="true">
+      <div class="bg-white rounded-card" style="width: 500px">
+        <div class="d-flex align-items-center justify-content-between px-4 py-3 pb-2">
+          <span class="fw-medium fs-14">Feedback</span>
+          <n-button
+            text
+            size="small"
+            @click="showFeedbackModal = false"
+            class="hover-circle p-1 rounded-circle"
+          >
+            <X size="18" />
+          </n-button>
+        </div>
+        <n-divider style="margin: 5px 0; --n-color: #e4e4e7" />
+        <div class="px-4 pt-2 pb-3">
+          <template v-if="feedbackLoading">
+            <FeedbackSkeleton />
+          </template>
+
+          <template v-else-if="feedback">
+            <div class="d-flex align-items-center gap-2 mb-3">
+              <img
+                :src="feedback.reviewed_by?.avatar"
+                class="rounded-circle object-fit-cover"
+                style="width: 34px; height: 34px"
+              />
+              <p class="mb-0 fs-14">
+                <span class="text-dark">{{ feedback.reviewed_by?.name }}</span>
+                {{ feedback.status === "approved" ? "approved" : "rejected" }} the
+                submission
+              </p>
+            </div>
+
+            <div class="bg-accent rounded-card p-3">
+              <p class="fs-14 text-dark mb-2 fw-medium">Feedback</p>
+              <p class="mb-0 fs-13">{{ feedback.feedback || "No feedback provided" }}</p>
+            </div>
+          </template>
+
+          <template v-else>
+            <n-empty
+              description="No feedback found"
+              style="--n-icon-size: 35px; font-size: 12px"
+            />
+          </template>
+        </div>
+      </div>
+    </n-modal>
   </div>
 </template>
 
@@ -947,6 +1071,9 @@ import {
   Link,
   MessageCircle,
   Eye,
+  UserMinus,
+  MessageCircleCheck,
+  MessageCircleX,
 } from "lucide-vue-next";
 import { useTaskStore } from "@/stores/user/task";
 import { storeToRefs } from "pinia";
@@ -957,6 +1084,7 @@ import { useAuthStore } from "@/stores/auth";
 import CompletionSkeleton from "../Skeleton/CompletionSkeleton.vue";
 import MyTaskSkeleton from "../Skeleton/MyTaskSkeleton.vue";
 import { useSubmissionStore } from "@/stores/user/submission.js";
+import FeedbackSkeleton from "../Skeleton/FeedbackSkeleton.vue";
 
 const route = useRoute();
 const router = useRouter();
@@ -974,6 +1102,9 @@ const authStore = useAuthStore();
 const { getMe } = storeToRefs(authStore);
 
 const submissionStore = useSubmissionStore();
+const { feedback } = storeToRefs(submissionStore);
+
+const showFeedbackModal = ref(false);
 
 onMounted(async () => {
   updateTime();
@@ -983,6 +1114,24 @@ onMounted(async () => {
     await taskStore.getMyTaskStore(workspace_id.value, team_id.value),
   ]);
 });
+
+const feedbackLoading = ref(false);
+
+const openFeedback = async (task) => {
+  showFeedbackModal.value = true;
+  feedbackLoading.value = true;
+  try {
+    await submissionStore.getFeedbackByTaskStore(
+      workspace_id.value,
+      team_id.value,
+      task.id
+    );
+  } catch (error) {
+    toast.error(error.message);
+  } finally {
+    feedbackLoading.value = false;
+  }
+};
 
 // Access your data source
 const summary = computed(() => getSummaryTask.value || {});
@@ -1106,6 +1255,8 @@ const handleSubmit = async (task) => {
     showTaskModal.value = false;
   } catch (err) {
     toast.error(err.message);
+    taskMessage.value = "";
+    removeFile();
   } finally {
     isLoading.value = false;
   }
@@ -1173,7 +1324,9 @@ const getAssigneeOptions = computed(() => {
     return getTeamById.value.members;
   }
   if (myWorkspaceRole.value === "moderator") {
-    return getMember.value;
+    return getMember.value.filter(
+      (m) => m.user_id === getMe.value?.user_id || m.role === "member"
+    );
   }
   return getMember.value.filter((m) => m.user_id === getMe.value?.user_id);
 });
@@ -1233,6 +1386,11 @@ const handleUpdateTask = async (task, forceField = null, assigneeChanged = false
     }
   } catch (error) {
     toast.error(error.message);
+
+    if (selectedTask.value?.id === task.id && originalTask.value) {
+      selectedTask.value = { ...selectedTask.value, ...originalTask.value };
+    }
+
     await taskStore.getTaskByTeamStore(workspace_id.value, team_id.value, "", true);
   }
 };
@@ -1285,6 +1443,7 @@ const actTagClass = (action) => {
   const map = {
     create: "act-tag-create",
     assign: "act-tag-assign",
+    unassign: "act-tag-unassign",
     submit: "act-tag-submit",
     review: "act-tag-review",
   };
@@ -1292,7 +1451,13 @@ const actTagClass = (action) => {
 };
 
 const actTagIcon = (action) => {
-  const map = { create: Plus, assign: UserCheck, submit: Send, review: Eye };
+  const map = {
+    create: Plus,
+    assign: UserCheck,
+    unassign: UserMinus,
+    submit: Send,
+    review: Eye,
+  };
   return map[action?.toLowerCase()];
 };
 

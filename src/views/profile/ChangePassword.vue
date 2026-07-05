@@ -17,7 +17,7 @@
         <form @submit.prevent="handleChangePassword">
           <!-- Old Password -->
           <div class="form-group">
-            <label class="form-label">Current password</label>
+            <label class="form-label required">Current password</label>
             <div class="input-wrap">
               <input
                 :type="show.current ? 'text' : 'password'"
@@ -34,7 +34,7 @@
 
           <!-- New Password -->
           <div class="form-group">
-            <label class="form-label">New password</label>
+            <label class="form-label required">New password</label>
             <div class="input-wrap">
               <input
                 :type="show.newPass ? 'text' : 'password'"
@@ -67,7 +67,7 @@
 
           <!-- Confirm Password -->
           <div class="form-group">
-            <label class="form-label">Confirm new password</label>
+            <label class="form-label required">Confirm new password</label>
             <div class="input-wrap">
               <input
                 :type="show.confirm ? 'text' : 'password'"
