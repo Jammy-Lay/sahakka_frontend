@@ -18,13 +18,13 @@ const router = createRouter({
       path: "/register",
       name: "register",
       component: () => import("../views/auth/RegisterView.vue"),
-      meta: { title: "Sign Up | Sahakka" },
+      meta: { title: "Sign Up | Sahakka", requiresOtpAccess: true, },
     },
     {
       path: "/otp",
       name: "otp",
       component: () => import("../views/auth/OtpView.vue"),
-      meta: { title: "OTP Verification | Sahakka" },
+      meta: { title: "OTP Verification | Sahakka", requiresOtpAccess: true },
     },
     {
       path: "/forgot-password",
@@ -36,7 +36,7 @@ const router = createRouter({
       path: "/new-password",
       name: "new-password",
       component: () => import("../views/auth/newPassword.vue"),
-      meta: { title: "Reset Password | Sahakka" },
+      meta: { title: "Reset Password | Sahakka", requiresResetAccess: true },
     },
     {
       path: "/workspace",
@@ -55,6 +55,12 @@ const router = createRouter({
           name: "submissions",
           component: () => import("../views/user/SubmissionView.vue"),
           meta: { title: "Submissions | Sahakka" },
+        },
+        {
+          path: ":workspace_id/team/:team_id/analytics",
+          name: "submissions",
+          component: () => import("../views/user/MemberAnnaly.vue"),
+          meta: { title: "Analytics | Sahakka" },
         },
         {
           path: ":workspace_id/team/:team_id/issues",
@@ -218,6 +224,28 @@ router.afterEach((to) => {
 
 router.beforeEach(async (to) => {
   const auth = useAuthStore();
+
+  const requiresOtpAccess = to.matched.some(r => r.meta.requiresOtpAccess);
+  const requiresResetAccess = to.matched.some(r => r.meta.requiresResetAccess);
+
+  if (requiresOtpAccess) {
+    const allowOtp = sessionStorage.getItem("allowOtp");
+
+    if (!allowOtp) {
+      return { name: "not-found" };
+    }
+
+    return true;
+  }
+
+  if (requiresResetAccess) {
+    const allowReset = sessionStorage.getItem("allowNewPassword");
+    if (!allowReset) {
+      return { name: "not-found" };
+    }
+
+    return true;
+  }
 
   const needsAuth = to.matched.some((r) => r.meta.requiresAuth);
   const needsAdmin = to.matched.some((r) => r.meta.requiresAdmin);

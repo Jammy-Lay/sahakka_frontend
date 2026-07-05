@@ -114,7 +114,6 @@ import { useTaskstore } from "@/stores/admin/tasks";
 import router from "@/router";
 import { ChartPie, Users, Layers, Search, ChevronLeft, ChevronRight, Target } from "lucide-vue-next";
 import BaseTitle from "@/components/BaseTitle.vue";
-import Loading from "@/components/layouts/Loading.vue";
 import { useToast } from "vue-toastification";
 import SkeletonWorkspace from "@/components/Skeleton/SkeletonWorkspace.vue";
 import api from "@/api/https";

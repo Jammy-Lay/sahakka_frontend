@@ -196,7 +196,7 @@
               class="d-flex align-items-center justify-content-between"
               style="padding: 0 10px; padding-top: 10px"
             >
-              <span class="fw-bold fs-15 ps-1">Join with passcode</span>
+              <span class="fw-bold fs-15 ps-1">Join with code or token</span>
               <n-button
                 text
                 size="small"
@@ -211,7 +211,7 @@
 
             <div style="padding: 10px">
               <div class="p-2 rounded-btn bg-accent border border-1">
-                <p class="fs-13 mb-2 ps-1 text-dark">Passcode</p>
+                <p class="fs-13 mb-2 ps-1 text-dark required">Code or token</p>
                 <BaseInput
                   v-model="joinCode"
                   input-placeholder="XXXXXXXX"

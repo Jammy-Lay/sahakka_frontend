@@ -139,6 +139,8 @@ async function handleOtp() {
     isLoading.value = true;
     await auth.verifyOtp(forgotEmail.value, otp);
     localStorage.removeItem("otp_expiry");
+    sessionStorage.removeItem("allowOtp");
+    sessionStorage.setItem("allowNewPassword", "true");
     toast.success("Verify Successfully", "/new-password");
   } catch (err) {
     toast.error(err.message);

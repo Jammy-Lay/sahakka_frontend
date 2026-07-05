@@ -155,7 +155,6 @@ import {
 import api from "@/api/https";
 import BaseTitle from "@/components/BaseTitle.vue";
 import { useUserStore } from "@/stores/admin/users";
-import Loading from "@/components/layouts/Loading.vue";
 import { useToast } from "vue-toastification";
 import Chart from "chart.js/auto";
 import Dashboard from "@/components/Skeleton/Dashboard.vue";
