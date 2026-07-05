@@ -18,7 +18,7 @@ const router = createRouter({
       path: "/register",
       name: "register",
       component: () => import("../views/auth/RegisterView.vue"),
-      meta: { title: "Sign Up | Sahakka", requiresOtpAccess: true, },
+      meta: { title: "Sign Up | Sahakka" },
     },
     {
       path: "/otp",
@@ -58,7 +58,7 @@ const router = createRouter({
         },
         {
           path: ":workspace_id/team/:team_id/analytics",
-          name: "submissions",
+          name: "analytics",
           component: () => import("../views/user/MemberAnnaly.vue"),
           meta: { title: "Analytics | Sahakka" },
         },
@@ -225,8 +225,10 @@ router.afterEach((to) => {
 router.beforeEach(async (to) => {
   const auth = useAuthStore();
 
-  const requiresOtpAccess = to.matched.some(r => r.meta.requiresOtpAccess);
-  const requiresResetAccess = to.matched.some(r => r.meta.requiresResetAccess);
+  const requiresOtpAccess = to.matched.some((r) => r.meta.requiresOtpAccess);
+  const requiresResetAccess = to.matched.some(
+    (r) => r.meta.requiresResetAccess,
+  );
 
   if (requiresOtpAccess) {
     const allowOtp = sessionStorage.getItem("allowOtp");

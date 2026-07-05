@@ -35,6 +35,7 @@ export const initSocket = () => {
   socket.off("document-created");
   socket.off("document-updated");
   socket.off("document-deleted");
+  socket.off("document-updated-content"); 
   socket.off("submission-created");
   socket.off("submission-updated");
   socket.off("profile-updated");

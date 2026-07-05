@@ -69,7 +69,6 @@ import { useKickListener } from "@/composables/useKickListener";
 
 const route = useRoute();
 const leftOpen = ref(true);
-const showPopover = ref(false);
 
 const authStore = useAuthStore();
 const { getMe } = storeToRefs(authStore);
@@ -115,7 +114,7 @@ onUnmounted(() => {
 });
 
 const showCalendar = computed(() => {
-  return route.name !== "viewMember" && route.name !== "submissions";
+  return route.name !== "viewMember" && route.name !== "submissions" && route.name !== "analytics";
 });
 </script>
 
