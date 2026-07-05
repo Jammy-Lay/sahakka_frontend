@@ -355,8 +355,8 @@ const reviewStatusConfig = {
 };
 
 onMounted(async () => {
-  await teamStore.getTeamByIdStore(workspace_id.value, team_id.value);
   await submissionStore.getAllSubmissionByTeamStore(workspace_id.value, team_id.value);
+  await teamStore.getTeamByIdStore(workspace_id.value, team_id.value);
 
   const submissionIdFromQuery = route.query.submission_id;
   if (submissionIdFromQuery) {

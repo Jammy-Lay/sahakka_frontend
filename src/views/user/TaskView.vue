@@ -1888,9 +1888,10 @@ const handleCreateTask = async () => {
     form.value = defaultForm();
     await taskStore.createTask(workspace_id.value, team_id.value, payload);
     await taskStore.getTaskByTeamStore(workspace_id.value, team_id.value);
+    await taskStore.getSummaryTaskStore(workspace_id.value, team_id.value, true);
+    await taskStore.getMyTaskStore(workspace_id.value, team_id.value, "", true);
     toast.success("Create Task Successfully");
     showCreateTask.value = false;
-    await taskStore.getSummaryTaskStore(workspace_id.value, team_id.value);
   } catch (error) {
     toast.error(error.message);
   } finally {
