@@ -214,6 +214,7 @@
               placeholder="Feedback"
               class="form-control fs-13 rounded-btn-sm bg-white mb-3 base-input"
               style="min-height: 90px; resize: vertical; border: 1px solid #e4e4e7"
+              :disabled="selectedSubmission.status !== 'pending'"
             />
             <div class="d-flex align-items-center gap-2 z-3">
               <label class="fs-14 text-dark">Review Status :</label>
@@ -222,19 +223,23 @@
                 trigger="click"
                 placement="bottom-start"
                 :show-arrow="false"
+                :disabled="selectedSubmission.status !== 'pending'"
                 style="border-radius: 12px; padding: 6px; width: 140px"
               >
                 <template #trigger>
                   <span
-                    class="tab-info w-fit fw-medium cursor-pointer"
-                    :class="
+                    class="tab-info w-fit fw-medium"
+                    :class="[
                       selectedStatus
                         ? [
                             reviewStatusConfig[selectedStatus]?.bg,
                             reviewStatusConfig[selectedStatus]?.text,
                           ]
-                        : ['bg-accent', 'text-mute']
-                    "
+                        : ['bg-accent', 'text-mute'],
+                      selectedSubmission.status !== 'pending'
+                        ? 'cursor-default'
+                        : 'cursor-pointer',
+                    ]"
                   >
                     <component
                       v-if="selectedStatus"
@@ -274,6 +279,7 @@
               Close
             </button>
             <button
+              v-if="selectedSubmission.status === 'pending'"
               class="btn bg-btn rounded-card py-2 px-3 d-flex align-items-center gap-2 fs-14"
               :disabled="isLoading"
               @click="handleSend"
@@ -392,7 +398,7 @@ const openReview = (sub) => {
   selectedSubmission.value = sub;
   selectedStatus.value =
     sub.status === "approved" || sub.status === "rejected" ? sub.status : null;
-  feedback.value = "";
+  feedback.value = sub.status === "pending" ? "" : sub.feedback || "";
   showModal.value = true;
 };
 

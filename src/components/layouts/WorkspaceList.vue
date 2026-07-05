@@ -584,6 +584,7 @@ import { notify } from "@/utils/toast";
 import { useCrudWorkspaceStore } from "@/stores/workspaces/workspaces";
 import BaseBtn from "../BaseBtn.vue";
 import HeaderSkeleton from "../workspace/HeaderSkeleton.vue";
+import { require, isEmail, validates } from "@/utils/validate";
 
 const route = useRoute();
 const router = useRouter();
@@ -777,7 +778,15 @@ const handleJoin = async () => {
 };
 
 const handleInvite = async () => {
-  if (!inviteEmail.value.trim()) return;
+  const err = validates(inviteEmail.value, [
+    (v) => require(v, "Email is required"),
+    (v) => isEmail(v, "Please enter a valid email"),
+  ]);
+
+  if (err) {
+    toast.error(err);
+    return;
+  }
 
   isInviteLoading.value = true;
   try {
@@ -791,6 +800,7 @@ const handleInvite = async () => {
     showInvitePopover.value = false;
   } catch (error) {
     toast.error(error.message);
+    inviteEmail.value = "";
   } finally {
     isInviteLoading.value = false;
   }

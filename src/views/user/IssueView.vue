@@ -206,11 +206,12 @@
                       {{ task.type }}
                     </span>
                   </template>
-                  <div>
+                  <div class="d-flex flex-column gap-1">
                     <div
                       v-for="(cfg, key) in typeConfig"
                       :key="key"
                       class="d-flex align-items-center gap-2 px-2 py-1 rounded workspace-item fs-13 fw-medium cursor-pointer text-capitalize"
+                      :class="task.type === key ? 'bg-accent' : ''"
                       @click="
                         task.type = key;
                         closePop(task.id, 'type');
@@ -284,11 +285,12 @@
                         {{ statusConfigFull[task.status]?.label }}
                       </span>
                     </template>
-                    <div>
+                    <div class="d-flex flex-column gap-1">
                       <div
                         v-for="(cfg, key) in statusConfig"
                         :key="key"
                         class="d-flex align-items-center gap-2 px-2 py-1 rounded workspace-item fs-13 fw-medium cursor-pointer"
+                        :class="task.status === key ? 'bg-accent' : ''"
                         @click="
                           task.status = key;
                           closePop(task.id, 'status');
@@ -336,11 +338,12 @@
                         {{ task.priority }}
                       </span>
                     </template>
-                    <div>
+                    <div class="d-flex flex-column gap-1">
                       <div
                         v-for="(cfg, key) in priorityConfig"
                         :key="key"
                         class="d-flex align-items-center gap-2 px-2 py-1 rounded workspace-item fs-13 fw-medium cursor-pointer text-capitalize"
+                        :class="task.priority === key ? 'bg-accent' : ''"
                         @click="
                           task.priority = key;
                           closePop(task.id, 'priority');
@@ -567,7 +570,7 @@
                 </div>
               </div>
 
-              <p class="fw-semibold mb-2" style="font-size: 18px">{{ task.title }}</p>
+              <p class="fw-semibold mb-2 text-truncate" style="font-size: 18px">{{ task.title }}</p>
               <p class="mb-0 text-mute fs-15 card-width">
                 <n-ellipsis :tooltip="false">
                   {{ task.description || "No description provided" }}
@@ -628,11 +631,12 @@
                   {{ form.type }}
                 </span>
               </template>
-              <div>
+              <div class="d-flex flex-column gap-1">
                 <div
                   v-for="(cfg, key) in typeConfig"
                   :key="key"
                   class="d-flex align-items-center gap-2 px-2 py-1 rounded workspace-item fs-13 fw-medium cursor-pointer text-capitalize"
+                  :class="form.type === key ? 'bg-accent' : ''"
                   @click="
                     form.type = key;
                     showTypePop = false;
@@ -682,11 +686,12 @@
                   {{ statusConfig[form.status]?.label }}
                 </span>
               </template>
-              <div>
+              <div class="d-flex flex-column gap-1">
                 <div
                   v-for="(cfg, key) in statusConfig"
                   :key="key"
                   class="d-flex align-items-center gap-2 px-2 py-1 rounded workspace-item fs-13 fw-medium cursor-pointer"
+                  :class="form.status === key ? 'bg-accent' : ''"
                   @click="
                     form.status = key;
                     showStatusPop = false;
@@ -722,11 +727,12 @@
                   {{ form.priority }}
                 </span>
               </template>
-              <div>
+              <div class="d-flex flex-column gap-1">
                 <div
                   v-for="(cfg, key) in priorityConfig"
                   :key="key"
                   class="d-flex align-items-center gap-2 px-2 py-1 rounded workspace-item fs-13 fw-medium cursor-pointer text-capitalize"
+                  :class="form.priority === key ? 'bg-accent' : ''"
                   @click="
                     form.priority = key;
                     showPriorityPop = false;
@@ -786,10 +792,11 @@
                 </span>
               </template>
 
-              <div>
+              <div class="d-flex flex-column gap-1">
                 <div
                   v-if="canChangeAssignee"
                   class="d-flex align-items-center gap-2 px-2 py-1 rounded workspace-item fs-13 cursor-pointer"
+                  :class="!form.assigned_to ? 'bg-accent' : ''"
                   @click="
                     form.assigned_to = null;
                     showAssigneePop = false;
@@ -812,6 +819,7 @@
                   v-for="member in getAssigneeOptions"
                   :key="member.user_id"
                   class="d-flex align-items-center gap-2 px-2 py-1 rounded workspace-item fs-13 cursor-pointer"
+                  :class="form.assigned_to === member.user_id ? 'bg-accent' : ''"
                   @click="
                     form.assigned_to = member.user_id;
                     showAssigneePop = false;
@@ -956,51 +964,91 @@
                   </template>
                 </div>
 
-                <!-- Type badge -->
-                <n-popover
-                  trigger="click"
-                  placement="bottom-end"
-                  v-model:show="showDetailTypePop"
-                  :show-arrow="false"
-                  :disabled="isAssigneeLocked(selectedTask.status)"
-                  style="border-radius: 12px; padding: 6px; width: 160px"
-                >
-                  <template #trigger>
-                    <span
-                      class="tab-info fw-medium cursor-pointer"
-                      :class="[
-                        typeConfig[selectedTask.type]?.bg,
-                        typeConfig[selectedTask.type]?.text,
-                        isAssigneeLocked(selectedTask.status)
-                          ? 'cursor-default'
-                          : 'cursor-pointer',
-                      ]"
-                      @click.stop
-                    >
-                      <Circle
-                        size="10"
-                        :fill="typeConfig[selectedTask.type]?.fill"
-                        stroke-width="0"
-                      />
-                      {{ selectedTask.type }}
-                    </span>
-                  </template>
-                  <div>
-                    <div
-                      v-for="(cfg, key) in typeConfig"
-                      :key="key"
-                      class="d-flex align-items-center gap-2 px-2 py-1 rounded workspace-item fs-13 fw-medium cursor-pointer text-capitalize"
-                      @click="
-                        selectedTask.type = key;
-                        showDetailTypePop = false;
-                        handleUpdateTask(selectedTask, true);
-                      "
-                    >
-                      <Circle size="10" :fill="cfg.fill" stroke-width="0" />
-                      {{ key }}
+                <div class="d-flex justify-content-center align-items-center">
+                  <n-popover
+                    trigger="click"
+                    placement="bottom-end"
+                    v-model:show="showDetailTypePop"
+                    :show-arrow="false"
+                    :disabled="isAssigneeLocked(selectedTask.status)"
+                    style="border-radius: 12px; padding: 6px; width: 160px"
+                  >
+                    <template #trigger>
+                      <span
+                        class="tab-info fw-medium cursor-pointer h-fit"
+                        :class="[
+                          typeConfig[selectedTask.type]?.bg,
+                          typeConfig[selectedTask.type]?.text,
+                          isAssigneeLocked(selectedTask.status)
+                            ? 'cursor-default'
+                            : 'cursor-pointer',
+                        ]"
+                        @click.stop
+                      >
+                        <Circle
+                          size="10"
+                          :fill="typeConfig[selectedTask.type]?.fill"
+                          stroke-width="0"
+                        />
+                        {{ selectedTask.type }}
+                      </span>
+                    </template>
+                    <div class="d-flex flex-column gap-1">
+                      <div
+                        v-for="(cfg, key) in typeConfig"
+                        :key="key"
+                        class="d-flex align-items-center gap-2 px-2 py-1 rounded workspace-item fs-13 fw-medium cursor-pointer text-capitalize"
+                        :class="selectedTask.type === key ? 'bg-accent' : ''"
+                        @click="
+                          selectedTask.type = key;
+                          showDetailTypePop = false;
+                          handleUpdateTask(selectedTask, true);
+                        "
+                      >
+                        <Circle size="10" :fill="cfg.fill" stroke-width="0" />
+                        {{ key }}
+                      </div>
                     </div>
-                  </div>
-                </n-popover>
+                  </n-popover>
+
+                  <n-tooltip
+                    v-if="
+                      selectedTask.status === 'approved' ||
+                      selectedTask.status === 'rejected'
+                    "
+                    placement="bottom"
+                    trigger="hover"
+                    :show-arrow="false"
+                    :keep-alive-on-hover="false"
+                    :style="{
+                      fontSize: '11px !important',
+                      padding: '4px 8px !important',
+                      borderRadius: '8px !important',
+                      marginTop: '3px !important',
+                      marginLeft: '0px !important',
+                      pointerEvents: 'none',
+                    }"
+                  >
+                    <template #trigger>
+                      <button
+                        class="ms-3"
+                        :class="
+                          selectedTask.status === 'approved'
+                            ? 'icon-action-btn-check'
+                            : 'icon-action-btn-trash'
+                        "
+                        @click.stop="openFeedback(selectedTask)"
+                      >
+                        <MessageCircleCheck
+                          v-if="selectedTask.status === 'approved'"
+                          size="20"
+                        />
+                        <MessageCircleX v-else size="20" />
+                      </button>
+                    </template>
+                    Feedback
+                  </n-tooltip>
+                </div>
               </div>
 
               <!-- Meta rows -->
@@ -1082,11 +1130,12 @@
                         {{ selectedTask.priority }}
                       </span>
                     </template>
-                    <div>
+                    <div class="d-flex flex-column gap-1">
                       <div
                         v-for="(cfg, key) in priorityConfig"
                         :key="key"
                         class="d-flex align-items-center gap-2 px-2 py-1 rounded workspace-item fs-13 fw-medium cursor-pointer text-capitalize"
+                        :class="selectedTask.priority === key ? 'bg-accent' : ''"
                         @click="
                           selectedTask.priority = key;
                           showDetailPriorityPop = false;
@@ -1454,7 +1503,7 @@
                         </div>
                         <span class="fs-11 text-mute">{{ act.time }}</span>
                       </div>
-                      <div class="act-note">{{ act.note }}</div>
+                      <div class="act-note text-truncate">{{ act.note }}</div>
                     </div>
                   </template>
                 </template>
@@ -1525,6 +1574,58 @@
         </div>
       </div>
     </n-modal>
+
+    <!-- Feedback Modal -->
+    <n-modal v-model:show="showFeedbackModal" :mask-closable="true">
+      <div class="bg-white rounded-card" style="width: 500px">
+        <div class="d-flex align-items-center justify-content-between px-4 py-3 pb-2">
+          <span class="fw-medium fs-14">Feedback</span>
+          <n-button
+            text
+            size="small"
+            @click="showFeedbackModal = false"
+            class="hover-circle p-1 rounded-circle"
+          >
+            <X size="18" />
+          </n-button>
+        </div>
+        <n-divider style="margin: 5px 0; --n-color: #e4e4e7" />
+        <div class="px-4 pt-2 pb-3">
+          <template v-if="feedbackLoading">
+            <div class="d-flex justify-content-center py-4">
+              <span class="spinner-border spinner-border-sm" />
+            </div>
+          </template>
+
+          <template v-else-if="feedback">
+            <div class="d-flex align-items-center gap-2 mb-3">
+              <img
+                :src="feedback.reviewed_by?.avatar"
+                class="rounded-circle object-fit-cover"
+                style="width: 34px; height: 34px"
+              />
+              <p class="mb-0 fs-14">
+                <span class="text-dark">{{ feedback.reviewed_by?.name }}</span>
+                {{ feedback.status === "approved" ? "approved" : "rejected" }} the
+                submission
+              </p>
+            </div>
+
+            <div class="bg-accent rounded-card p-3">
+              <p class="fs-14 text-dark mb-2 fw-medium">Feedback</p>
+              <p class="mb-0 fs-13">{{ feedback.feedback || "No feedback provided" }}</p>
+            </div>
+          </template>
+
+          <template v-else>
+            <n-empty
+              description="No feedback found"
+              style="--n-icon-size: 35px; font-size: 12px"
+            />
+          </template>
+        </div>
+      </div>
+    </n-modal>
   </div>
 </template>
 
@@ -1548,6 +1649,8 @@ import {
   UserMinus,
   LayoutDashboard,
   ClipboardList,
+  MessageCircleCheck,
+  MessageCircleX,
 } from "lucide-vue-next";
 import BaseButton from "@/components/BaseButton.vue";
 import BaseInput from "@/components/BaseInput.vue";
@@ -1584,9 +1687,10 @@ const authStore = useAuthStore();
 const { getMe } = storeToRefs(authStore);
 
 const submissionStore = useSubmissionStore();
+const { feedback } = storeToRefs(submissionStore);
 
 const showCreateTask = ref(false);
-
+const showFeedbackModal = ref(false);
 const showStatusPop = ref(false);
 const showPriorityPop = ref(false);
 const showTypePop = ref(false);
@@ -1625,6 +1729,24 @@ const openTaskModal = async (task) => {
     el.style.height = "auto";
     el.style.height = el.scrollHeight + "px";
   });
+};
+
+const feedbackLoading = ref(false);
+
+const openFeedback = async (task) => {
+  showFeedbackModal.value = true;
+  feedbackLoading.value = true;
+  try {
+    await submissionStore.getFeedbackByTaskStore(
+      workspace_id.value,
+      team_id.value,
+      task.id
+    );
+  } catch (error) {
+    toast.error(error.message);
+  } finally {
+    feedbackLoading.value = false;
+  }
 };
 
 const activeTab = ref("");
@@ -1954,6 +2076,8 @@ const handleSubmit = async (task) => {
     showTaskModal.value = false;
   } catch (err) {
     toast.error(err.message);
+    taskMessage.value = "";
+    removeFile();
   } finally {
     isLoading.value = false;
   }

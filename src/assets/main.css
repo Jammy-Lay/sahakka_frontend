@@ -365,6 +365,10 @@ body .n-popover.n-tooltip {
   border: none !important;
 }
 
+button {
+  white-space: nowrap !important;
+}
+
 .workspace-trigger {
   cursor: pointer;
   user-select: none;
@@ -380,7 +384,8 @@ body .n-popover.n-tooltip {
 }
 
 .icon-action-btn,
-.icon-action-btn-trash {
+.icon-action-btn-trash,
+.icon-action-btn-check {
   background: none;
   border: none;
   cursor: pointer;
@@ -401,6 +406,11 @@ body .n-popover.n-tooltip {
 .icon-action-btn-trash:hover {
   background: #f4f4f5;
   color: #FF383C;
+}
+
+.icon-action-btn-check:hover {
+  background: #f4f4f5;
+  color: #34C759;
 }
 
 .cursor-pointer {
@@ -581,8 +591,8 @@ body .n-popover.n-tooltip {
 }
 
 .detail-activity {
-  width: 300px;
-  max-width: 300px;
+  width: 320px;
+  max-width: 320px;
   flex-shrink: 0;
   overflow: hidden;
   display: flex;
@@ -799,7 +809,7 @@ body .n-popover.n-tooltip {
 
 .slide-activity-enter-to,
 .slide-activity-leave-from {
-  max-width: 300px;
+  max-width: 320px;
   opacity: 1;
 }
 
