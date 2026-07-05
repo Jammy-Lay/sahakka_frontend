@@ -15,6 +15,12 @@ const router = createRouter({
       meta: { title: "Sahakka — Team Collaboration Made Simple" },
     },
     {
+      path: "/about",
+      name: "about",
+      component: () => import("../views/AboutView.vue"),
+      meta: { title: "About | Sahakka" },
+    },
+    {
       path: "/register",
       name: "register",
       component: () => import("../views/auth/RegisterView.vue"),
@@ -111,12 +117,6 @@ const router = createRouter({
       name: "invite",
       component: () => import("../views/InviteView.vue"),
       meta: { title: "Invitation | Sahakka" },
-    },
-    {
-      path: "/about",
-      name: "about",
-      component: () => import("../views/AboutView.vue"),
-      meta: { title: "About | Sahakka" },
     },
     {
       path: "/not-verify",
