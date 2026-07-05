@@ -202,7 +202,9 @@
                   class="rounded-circle object-fit-cover"
                   style="width: 30px; height: 30px"
                 />
-                <span class="fw-semibold fs-13 text-truncate">{{ task.assigned_to?.name }}</span>
+                <span class="fw-semibold fs-13 text-truncate">{{
+                  task.assigned_to?.name
+                }}</span>
                 <span class="fw-bold text-mute fs-12">·</span>
                 <span class="text-mute fs-13">Self-assigned the task</span>
               </template>
@@ -214,7 +216,9 @@
                   class="rounded-circle object-fit-cover"
                   style="width: 30px; height: 30px"
                 />
-                <span class="fw-semibold fs-13 text-truncate">{{ task.assigned_by?.name }}</span>
+                <span class="fw-semibold fs-13 text-truncate">{{
+                  task.assigned_by?.name
+                }}</span>
                 <span class="fw-bold text-mute fs-12">·</span>
                 <span
                   v-if="task.assigned_to?.user_id === getMe.user_id"
@@ -1009,9 +1013,7 @@
         <n-divider style="margin: 5px 0; --n-color: #e4e4e7" />
         <div class="px-4 pt-2 pb-3">
           <template v-if="feedbackLoading">
-            <div class="d-flex justify-content-center py-4">
-              <span class="spinner-border spinner-border-sm" />
-            </div>
+            <FeedbackSkeleton />
           </template>
 
           <template v-else-if="feedback">
@@ -1082,6 +1084,7 @@ import { useAuthStore } from "@/stores/auth";
 import CompletionSkeleton from "../Skeleton/CompletionSkeleton.vue";
 import MyTaskSkeleton from "../Skeleton/MyTaskSkeleton.vue";
 import { useSubmissionStore } from "@/stores/user/submission.js";
+import FeedbackSkeleton from "../Skeleton/FeedbackSkeleton.vue";
 
 const route = useRoute();
 const router = useRouter();

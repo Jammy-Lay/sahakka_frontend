@@ -768,7 +768,7 @@ const handleJoin = async () => {
     showJoinPopover.value = false;
     showPopover.value = false;
     toast.success("Joined workspace successfully");
-    await teamStore.getTeamByWorkspaceStore(currentRouteWorkspaceId.value);
+    await teamStore.getTeamByWorkspaceStore(currentRouteWorkspaceId.value, true);
     await refreshWorkspaces();
   } catch (error) {
     toast.error(error.message);

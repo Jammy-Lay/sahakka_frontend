@@ -114,7 +114,7 @@ export const initSocket = () => {
   socket.on("member-joined", async (data) => {
     memberStore.handleMemberJoined(data);
     teamStore.handleMemberJoined(data);
-    workspaceStore.handleMemberJoined(data);
+    // workspaceStore.handleMemberJoined(data);
     const { workspace_id, team_id } = router.currentRoute.value.params;
     if (workspace_id && team_id)
       await teamStore.getActivityTeamStore(workspace_id, team_id);

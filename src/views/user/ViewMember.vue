@@ -242,7 +242,6 @@ async function confirmKick() {
         selectedTeamId.value,
         kickTarget.value.user_id
       );
-      await memberStore.getAllMemberInTeamStore(workspace_id.value, selectedTeamId.value);
     } else {
       await memberStore.removeFromWorkspace(workspace_id.value, kickTarget.value.user_id);
       await memberStore.getAllMemberInWorkspaceStore(workspace_id.value);
@@ -254,8 +253,10 @@ async function confirmKick() {
     toast.error(err.message);
   } finally {
     isKicking.value = false;
-    await teamStore.getTeamByWorkspaceStore(workspace_id.value);
-    await teamStore.getTeamByIdStore(workspace_id.value, selectedTeamId.value);
+    await teamStore.getTeamByWorkspaceStore(workspace_id.value, true);
+    if (selectedTeamId.value !== null) {
+      await teamStore.getTeamByIdStore(workspace_id.value, selectedTeamId.value);
+    }
   }
 }
 
