@@ -118,6 +118,12 @@
                     <ClipboardList size="15" /> Submissions
                   </div>
                   <div
+                    class="d-flex align-items-center rounded gap-2 px-2 py-1 fw-bold workspace-item"
+                    @click="goAnalyticsView(t.team_id)"
+                  >
+                    <ChartNoAxesCombined size="15" /> Analytics
+                  </div>
+                  <div
                     class="d-flex align-items-center rounded gap-2 px-2 py-1 text-danger fw-bold workspace-item"
                     @click.prevent="openDelete(t)"
                   >
@@ -357,6 +363,11 @@ onMounted(async () => {
 const goSubmissionView = (teamId) => {
   showPopover.value[teamId] = false;
   router.push(`/workspace/${currentRouteWorkspaceId.value}/team/${teamId}/submissions`);
+};
+
+const goAnalyticsView = (teamId) => {
+  showPopover.value[teamId] = false;
+  router.push(`/workspace/${currentRouteWorkspaceId.value}/team/${teamId}/analytics`);
 };
 
 function mapMembers(members = []) {

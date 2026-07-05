@@ -95,9 +95,10 @@ async function forgotPassword() {
   isLoading.value = true;
   try {
     await authStore.forgotPassword(email.value);
+    sessionStorage.setItem("allowOtp", "true");
     toast.success("Reset link sent successfully", "/otp");
   } catch (error) {
-    toast.error(error.message || "Something went wrong");
+    toast.success(error.message || "Something went wrong");
   } finally {
     isLoading.value = false;
   }

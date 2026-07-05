@@ -153,7 +153,6 @@ import { useRoute, useRouter } from "vue-router";
 import { NAvatar, NButton, NTag } from "naive-ui";
 import { CircleCheckBig, CircleDashed, Send, CircleCheck, CircleX } from "lucide-vue-next";
 import { useTeamstore } from "@/stores/admin/teams";
-import Loading from "@/components/layouts/Loading.vue";
 import { useToast } from "vue-toastification";
 import { useTaskstore } from "@/stores/admin/tasks";
 import SkeletonTeamDetail from "@/components/Skeleton/SkeletonTeamDetail.vue";

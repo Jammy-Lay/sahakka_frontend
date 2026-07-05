@@ -59,7 +59,6 @@ import { onMounted, ref, computed, watch } from "vue";
 import router from "@/router";
 import { ChartPie, Users } from "lucide-vue-next";
 import BaseTitle from "@/components/BaseTitle.vue";
-import Loading from "@/components/layouts/Loading.vue";
 import { useToast } from "vue-toastification";
 import BaseCardTeam from "@/components/BaseCardTeam.vue";
 import SkeletonTeam from "@/components/Skeleton/SkeletonTeam.vue";
