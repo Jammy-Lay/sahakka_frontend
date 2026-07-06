@@ -242,6 +242,7 @@ async function confirmKick() {
         selectedTeamId.value,
         kickTarget.value.user_id
       );
+      await memberStore.getAllMemberInTeamStore(workspace_id.value, selectedTeamId.value);
     } else {
       await memberStore.removeFromWorkspace(workspace_id.value, kickTarget.value.user_id);
       await memberStore.getAllMemberInWorkspaceStore(workspace_id.value);

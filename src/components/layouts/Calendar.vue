@@ -1304,6 +1304,15 @@ const closePop = (taskId, field) => {
   openPop.value[`${taskId}_${field}`] = false;
 };
 
+watch([getMyTask, selectedTask], ([tasks, selected]) => {
+  if (!selected?.id || !showTaskModal.value) return;
+  if (!tasks.some((t) => t.id === selected.id)) {
+    showTaskModal.value = false;
+    selectedTask.value = null;
+    originalTask.value = null;
+  }
+});
+
 const myWorkspaceRole = computed(() => {
   const me = getTeamById.value?.members?.find((m) => m.user_id === getMe.value?.user_id);
   return me?.role ?? "member";
