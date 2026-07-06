@@ -98,9 +98,9 @@ watch(
   { immediate: true, deep: true }
 );
 
-// onMounted(async () => {
-//   await authStore.getMeStore();
-// });
+onMounted(async () => {
+  await authStore.getMeStore();
+});
 
 const showCalendar = computed(() => {
   return route.name !== "viewMember" && route.name !== "submissions" && route.name !== "analytics";
