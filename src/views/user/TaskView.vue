@@ -1680,7 +1680,7 @@ const workspaceStore = UseWorkspaceStore();
 const { getAllWorkspace } = storeToRefs(workspaceStore);
 
 const taskStore = useTaskStore();
-const { getTask, getTaskActivity, getMyTask, getMyDailyTask } = storeToRefs(taskStore);
+const { getTaskByTeam, getTask, getTaskActivity, getMyTask, getMyDailyTask } = storeToRefs(taskStore);
 
 const teamStore = useTeamStore();
 const { getTeamById, getTeamByWorkspace, getMember } = storeToRefs(teamStore);
@@ -1967,12 +1967,26 @@ const handleDeleteTask = async (task) => {
     await taskStore.getTaskByTeamStore(workspace_id.value, team_id.value);
     toast.success("Delete Task Successfully");
     showDeleteModal.value = false;
+    if (selectedTask.value?.id === task.id) {
+      showTaskModal.value = false;
+      selectedTask.value = null;
+      originalTask.value = null;
+    }
   } catch (error) {
     toast.error(error.message);
   } finally {
     isLoading.value = false;
   }
 };
+
+watch([getTaskByTeam, selectedTask], ([tasks, selected]) => {
+  if (!selected?.id || !showTaskModal.value) return;
+  if (!tasks.some((t) => t.id === selected.id)) {
+    showTaskModal.value = false;
+    selectedTask.value = null;
+    originalTask.value = null;
+  }
+});
 
 onMounted(async () => {
   await taskStore.getTaskByTeamStore(workspace_id.value, team_id.value);

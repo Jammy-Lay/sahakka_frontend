@@ -35,12 +35,12 @@ export const initSocket = () => {
   socket.off("document-created");
   socket.off("document-updated");
   socket.off("document-deleted");
-  socket.off("document-updated-content"); 
+  socket.off("document-updated-content");
   socket.off("submission-created");
   socket.off("submission-updated");
   socket.off("profile-updated");
   socket.off("connect");
-   socket.off("error"); 
+  socket.off("error");
 
   socket.on("connect", () => {
     const { workspace_id, team_id } = router.currentRoute.value.params;
@@ -165,6 +165,7 @@ export const initSocket = () => {
       await memberStore.getAllMemberInTeamStore(
         data.workspace_id,
         data.team_id,
+        true,
       );
     }
 
@@ -194,6 +195,7 @@ export const initSocket = () => {
       await memberStore.getAllMemberInTeamStore(
         data.workspace_id,
         memberStore.selectedTeamId,
+        true,
       );
     }
   });
