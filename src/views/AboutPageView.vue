@@ -58,7 +58,7 @@ import Footer from './Footer.vue';
 import { ArrowLeft } from 'lucide-vue-next';
 import { Swiper, SwiperSlide } from 'swiper/vue';
 import DevTeamCard from './DevTeamCard.vue';
-import dumb from '../assets/image/dev-team-img/dumb.jpg';
+import dumb from '../assets/image/dev-team-img/hor.png';
 import satsya from '../assets/image/dev-team-img/satsya.jpg';
 import sothatt from '../assets/image/dev-team-img/sothatt.jpg';
 import vichhra from '../assets/image/dev-team-img/vichhra.jpg';
