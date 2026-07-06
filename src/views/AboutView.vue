@@ -72,7 +72,7 @@ import image3 from '../assets/image/dev-team-img/sponsor/image3.png';
 import 'swiper/css';
 import 'swiper/css/effect-cards';
 // import required modules
-import { EffectCards } from 'swiper/modules';
+import { EffectCards } from 'swiper/modules'; 
 
 const modules = [EffectCards];
 
