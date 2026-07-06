@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory } from "vue-router";
-import HomeView from "../views/LandingPageView.vue";
+import HomeView from "../views/HomeView.vue";
 import { useAuthStore } from "@/stores/auth.js";
 import { UseWorkspaceStore } from "@/stores/user/workspace";
 import { useTeamStore } from "@/stores/user/team";
@@ -115,7 +115,7 @@ const router = createRouter({
     {
       path: "/about",
       name: "about",
-      component: () => import("../views/AboutView.vue"),
+      component: () => import("../views/AboutPageView.vue"),
       meta: { title: "About | Sahakka" },
     },
     {

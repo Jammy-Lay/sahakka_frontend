@@ -1,40 +1,6 @@
 <template>
-  <header class="fixed-top z-9999">
-    <nav class="navbar navbar-expand-lg bg-white">
-      <div class="container-fluid d-flex justify-between align-items-center h-100">
-        <router-link :to="{ name: 'home' }" class="navbar-brand">
-          <img height="50" src="../assets/image/logo-nospace.svg" alt="" srcset="">
-        </router-link>
-
-        <button ref="collapse" class="navbar-toggler border-dark border-2 shadow-none rounded-4 px-4 py-2" type="button"
-          data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false"
-          aria-label="Toggle navigation">
-          <Menu />
-        </button>
-
-        <div class="collapse navbar-collapse justify-content-end gap-5 gap-lg-2" id="navbarNav">
-          <ul class="navbar-nav">
-            <li class="nav-item">
-              <router-link :to="{ name: 'login' }"
-                class="nav-link rounded-btn py-3 text-black d-flex align-items-center gap-2">
-                <Mail size="16" />
-                Contact us
-              </router-link>
-            </li>
-          </ul>
-          <div class="d-flex gap-2">
-            <router-link :to="{ name: 'register' }" class="btn rounded-btn btn-light border px-4 py-2">Sign
-              up</router-link>
-            <router-link :to="{ name: 'login' }" class="btn rounded-btn btn-primary px-4 py-2">Sign in</router-link>
-          </div>
-        </div>
-
-      </div>
-    </nav>
-  </header>
 
   <main>
-    <div style="height: 8vh"></div>
     <section class="position-relative overflow-hidden hero-section">
       <img src="../assets/image/m.svg" class="position-absolute m-path top-0 start-0 z-0" alt="" style="scale: 1.6 1;">
       <div class="container-fluid h-100">
@@ -186,34 +152,6 @@
     </section>
 
   </main>
-
-  <footer class="pb-1">
-    <div class="container">
-      <div class="logo"><img src="../assets/image/logo-nospace.svg" height="70" alt=""></div>
-      <div style="height: 60px"></div>
-      <div class="row">
-        <div class="col-4">
-          <h3 class="fw-bold mb-3">Company</h3>
-          <ul class="navbar-nav">
-            <li>
-              <router-link :to="{ name: 'about' }" class="nav-link fw-medium">About us</router-link>
-            </li>
-          </ul>
-        </div>
-      </div>
-      <div class="row mt-5 g-3">
-        <div class="col-md-6">
-          <h6 class="fw-bold text-muted">&copy;&nbsp;{{ new Date().getFullYear() }}  Sahakka, Inc. All rights reserved.</h6>
-        </div>
-        <div class="col-md-6">
-          <h6 class="fw-bold text-muted text-lg-end">Made with care for teams who ship.</h6>
-        </div>
-      </div>
-      <div class="mt-10">
-        <img class="w-100" src="../assets/image/shakka-name.svg" alt="">
-      </div>
-    </div>
-  </footer>
   
 </template>
 
