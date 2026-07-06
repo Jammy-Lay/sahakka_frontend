@@ -278,7 +278,7 @@
               v-if="myWorkspaces.length === 0"
               description="No Data"
               class="my-2"
-              style="--n-icon-size: 25px"
+              style="--n-icon-size: 35px"
             />
 
             <div
@@ -312,7 +312,7 @@
               v-if="joinedWorkspaces.length === 0"
               description="No Data"
               class="my-2"
-              style="--n-icon-size: 25px"
+              style="--n-icon-size: 35px"
             />
 
             <div

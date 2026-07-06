@@ -208,12 +208,13 @@
           </div>
 
           <div class="mb-2">
-            <label class="fs-14 text-dark mb-1">Feedback</label>
+            <label class="fs-14 text-dark mb-1 required">Feedback</label>
             <textarea
               v-model="feedback"
               placeholder="Feedback"
               class="form-control fs-13 rounded-btn-sm bg-white mb-3 base-input"
               style="min-height: 90px; resize: vertical; border: 1px solid #e4e4e7"
+              :disabled="selectedSubmission.status !== 'pending'"
             />
             <div class="d-flex align-items-center gap-2 z-3">
               <label class="fs-14 text-dark">Review Status :</label>
@@ -222,19 +223,23 @@
                 trigger="click"
                 placement="bottom-start"
                 :show-arrow="false"
+                :disabled="selectedSubmission.status !== 'pending'"
                 style="border-radius: 12px; padding: 6px; width: 140px"
               >
                 <template #trigger>
                   <span
-                    class="tab-info w-fit fw-medium cursor-pointer"
-                    :class="
+                    class="tab-info w-fit fw-medium"
+                    :class="[
                       selectedStatus
                         ? [
                             reviewStatusConfig[selectedStatus]?.bg,
                             reviewStatusConfig[selectedStatus]?.text,
                           ]
-                        : ['bg-accent', 'text-mute']
-                    "
+                        : ['bg-accent', 'text-mute'],
+                      selectedSubmission.status !== 'pending'
+                        ? 'cursor-default'
+                        : 'cursor-pointer',
+                    ]"
                   >
                     <component
                       v-if="selectedStatus"
@@ -274,6 +279,7 @@
               Close
             </button>
             <button
+              v-if="selectedSubmission.status === 'pending'"
               class="btn bg-btn rounded-card py-2 px-3 d-flex align-items-center gap-2 fs-14"
               :disabled="isLoading"
               @click="handleSend"
@@ -307,6 +313,7 @@ import { notify } from "@/utils/toast";
 import { storeToRefs } from "pinia";
 import SubmissionSkeleton from "@/components/Skeleton/SubmissionSkeleton.vue";
 import { useTeamStore } from "@/stores/user/team";
+import { useTaskStore } from "@/stores/user/task";
 
 const route = useRoute();
 const router = useRouter();
@@ -319,6 +326,8 @@ const { getAllSubmissionByTeam } = storeToRefs(submissionStore);
 
 const teamStore = useTeamStore();
 const { getTeamById } = storeToRefs(teamStore);
+
+const taskStore = useTaskStore();
 
 const showModal = ref(false);
 const showStatusPop = ref(false);
@@ -346,8 +355,17 @@ const reviewStatusConfig = {
 };
 
 onMounted(async () => {
-  teamStore.getTeamByIdStore(workspace_id.value, team_id.value);
-  submissionStore.getAllSubmissionByTeamStore(workspace_id.value, team_id.value);
+  await submissionStore.getAllSubmissionByTeamStore(workspace_id.value, team_id.value);
+  await teamStore.getTeamByIdStore(workspace_id.value, team_id.value);
+
+  const submissionIdFromQuery = route.query.submission_id;
+  if (submissionIdFromQuery) {
+    const found = getAllSubmissionByTeam.value.find(
+      (s) => String(s.submission_id) === String(submissionIdFromQuery)
+    );
+    if (found) openReview(found);
+    router.replace({ query: {} });
+  }
 });
 
 const formatDateTime = (dateString) => {
@@ -380,7 +398,7 @@ const openReview = (sub) => {
   selectedSubmission.value = sub;
   selectedStatus.value =
     sub.status === "approved" || sub.status === "rejected" ? sub.status : null;
-  feedback.value = "";
+  feedback.value = sub.status === "pending" ? "" : sub.feedback || "";
   showModal.value = true;
 };
 
@@ -404,6 +422,7 @@ async function handleSend() {
       { status: selectedStatus.value, feedback: feedback.value }
     );
     await submissionStore.getAllSubmissionByTeamStore(workspace_id.value, team_id.value);
+    await taskStore.getTaskByTeamStore(workspace_id.value, team_id.value, "", true);
     feedback.value = "";
     selectedStatus.value = null;
     selectedSubmission.value = null;

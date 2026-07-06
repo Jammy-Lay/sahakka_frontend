@@ -82,10 +82,11 @@ import router from "@/router";
 import { useToast } from "vue-toastification";
 import BaseCardTeam from "@/components/BaseCardTeam.vue";
 import SkeletonWorkspaceDetail from "@/components/Skeleton/SkeletonWorkspaceDetail.vue";
+import { notify } from "@/utils/toast";
 
 const route = useRoute();
 const loading = ref(false);
-const toast = useToast();
+const toast = notify(router);
 
 const useWorkspace = useWorkspaceStore();
 const useTeam = useTeamstore();

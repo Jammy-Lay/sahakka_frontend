@@ -54,7 +54,7 @@ body .n-popover.n-tooltip {
   border: 1px solid transparent !important;
   border-radius: 10px !important;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) !important;
-  padding: 12px 16px !important;
+  padding: 20px 18px !important;
   display: flex !important;
   align-items: center !important;
   min-height: unset !important;
@@ -64,7 +64,7 @@ body .n-popover.n-tooltip {
 .Vue-Toastification__toast-body {
   display: flex !important;
   align-items: center !important;
-  font-size: 13px !important;
+  font-size: 15px !important;
   font-weight: 500 !important;
   padding: 0 !important;
   margin: 0 !important;
@@ -365,6 +365,10 @@ body .n-popover.n-tooltip {
   border: none !important;
 }
 
+button {
+  white-space: nowrap !important;
+}
+
 .workspace-trigger {
   cursor: pointer;
   user-select: none;
@@ -380,7 +384,8 @@ body .n-popover.n-tooltip {
 }
 
 .icon-action-btn,
-.icon-action-btn-trash {
+.icon-action-btn-trash,
+.icon-action-btn-check {
   background: none;
   border: none;
   cursor: pointer;
@@ -401,6 +406,11 @@ body .n-popover.n-tooltip {
 .icon-action-btn-trash:hover {
   background: #f4f4f5;
   color: #FF383C;
+}
+
+.icon-action-btn-check:hover {
+  background: #f4f4f5;
+  color: #34C759;
 }
 
 .cursor-pointer {
@@ -581,8 +591,8 @@ body .n-popover.n-tooltip {
 }
 
 .detail-activity {
-  width: 300px;
-  max-width: 300px;
+  width: 320px;
+  max-width: 320px;
   flex-shrink: 0;
   overflow: hidden;
   display: flex;
@@ -714,6 +724,11 @@ body .n-popover.n-tooltip {
   color: #34c759;
 }
 
+.act-tag-join {
+  background: #c2eecd;
+  color: #34c759;
+}
+
 .act-tag-assign {
   background: #b2dbff;
   color: #0088ff;
@@ -745,6 +760,11 @@ body .n-popover.n-tooltip {
 }
 
 .act-tag-leave {
+  background: #ffc3c4;
+  color: #FF383C;
+}
+
+.act-tag-unassign {
   background: #ffc3c4;
   color: #FF383C;
 }
@@ -789,7 +809,7 @@ body .n-popover.n-tooltip {
 
 .slide-activity-enter-to,
 .slide-activity-leave-from {
-  max-width: 300px;
+  max-width: 320px;
   opacity: 1;
 }
 
@@ -869,4 +889,9 @@ body .n-popover.n-tooltip {
 /* child items — bar sits near the text */
 .n-submenu-children .n-menu-item-content::after {
   left: 28px !important;
+}
+
+.required::after {
+    content: " *";
+    color: red;
 }

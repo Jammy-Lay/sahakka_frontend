@@ -5,6 +5,7 @@ import { ref } from "vue";
 export const useSubmissionStore = defineStore("submission", () => {
   let getAllSubmissionByTeam = ref([]);
   let loading = ref(true);
+  let feedback = ref(null);
 
   const getAllSubmissionByTeamStore = async (workspace_id, team_id) => {
     try {
@@ -48,11 +49,24 @@ export const useSubmissionStore = defineStore("submission", () => {
     }
   };
 
+  const getFeedbackByTaskStore = async (workspace_id, team_id, task_id) => {
+    try {
+      const res = await api.get(
+        `/workspace/${workspace_id}/team/${team_id}/task/${task_id}/feedback`,
+      );
+      feedback.value = res.data.data;
+    } catch (err) {
+      throw new Error(err.response?.data?.message || "Get feedback failed");
+    }
+  };
+
   return {
     getAllSubmissionByTeam,
     getAllSubmissionByTeamStore,
     loading,
     submitTask,
-    updateSubmission
+    updateSubmission,
+    getFeedbackByTaskStore,
+    feedback,
   };
 });

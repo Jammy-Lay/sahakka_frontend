@@ -14,7 +14,7 @@
                 <div class="mb-4 col-12 col-sm-6 col-md-4 col-lg-3 px-0">
                     <div class="form-control rounded-btn d-flex align-items-center py-1" style="width: 300px;">
                         <input v-model="search" type="text" class="search-input shadow-none outline-none border-0 w-100"
-                            placeholder="Search " />
+                            placeholder="Search by team , task" />
                         <Search color="var(--bs-gray)" size="18" />
                     </div>
                 </div>
@@ -267,23 +267,23 @@ const formatDate = (d) => {
 }
 
 .badge-urgent {
-    background: #faece7;
-    color: #993c1d;
+    background-color: #cfccfc !important;
+    color: #6155f5 !important;
 }
 
 .badge-high {
-    background: #faeeda;
-    color: #854f0b;
+    background-color: #ffc3c4 !important;
+    color: #ff383c !important;
 }
 
 .badge-medium {
-    background: #e6f1fb;
-    color: #185fa5;
+    background-color: #ffddbe !important;
+    color: #ff8d28 !important;
 }
 
 .badge-low {
-    background: #eaf3de;
-    color: #3b6d11;
+    background-color: #D5D4D6 !important;
+    color: #171717 !important;
 }
 
 /* ── Footer ── */

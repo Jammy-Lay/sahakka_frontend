@@ -20,7 +20,7 @@
             <h6 class="text-mute mb-6">Create your account and manage your task.</h6>
 
             <form @submit.prevent="handleRegister">
-              <label class="mb-2 text-dark">Username</label>
+              <label class="mb-2 text-dark required">Username</label>
               <BaseInput
                 input-style="padding: 12px 0"
                 input-class="ps-3 rounded-btn text-dark fs-15"
@@ -30,7 +30,7 @@
               <p v-if="err.name" class="text-danger mt-1 fs-14">{{ err.name }}</p>
 
               <div :class="err.name ? 'mt-3' : 'mt-4'">
-                <label class="mb-2 text-dark">Email</label>
+                <label class="mb-2 text-dark required">Email</label>
                 <BaseInput
                   input-style="padding: 12px 0"
                   input-class="ps-3 rounded-btn text-dark fs-15"
@@ -41,7 +41,7 @@
               </div>
 
               <div :class="err.email ? 'mt-3 mb-4' : 'my-4'">
-                <label class="mb-2 text-dark">Password</label>
+                <label class="mb-2 text-dark required">Password</label>
                 <div class="position-relative">
                   <BaseInput
                     :input-type="showPassword ? 'text' : 'password'"
