@@ -12,7 +12,7 @@ import { onBeforeUnmount, onMounted, ref } from "vue";
 import { useEditor, EditorContent, Extension } from "@tiptap/vue-3";
 import { Placeholder } from "@tiptap/extensions";
 import StarterKit from "@tiptap/starter-kit";
-import Underline from "@tiptap/extension-underline"; 
+import Underline from "@tiptap/extension-underline";
 import TipTapToolbar from "./TipTapToolbar.vue";
 import { useDocumentStore } from "@/stores/user/document.js";
 import { useRoute } from "vue-router";
@@ -52,6 +52,7 @@ const editor = useEditor({
       blockquote: {},
       hardBreak: {},
       history: {},
+      underline: false,
     }),
     Placeholder.configure({
       placeholder: "Write something…",
@@ -104,19 +105,11 @@ const handleDocumentUpdated = (data) => {
   const current = editor.value.getHTML();
   if (incoming === current) return;
 
-  editor.value
-    .chain()
-    .setMeta("addToHistory", false)
-    .setContent(incoming, false)
-    .run();
+  editor.value.chain().setMeta("addToHistory", false).setContent(incoming, false).run();
 };
 
 onMounted(async () => {
-  const res = await useDocument.getDocumentById(
-    workspace_id,
-    team_id,
-    document_id
-  );
+  const res = await useDocument.getDocumentById(workspace_id, team_id, document_id);
   title.value = res.title;
   editor.value
     .chain()
@@ -125,12 +118,12 @@ onMounted(async () => {
     .run();
   editor.value.chain().focus().run();
 
-  socket.on("document-updated", handleDocumentUpdated); 
+  socket.on("document-updated-content", handleDocumentUpdated);
 });
 
 onBeforeUnmount(() => {
   clearTimeout(saveTimeout);
-  socket.off("document-updated", handleDocumentUpdated);
+  socket.off("document-updated-content", handleDocumentUpdated);
   editor.value?.destroy();
 });
 </script>

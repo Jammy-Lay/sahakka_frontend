@@ -75,7 +75,7 @@
               </button>
             </template>
             <div style="padding: 10px">
-              <h6 class="fw-semibold fs-13 ps-1">Workspace name</h6>
+              <h6 class="fw-semibold fs-13 ps-1 required">Workspace name</h6>
               <BaseInput
                 v-model="newWorkspaceName"
                 input-placeholder="Name"
@@ -211,7 +211,7 @@
 
             <div style="padding: 10px">
               <div class="p-2 rounded-btn bg-accent border border-1">
-                <p class="fs-13 mb-2 ps-1 text-dark">Code or token</p>
+                <p class="fs-13 mb-2 ps-1 text-dark required">Code or token</p>
                 <BaseInput
                   v-model="joinCode"
                   input-placeholder="XXXXXXXX"
@@ -237,7 +237,7 @@
           style="--n-icon-size: 25px; font-size: 10px"
         />
 
-        <n-scrollbar style="max-height: 132px" v-else>
+        <n-scrollbar style="max-height: 180px" v-else>
           <div
             v-for="ws in joinedWorkspaces"
             :key="ws.workspace_id"
@@ -361,12 +361,18 @@
                 />
               </div>
               <div>
-                <BaseButton
-                  :btnName="isInviteLoading ? 'Inviting...' : 'Invite'"
-                  class="fs-13 rounded-btn-sm fw-medium text-nowrap h-100"
+                <button
+                  class="btn bg-btn rounded-btn-sm d-flex align-items-center gap-1 fs-13 text-nowrap h-100"
                   :disabled="isInviteLoading"
                   @click="handleInvite"
-                />
+                >
+                  <span
+                    v-if="isInviteLoading"
+                    class="spinner-border spinner-border-sm me-2"
+                  />
+                  <Plus v-else :size="15" />
+                  {{ isInviteLoading ? "Inviting..." : "Invite" }}
+                </button>
               </div>
             </div>
 
@@ -578,6 +584,7 @@ import { notify } from "@/utils/toast";
 import { useCrudWorkspaceStore } from "@/stores/workspaces/workspaces";
 import BaseBtn from "../BaseBtn.vue";
 import HeaderSkeleton from "../workspace/HeaderSkeleton.vue";
+import { require, isEmail, validates } from "@/utils/validate";
 
 const route = useRoute();
 const router = useRouter();
@@ -761,7 +768,7 @@ const handleJoin = async () => {
     showJoinPopover.value = false;
     showPopover.value = false;
     toast.success("Joined workspace successfully");
-    await teamStore.getTeamByWorkspaceStore(currentRouteWorkspaceId.value);
+    await teamStore.getTeamByWorkspaceStore(currentRouteWorkspaceId.value, true);
     await refreshWorkspaces();
   } catch (error) {
     toast.error(error.message);
@@ -771,7 +778,15 @@ const handleJoin = async () => {
 };
 
 const handleInvite = async () => {
-  if (!inviteEmail.value.trim()) return;
+  const err = validates(inviteEmail.value, [
+    (v) => require(v, "Email is required"),
+    (v) => isEmail(v, "Please enter a valid email"),
+  ]);
+
+  if (err) {
+    toast.error(err);
+    return;
+  }
 
   isInviteLoading.value = true;
   try {
@@ -785,13 +800,13 @@ const handleInvite = async () => {
     showInvitePopover.value = false;
   } catch (error) {
     toast.error(error.message);
+    inviteEmail.value = "";
   } finally {
     isInviteLoading.value = false;
   }
 };
 
 const handleGenerate = async () => {
-  isLoading.value = true;
   isGenerateLoading.value = true;
   try {
     const res = await inviteStore.generatePasscode(
@@ -804,7 +819,6 @@ const handleGenerate = async () => {
     toast.error(error.message);
   } finally {
     isGenerateLoading.value = false;
-    isLoading.value = false;
   }
 };
 
@@ -817,6 +831,13 @@ const handleCopy = async () => {
     isCopy.value = false;
   }, 2000);
 };
+
+watch(currentRouteTeamId, () => {
+  passcode.value = "";
+  inviteEmail.value = "";
+  isCopy.value = false;
+  showInvitePopover.value = false;
+});
 
 const handleLogout = async () => {
   try {

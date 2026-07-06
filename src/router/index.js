@@ -1,5 +1,9 @@
 import { createRouter, createWebHistory } from "vue-router";
-import HomeView from "../views/HomeView.vue";
+import HomeView from "../views/LandingPageView.vue";
+import { useAuthStore } from "@/stores/auth.js";
+import { UseWorkspaceStore } from "@/stores/user/workspace";
+import { useTeamStore } from "@/stores/user/team";
+import { jwtDecode } from "jwt-decode";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -11,12 +15,6 @@ const router = createRouter({
       meta: { title: "Sahakka — Team Collaboration Made Simple" },
     },
     {
-      path: "/about",
-      name: "about",
-      component: () => import("../views/AboutView.vue"),
-      meta: { title: "About | Sahakka" },
-    },
-    {
       path: "/register",
       name: "register",
       component: () => import("../views/auth/RegisterView.vue"),
@@ -26,7 +24,7 @@ const router = createRouter({
       path: "/otp",
       name: "otp",
       component: () => import("../views/auth/OtpView.vue"),
-      meta: { title: "OTP Verification | Sahakka" },
+      meta: { title: "OTP Verification | Sahakka", requiresOtpAccess: true },
     },
     {
       path: "/forgot-password",
@@ -38,12 +36,13 @@ const router = createRouter({
       path: "/new-password",
       name: "new-password",
       component: () => import("../views/auth/newPassword.vue"),
-      meta: { title: "Reset Password | Sahakka" },
+      meta: { title: "Reset Password | Sahakka", requiresResetAccess: true },
     },
     {
       path: "/workspace",
       name: "workspace",
       component: () => import("../layouts/MainLayout.vue"),
+      meta: { requiresAuth: true, requiresMembership: true },
       children: [
         {
           path: ":workspace_id/team/:team_id/tasks",
@@ -56,6 +55,12 @@ const router = createRouter({
           name: "submissions",
           component: () => import("../views/user/SubmissionView.vue"),
           meta: { title: "Submissions | Sahakka" },
+        },
+        {
+          path: ":workspace_id/team/:team_id/analytics",
+          name: "analytics",
+          component: () => import("../views/user/MemberAnnaly.vue"),
+          meta: { title: "Analytics | Sahakka" },
         },
         {
           path: ":workspace_id/team/:team_id/issues",
@@ -108,6 +113,12 @@ const router = createRouter({
       meta: { title: "Invitation | Sahakka" },
     },
     {
+      path: "/about",
+      name: "about",
+      component: () => import("../views/AboutView.vue"),
+      meta: { title: "About | Sahakka" },
+    },
+    {
       path: "/not-verify",
       name: "not-verify",
       component: () => import("../views/NotVerifyEmailView.vue"),
@@ -122,6 +133,7 @@ const router = createRouter({
     {
       path: "/settings",
       component: () => import("../layouts/ProfileLayout.vue"),
+      meta: { requiresAuth: true },
       children: [
         {
           path: "",
@@ -147,6 +159,7 @@ const router = createRouter({
     {
       path: "/admin/",
       component: () => import("../layouts/AdminLayout.vue"),
+      meta: { requiresAuth: true, requiresAdmin: true },
       children: [
         {
           path: "dashboard",
@@ -197,12 +210,6 @@ const router = createRouter({
       ],
     },
     {
-      path: "/loading",
-      name: "loading",
-      component: () => import("../components/layouts/Loading.vue"),
-      meta: { title: "Loading | Sahakka" },
-    },
-    {
       path: "/:pathMatch(.*)*",
       name: "not-found",
       component: () => import("../views/NotFoundView.vue"),
@@ -211,9 +218,112 @@ const router = createRouter({
   ],
 });
 
-// Dynamic title handler
 router.afterEach((to) => {
   document.title = to.meta.title || "Sahakka — Team Collaboration Made Simple";
+});
+
+router.beforeEach(async (to) => {
+  const auth = useAuthStore();
+
+  const requiresOtpAccess = to.matched.some((r) => r.meta.requiresOtpAccess);
+  const requiresResetAccess = to.matched.some(
+    (r) => r.meta.requiresResetAccess,
+  );
+
+  if (requiresOtpAccess) {
+    const allowOtp = sessionStorage.getItem("allowOtp");
+
+    if (!allowOtp) {
+      return { name: "not-found" };
+    }
+
+    return true;
+  }
+
+  if (requiresResetAccess) {
+    const allowReset = sessionStorage.getItem("allowNewPassword");
+    if (!allowReset) {
+      return { name: "not-found" };
+    }
+
+    return true;
+  }
+
+  const needsAuth = to.matched.some((r) => r.meta.requiresAuth);
+  const needsAdmin = to.matched.some((r) => r.meta.requiresAdmin);
+  const needsMembership = to.matched.some((r) => r.meta.requiresMembership);
+
+  if (!needsAuth && !needsAdmin && !needsMembership) return true;
+
+  if (!auth.isLoggedIn) {
+    return needsAdmin ? { name: "not-found" } : { name: "login" };
+  }
+
+  if (needsAdmin) {
+    let decoded;
+    try {
+      decoded = jwtDecode(auth.token);
+    } catch (err) {
+      auth.logout();
+      return { name: "login", query: { redirect: to.fullPath } };
+    }
+
+    if (!decoded.role) {
+      try {
+        await auth.getMeStore();
+      } catch (err) {
+        auth.logout();
+        return { name: "not-found" };
+      }
+    }
+    if (decoded.role !== "admin") {
+      return { name: "not-found" };
+    }
+  }
+
+  if (needsMembership) {
+    const { workspace_id, team_id } = to.params;
+
+    if (workspace_id) {
+      const workspaceStore = UseWorkspaceStore();
+
+      if (workspaceStore.getAllWorkspace.length === 0) {
+        try {
+          await workspaceStore.getMyWorkspaceStore();
+        } catch (err) {
+          return { name: "login" };
+        }
+      }
+
+      const inWorkspace = workspaceStore.getAllWorkspace.some(
+        (w) => String(w.workspace_id) === String(workspace_id),
+      );
+
+      if (!inWorkspace) {
+        return { name: "not-found" };
+      }
+
+      if (team_id) {
+        const teamStore = useTeamStore();
+
+        try {
+          await teamStore.getTeamByWorkspaceStore(workspace_id, true);
+        } catch (err) {
+          return { name: "not-found" };
+        }
+
+        const inTeam = teamStore.getTeamByWorkspace.some(
+          (t) => String(t.team_id) === String(team_id),
+        );
+
+        if (!inTeam) {
+          return { name: "not-found" };
+        }
+      }
+    }
+  }
+
+  return true;
 });
 
 export default router;

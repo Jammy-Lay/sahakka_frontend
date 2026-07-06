@@ -33,10 +33,6 @@
 
   .feature-card {
     height: 100%;
-    &:hover {
-      scale: 1.05;
-      box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
-    }
   }
 
   .feature-icon {

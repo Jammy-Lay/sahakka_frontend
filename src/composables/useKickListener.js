@@ -12,54 +12,95 @@ export function useKickListener() {
   const { myWorkspaces } = storeToRefs(workspaceStore);
 
   const redirectToFirstTeam = async (workspace_id) => {
-    await teamStore.getTeamByWorkspaceStore(workspace_id);
-    const teams = teamStore.getTeamByWorkspace;
+    try {
+      await teamStore.getTeamByWorkspaceStore(workspace_id);
+      const teams = teamStore.getTeamByWorkspace;
 
-    if (teams && teams.length > 0) {
-      router.push(`/workspace/${workspace_id}/team/${teams[0].team_id}/tasks`);
-      return true;
+      if (teams && teams.length > 0) {
+        router.push(
+          `/workspace/${workspace_id}/team/${teams[0].team_id}/tasks`,
+        );
+        return true;
+      }
+      return false;
+    } catch (err) {
+      console.error(
+        `[useKickListener] redirectToFirstTeam failed for workspace ${workspace_id}:`,
+        err,
+      );
+      return false;
     }
-    return false;
   };
 
   const redirectToFallbackWorkspace = async () => {
-    await workspaceStore.getMyWorkspaceStore();
-    const workspaces = myWorkspaces.value;
+    try {
+      await workspaceStore.getMyWorkspaceStore();
+      const workspaces = myWorkspaces.value;
 
-    if (!workspaces || workspaces.length === 0) {
+      if (!workspaces || workspaces.length === 0) {
+        router.push("/no-workspace");
+        return;
+      }
+
+      for (const ws of workspaces) {
+        const redirected = await redirectToFirstTeam(ws.workspace_id);
+        if (redirected) return;
+      }
+
       router.push("/no-workspace");
-      return;
+    } catch (err) {
+      console.error(
+        "[useKickListener] redirectToFallbackWorkspace failed:",
+        err,
+      );
+      router.push("/no-workspace");
     }
+  };
 
-    const redirected = await redirectToFirstTeam(workspaces[0].workspace_id);
-    if (!redirected) {
-      router.push("/no-workspace");
+  const refreshMyWorkspaces = async () => {
+    try {
+      await workspaceStore.getMyWorkspaceStore();
+    } catch (err) {
+      console.error("[useKickListener] refreshMyWorkspaces failed:", err);
     }
   };
 
   const handleKickedFromTeam = async ({ workspace_id, team_id }) => {
+    await refreshMyWorkspaces();
     const currentWorkspaceId = route.params.workspace_id;
     const currentTeamId = route.params.team_id;
 
-    const isInAffectedWorkspace = String(currentWorkspaceId) === String(workspace_id);
-    const isInAffectedTeam = String(currentTeamId) === String(team_id);
+    if (String(currentWorkspaceId) !== String(workspace_id)) {
+      return;
+    }
 
-    await workspaceStore.getMyWorkspaceStore();
-    await teamStore.getTeamByWorkspaceStore(workspace_id);
+    if (String(currentTeamId) !== String(team_id)) {
+      return;
+    }
 
-    if (!isInAffectedWorkspace) return;
-    if (!isInAffectedTeam) return;
+    try {
+      await teamStore.getTeamByWorkspaceStore(workspace_id, true);
 
-    const remainingTeams = teamStore.getTeamByWorkspace;
+      const remainingTeams = teamStore.getTeamByWorkspace;
+      const filteredTeams = remainingTeams?.filter(
+        (t) => String(t.team_id) !== String(team_id),
+      );
 
-    if (remainingTeams && remainingTeams.length > 0) {
-      router.push(`/workspace/${workspace_id}/team/${remainingTeams[0].team_id}/tasks`);
-    } else {
+      if (filteredTeams && filteredTeams.length > 0) {
+        router.push(
+          `/workspace/${workspace_id}/team/${filteredTeams[0].team_id}/tasks`,
+        );
+      } else {
+        await redirectToFallbackWorkspace();
+      }
+    } catch (err) {
+      console.error("[useKickListener] handleKickedFromTeam failed:", err);
       await redirectToFallbackWorkspace();
     }
   };
 
   const handleTeamDeleted = async ({ workspace_id, team_id }) => {
+    await refreshMyWorkspaces();
     const currentWorkspaceId = route.params.workspace_id;
     const currentTeamId = route.params.team_id;
 
@@ -67,29 +108,46 @@ export function useKickListener() {
       String(currentWorkspaceId) === String(workspace_id) &&
       String(currentTeamId) === String(team_id);
 
-    if (!isViewingDeletedTeam) return;
+    if (!isViewingDeletedTeam) {
+      return;
+    }
 
-    await workspaceStore.getMyWorkspaceStore();
-    await teamStore.getTeamByWorkspaceStore(workspace_id);
+    try {
+      await teamStore.getTeamByWorkspaceStore(workspace_id, true);
 
-    const remainingTeams = teamStore.getTeamByWorkspace;
+      const remainingTeams = teamStore.getTeamByWorkspace;
+      const filteredTeams = remainingTeams?.filter(
+        (t) => String(t.team_id) !== String(team_id),
+      );
 
-    if (remainingTeams && remainingTeams.length > 0) {
-      router.push(`/workspace/${workspace_id}/team/${remainingTeams[0].team_id}/tasks`);
-    } else {
+      if (filteredTeams && filteredTeams.length > 0) {
+        router.push(
+          `/workspace/${workspace_id}/team/${filteredTeams[0].team_id}/tasks`,
+        );
+      } else {
+        await redirectToFallbackWorkspace();
+      }
+    } catch (err) {
+      console.error("[useKickListener] handleTeamDeleted failed:", err);
       await redirectToFallbackWorkspace();
     }
   };
 
   const handleKickedFromWorkspace = async ({ workspace_id }) => {
-    const currentWorkspaceId = route.params.workspace_id;
+    try {
+      await workspaceStore.getMyWorkspaceStore();
 
-    if (String(currentWorkspaceId) !== String(workspace_id)) return;
+      const currentWorkspaceId = route.params.workspace_id;
+      if (String(currentWorkspaceId) !== String(workspace_id)) return;
 
-    await redirectToFallbackWorkspace();
+      await redirectToFallbackWorkspace();
+    } catch (err) {
+      console.error("[useKickListener] handleKickedFromWorkspace failed:", err);
+      router.push("/no-workspace");
+    }
   };
 
-  const startListening = (userId) => {
+  const startListening = () => {
     socket.on("kicked-from-team", handleKickedFromTeam);
     socket.on("kicked-from-workspace", handleKickedFromWorkspace);
     socket.on("team-deleted", handleTeamDeleted);

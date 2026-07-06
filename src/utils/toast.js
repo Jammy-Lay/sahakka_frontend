@@ -14,7 +14,7 @@ export const notify = (router) => {
       if (location) {
         setTimeout(() => {
           router.push(location);
-        }, 2000);
+        }, 1000);
       }
     },
 

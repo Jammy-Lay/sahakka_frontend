@@ -26,7 +26,7 @@
     </template>
 
     <!-- TASK CARDS -->
-    <div class="task-grid text-nowrap">
+    <div class="text-nowrap">
       <div
         v-for="i in 6"
         :key="i"

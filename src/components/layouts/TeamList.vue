@@ -29,14 +29,14 @@
           <n-divider style="margin: 5px 0; --n-color: #e4e4e7" />
 
           <div class="px-4 pt-2 pb-3">
-            <label class="mb-2 fs-12 fw-medium d-block">Team Name</label>
+            <label class="mb-2 fs-12 fw-medium d-block required">Team Name</label>
             <BaseInput
               v-model="teamName"
               input-placeholder="Team name"
               input-class="py-1 fs-13 rounded-btn-sm mb-3"
             />
 
-            <label class="mb-2 fs-12 fw-medium d-block">Description</label>
+            <label class="mb-2 fs-12 fw-medium d-block required">Description</label>
             <BaseInput
               v-model="description"
               input-placeholder="Description"
@@ -116,6 +116,12 @@
                     @click="goSubmissionView(t.team_id)"
                   >
                     <ClipboardList size="15" /> Submissions
+                  </div>
+                  <div
+                    class="d-flex align-items-center rounded gap-2 px-2 py-1 fw-bold workspace-item"
+                    @click="goAnalyticsView(t.team_id)"
+                  >
+                    <ChartNoAxesCombined size="15" /> Analytics
                   </div>
                   <div
                     class="d-flex align-items-center rounded gap-2 px-2 py-1 text-danger fw-bold workspace-item"
@@ -315,6 +321,7 @@ watch(
   async (teamId) => {
     if (!teamId) return;
     const calls = [
+      teamStore.getTeamByWorkspaceStore(currentRouteWorkspaceId.value, teamId, true),
       teamStore.getTeamByIdStore(currentRouteWorkspaceId.value, teamId),
       taskStore.getTaskByTeamStore(currentRouteWorkspaceId.value, teamId),
       taskStore.getSummaryTaskStore(currentRouteWorkspaceId.value, teamId),
@@ -356,6 +363,11 @@ onMounted(async () => {
 const goSubmissionView = (teamId) => {
   showPopover.value[teamId] = false;
   router.push(`/workspace/${currentRouteWorkspaceId.value}/team/${teamId}/submissions`);
+};
+
+const goAnalyticsView = (teamId) => {
+  showPopover.value[teamId] = false;
+  router.push(`/workspace/${currentRouteWorkspaceId.value}/team/${teamId}/analytics`);
 };
 
 function mapMembers(members = []) {

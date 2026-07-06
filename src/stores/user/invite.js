@@ -26,7 +26,7 @@ export const useInviteStore = defineStore("invite", () => {
       // console.log("API:", res.data);
 
       return res.data;
-    } catch (error) {
+    } catch (err) {
       throw new Error(err.response?.data?.message || "generate team failed");
     }
   };
