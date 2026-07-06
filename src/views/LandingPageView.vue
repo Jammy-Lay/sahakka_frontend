@@ -196,7 +196,7 @@
           <h3 class="fw-bold mb-3">Company</h3>
           <ul class="navbar-nav">
             <li>
-              <router-link :to="{ name: 'home' }" class="nav-link fw-medium">About us</router-link>
+              <router-link :to="{ name: 'about' }" class="nav-link fw-medium">About us</router-link>
             </li>
           </ul>
         </div>
