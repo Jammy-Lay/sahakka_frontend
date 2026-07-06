@@ -276,6 +276,28 @@
 </template>
 
 <script setup>
+<<<<<<< HEAD
+import Header from './Header.vue';
+import Footer from './Footer.vue';
+import { ArrowLeft } from 'lucide-vue-next';
+import { Swiper, SwiperSlide } from 'swiper/vue';
+import DevTeamCard from './DevTeamCard.vue';
+import dumb from '../assets/image/dev-team-img/dumb.jpg';
+import satya from '../assets/image/dev-team-img/satya.jpg';
+import sothatt from '../assets/image/dev-team-img/sothatt.jpg';
+import vichhra from '../assets/image/dev-team-img/vichhra.jpg';
+import jammy from '../assets/image/dev-team-img/jammy.jpg';
+import gitHub from '../assets/image/dev-team-img/logo/github.png';
+import faceBook from '../assets/image/dev-team-img/logo/facebook.png';
+import image1 from '../assets/image/dev-team-img/sponsor/image1.png';
+import image2 from '../assets/image/dev-team-img/sponsor/image2.png';
+import image3 from '../assets/image/dev-team-img/sponsor/image3.png';
+// Import Swiper styles
+import 'swiper/css';
+import 'swiper/css/effect-cards';
+// import required modules
+import { EffectCards } from 'swiper/modules'; 
+=======
 import { ref } from "vue";
 import {
   Grid3x3,
@@ -292,6 +314,7 @@ import {
   Calendar,
   Clock,
 } from "lucide-vue-next";
+>>>>>>> 47e5a29937da79b800cf0b72bf08ef6d5256c7d6
 
 const activeTeam = ref(1);
 const activeTab = ref("Tasks");
