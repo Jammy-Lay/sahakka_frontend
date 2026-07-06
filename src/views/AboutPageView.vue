@@ -59,7 +59,7 @@ import { ArrowLeft } from 'lucide-vue-next';
 import { Swiper, SwiperSlide } from 'swiper/vue';
 import DevTeamCard from './DevTeamCard.vue';
 import dumb from '../assets/image/dev-team-img/dumb.jpg';
-import satya from '../assets/image/dev-team-img/satya.jpg';
+import satsya from '../assets/image/dev-team-img/satsya.jpg';
 import sothatt from '../assets/image/dev-team-img/sothatt.jpg';
 import vichhra from '../assets/image/dev-team-img/vichhra.jpg';
 import jammy from '../assets/image/dev-team-img/jammy.jpg';
@@ -121,7 +121,7 @@ const devTeams = [
     responsibility: ['Back End', 'Front-End', 'DataBase']
   },
   {
-    profile: satya, name: memberName.satsya, role: ROLE.member,
+    profile: satsya, name: memberName.satsya, role: ROLE.member,
     socails: [
       {
         logo: gitHub,
