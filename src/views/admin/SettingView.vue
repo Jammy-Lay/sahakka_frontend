@@ -272,7 +272,7 @@
                         </template>
 
                         <n-input v-model:value="passwordForm.new" type="password" show-password-on="click"
-                            placeholder="Enter current password" size="large" />
+                            placeholder="Enter new password" size="large" />
                     </n-form-item-row>
                     <n-form-item-row>
                         <template #label>
@@ -482,22 +482,36 @@ function closePasswordModal() {
 }
 
 async function submitPassword() {
-    if (!passwordForm.value.current || !passwordForm.value.new || !passwordForm.value.cf) {
+    const current = passwordForm.value.current;
+    const newPass = passwordForm.value.new;
+    const cf = passwordForm.value.cf;
+
+    if (!current || !newPass || !cf) {
         toast.error("Please fill all fields");
         return;
     }
 
-    if (passwordForm.value.new !== passwordForm.value.cf) {
+    if (newPass !== cf) {
         toast.error("New passwords do not match");
+        return;
+    }
+
+    if (newPass === current) {
+        toast.error("New password must be different from current password");
+        return;
+    }
+
+    if (newPass.length < 8) {
+        toast.error("New password must be at least 8 characters");
         return;
     }
 
     pwLoading.value = true;
     try {
-        await auth.changePassword({
-            currentPassword: passwordForm.value.current,
-            newPassword: passwordForm.value.new,
-            confirmPassword: passwordForm.value.cf,
+        await auth.ChangePassword({
+            currentPassword: current,
+            newPassword: newPass,
+            confirmPassword: cf,
         });
         toast.success("Password changed successfully!");
         closePasswordModal();

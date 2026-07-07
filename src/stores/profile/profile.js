@@ -78,7 +78,6 @@ export const useProfileStore = defineStore("profile", () => {
         newPassword,
         confirmPassword,
       });
-      console.log(res.data.data);
       return res.data.data;
     } catch (err) {
       throw new Error(err.response?.data?.message || "failed");

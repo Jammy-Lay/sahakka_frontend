@@ -98,6 +98,17 @@ export const useAuthStore = defineStore("auth", () => {
       throw new Error(err.response?.data?.message || "Reset password failed");
     }
   };
+const ChangePassword = async ({ currentPassword, newPassword, confirmPassword }) => {
+  try {
+      api.post("/change-password", {
+      currentPassword,
+      newPassword,
+      confirmPassword,
+    });
+  } catch (err) {
+    throw new Error(err.response?.data?.message || "Change password failed");
+  }
+};
 
   return {
     user,
@@ -112,6 +123,7 @@ export const useAuthStore = defineStore("auth", () => {
     resentOtp,
     verifyOtp,
     register,
-    loading
+    loading,
+    ChangePassword
   };
 });

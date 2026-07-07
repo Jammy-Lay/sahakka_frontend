@@ -156,8 +156,14 @@ const getWorkspaces = async () => {
 
         const teamsData = useTeam.teams;
         const tasksData = useTask.tasks;
+        // reaching the UI, it doesn't remove the underlying bug.
+        const uniqueWorkspaces = [
+            ...new Map(
+                useWorkspace.workspaces.map((w) => [w.workspace_id, w])
+            ).values(),
+        ];
 
-        projects.value = useWorkspace.workspaces.map((workspace) => {
+        projects.value = uniqueWorkspaces.map((workspace) => {
             // teams
             const workspaceTeams = teamsData.filter(
                 (team) => team.workspace?.workspace_id === workspace.workspace_id
