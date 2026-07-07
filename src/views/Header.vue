@@ -13,15 +13,6 @@
         </button>
 
         <div class="collapse navbar-collapse justify-content-end gap-5 gap-lg-2" id="navbarNav">
-          <ul class="navbar-nav">
-            <li class="nav-item">
-              <router-link :to="{ name: 'login' }"
-                class="nav-link rounded-btn py-3 text-black d-flex align-items-center gap-2">
-                <Mail size="16" />
-                Contact us
-              </router-link>
-            </li>
-          </ul>
           <div class="d-flex gap-2">
             <router-link :to="{ name: 'register' }" class="btn rounded-btn btn-light border px-4 py-2">Sign
               up</router-link>

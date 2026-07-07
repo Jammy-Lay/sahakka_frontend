@@ -25,7 +25,7 @@
             </button>
           </template>
           <div class="d-flex flex-column gap-1">
-            <!-- All Members: owner only -->
+            
             <div
               v-if="isOwner"
               class="d-flex align-items-center gap-2 px-2 py-1 rounded workspace-item fs-13 cursor-pointer"
@@ -34,7 +34,7 @@
             >
               <Users size="15" /> All Members
             </div>
-            <!-- Teams: backend already scoped to this user's teams only -->
+            
             <div
               v-for="team in getTeamByWorkspace"
               :key="team.team_id"

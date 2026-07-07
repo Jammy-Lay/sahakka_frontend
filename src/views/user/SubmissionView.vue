@@ -363,7 +363,11 @@ onMounted(async () => {
     const found = getAllSubmissionByTeam.value.find(
       (s) => String(s.submission_id) === String(submissionIdFromQuery)
     );
-    if (found) openReview(found);
+    if (found) {
+      openReview(found);
+    } else {
+      toast.error("This submission no longer exists");
+    }
     router.replace({ query: {} });
   }
 });

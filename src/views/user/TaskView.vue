@@ -1994,7 +1994,11 @@ onMounted(async () => {
   const taskIdFromQuery = route.query.task_id;
   if (taskIdFromQuery) {
     const found = getTask.value.find((t) => String(t.id) === String(taskIdFromQuery));
-    if (found) openTaskModal(found);
+    if (found) {
+      openTaskModal(found);
+    } else {
+      toast.error("This task no longer exists");
+    }
     router.replace({ query: {} });
   }
 });
