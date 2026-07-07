@@ -1990,7 +1990,11 @@ onMounted(async () => {
     const found = getIssueTask.value.find(
       (t) => String(t.id) === String(taskIdFromQuery)
     );
-    if (found) openTaskModal(found);
+    if (found) {
+      openTaskModal(found);
+    } else {
+      toast.error("This task no longer exists");
+    }
     router.replace({ query: {} });
   }
 });

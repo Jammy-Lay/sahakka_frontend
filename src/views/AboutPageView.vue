@@ -23,7 +23,7 @@
                 Technology that we use to build our website
               </h4>
               <div class="d-flex align-items-end gap-5 flex-wrap mt-5 justify-content-between">
-                <div v-for="t in tech"
+                <div v-for="t in tech" :key="t"
                   class="d-flex flex-column justify-content-center align-items-center w-fit gap-3">
                   <img :src="t.src" :alt="t.name" width="80">
                   <span class="fw-bold">{{ t.name }}</span>

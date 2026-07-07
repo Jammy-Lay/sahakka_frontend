@@ -11,7 +11,7 @@
       <div>
         <h5 class="my-work fw-bold">What I work on in our website</h5>
         <ul class="fs-5 fw-normal">
-          <li v-for="list in lists">{{ list }}</li>
+          <li v-for="list in lists" :key="list" >{{ list }}</li>
         </ul>
       </div>
 

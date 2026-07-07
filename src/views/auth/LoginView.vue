@@ -201,7 +201,7 @@ async function handleLogin() {
       `/workspace/${workspace.workspace_id}/team/${team.team_id}/tasks`
     );
   } catch (error) {
-    if (error.message === "Email not verify") {
+    if (error.message === "Please verify your email before logging in") {
       router.push("/not-verify");
     }
     toast.error(error.message);
